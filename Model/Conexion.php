@@ -44,7 +44,7 @@ class Conexion
 
 
     // Métodos auxiliares para ejecutar consultas
-    private function executeQuery($sql, $params = array())
+    public function executeQuery($sql, $params = array())
     {
         $stmt = sqlsrv_query($this->connection, $sql, $params);
 
@@ -56,7 +56,7 @@ class Conexion
         return $stmt;
     }
 
-    private function getResults($stmt)
+    public function getResults($stmt)
     {
         $retorno = array();
 
@@ -73,7 +73,7 @@ class Conexion
         return $retorno;
     }
 
-    private function executeNonQuery($sql, $params = array())
+    public function executeNonQuery($sql, $params = array())
     {
         $stmt = sqlsrv_query($this->connection, $sql, $params);
 
@@ -85,6 +85,17 @@ class Conexion
         sqlsrv_free_stmt($stmt);
         return $rowsAffected;
     }
+
+
+    
+    //FUNCION PARA OBTENER EL ULTIMO ID
+    public function getLastInsertId() {
+        $sql = "SELECT SCOPE_IDENTITY() AS last_id";
+        $stmt = $this->executeQuery($sql);
+        $result = $this->getResults($stmt);
+        return $result[0]['last_id'];
+    }
+
 
 
 
@@ -272,13 +283,6 @@ public function isSuperUser($userId) {
         
         return array($resultado);
     }
-    //FUNCION PARA OBTENER EL ULTIMO ID
-    public function getLastInsertId() {
-        $sql = "SELECT SCOPE_IDENTITY() AS last_id";
-        $stmt = $this->executeQuery($sql);
-        $result = $this->getResults($stmt);
-        return $result[0]['last_id'];
-    }
-
+    
     
 }

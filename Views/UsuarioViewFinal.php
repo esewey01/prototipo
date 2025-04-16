@@ -34,68 +34,77 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <h3 class="page-header"><i class="fa fa-users"></i> ADMINISTRACIÓN DE USUARIOS</h3>
-                        <div class="<?PHP echo $alerta; ?>" role="alert">´
-                            <strong><?PHP echo $mensaje; ?></strong>
-                            <ol class="breadcrumb">
-                                <?php include("MenuOpcionesConfiguracion.php"); ?>
-                            </ol>
+                        <?php if (isset($_SESSION['mensaje'])): ?>
+                            <div class="alert <?= $_SESSION['alerta'] ?? 'alert-info' ?> alert-dismissible fade in" role="alert">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">×</span>
+                                </button>
+                                <strong><?= $_SESSION['mensaje'] ?></strong>
+                            </div>
+                        <?php
+                            unset($_SESSION['mensaje']);
+                            unset($_SESSION['alerta']);
+                        endif; ?>
+                        <ol class="breadcrumb">
+                            <?php include("MenuOpcionesConfiguracion.php"); ?>
+                        </ol>
+                    </div>
+
+                    <!-- Pestañas -->
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a href="#administradores" data-toggle="tab">Administradores</a></li>
+
+                        <li><a href="#vendedores" data-toggle="tab">Vendedores</a></li>
+                        <li><a href="#clientes" data-toggle="tab">Clientes</a></li>
+                    </ul>
+
+
+
+                    <!-- Contenido de las pestañas -->
+                    <div class="tab-content">
+
+                        <div class="panel-heading">
+                            Lista de Administradores del Sistema
+                            <div align="right">
+                                <button href="#addUser" title="" data-placement="left" data-toggle="modal"
+                                    class="btn btn-primary tooltips" type="button"
+                                    data-original-title="Nuevo Usuario">
+                                    <span class="fa fa-plus"> </span>
+                                    AGREGAR NUEVO USUARIO
+                                </button>
+                            </div>
                         </div>
 
-                        <!-- Pestañas -->
-                        <ul class="nav nav-tabs">
-                            <li class="active"><a href="#administradores" data-toggle="tab">Administradores</a></li>
-                            
-                            <li><a href="#vendedores" data-toggle="tab">Vendedores</a></li>
-                            <li><a href="#clientes" data-toggle="tab">Clientes</a></li>
-                        </ul>
 
+                        <!-- Tabla de Administradores -->
 
+                        <!-- Tabla de Administradores -->
+                        <div class="tab-pane active" id="administradores">
+                            <?php
+                            $tipo_actual = 'administrador';
+                            $usuarios = $administradores;
+                            include("_partials/tabla_usuarios.php");
+                            ?>
+                        </div>
+                        <!-- Tabla de Vendedores -->
+                        <div class="tab-pane" id="vendedores">
+                            <?php
+                            $tipo_actual = 'vendedor';
+                            $usuarios = $vendedores;
+                            include("_partials/tabla_usuarios.php");
+                            ?>
+                        </div>
 
-                        <!-- Contenido de las pestañas -->
-                        <div class="tab-content">
-
-                            <div class="panel-heading">
-                                Lista de Administradores del Sistema
-                                <div align="right">
-                                    <button href="#addUser" title="" data-placement="left" data-toggle="modal"
-                                        class="btn btn-primary tooltips" type="button"
-                                        data-original-title="Nuevo <?php echo ucfirst($tipo_actual) ?>">
-                                        <span class="fa fa-plus"> </span>
-                                        AGREGAR NUEVO USUARIO
-                                    </button>
-                                </div>
-                            </div>
-
-
-                            <!-- Tabla de Administradores -->
-                            
-                            <!-- Tabla de Administradores -->
-                            <div class="tab-pane active" id="administradores">
-                                <?php
-                                $tipo_actual = 'administrador';
-                                $usuarios = $administradores;
-                                include("_partials/tabla_usuarios.php");
-                                ?>
-                            </div>
-                            <!-- Tabla de Vendedores -->
-                            <div class="tab-pane" id="vendedores">
-                                <?php
-                                $tipo_actual = 'vendedor';
-                                $usuarios = $vendedores;
-                                include("_partials/tabla_usuarios.php");
-                                ?>
-                            </div>
-
-                            <!-- Tabla de Clientes -->
-                            <div class="tab-pane" id="clientes">
-                                <?php
-                                $tipo_actual = 'cliente';
-                                $usuarios = $clientes;
-                                include("_partials/tabla_usuarios.php");
-                                ?>
-                            </div>
+                        <!-- Tabla de Clientes -->
+                        <div class="tab-pane" id="clientes">
+                            <?php
+                            $tipo_actual = 'cliente';
+                            $usuarios = $clientes;
+                            include("_partials/tabla_usuarios.php");
+                            ?>
                         </div>
                     </div>
+                </div>
                 </div>
             </section>
         </section>
