@@ -1,12 +1,16 @@
 <?php
-session_start();
+if (session_status ()===PHP_SESSION_NONE){
+    session_start();
+}
 
-require('../Model/Conexion.php');
+require_once('../Model/Conexion.php');
 require('Constants.php');
+
 
 // Verificar sesión
 if (!isset($_SESSION['usuario']['login'])) {
-    header("Location: ../index.php");
+    die('Sesion no iniciada');
+    require(" ../index.php");
     exit();
 }
 
@@ -19,13 +23,16 @@ $mensaje = $_SESSION['mensaje'] ?? '';
 try {
     $con = new Conexion();
     if (!$con) throw new Exception("Error de conexión");
+    $roles=$con->getRoles();
+    $_SESSION['usuario']['login'];
+    $_SESSION['nombre_rol']=$roles;
     //obtener el rol del usuario actual
     $rolUsuario = $con->getRolUser($_SESSION['usuario']['id_usuario']);
     // Obtener información del usuario logueado
     $currentUser = $con->getUserWithRole($_SESSION['usuario']['login']);
     
     // Verificar si es super usuario
-    $isSuperUser = ($rolUsuario['id_rol'] == 1);
+    $isSuperUser = ($rolUsuario['id_rol'] == 0);
     
     // Obtener usuarios según roles
     $administradores = $con->getUsersByRoleType('ADMINISTRADOR');
@@ -35,7 +42,7 @@ try {
     // Preparar datos para la vista
     $viewData = [
         'usuario' => $_SESSION['usuario'],
-        'nombres' => $_SESSION['usuario']['nombre'] ?? 'Usuario',
+        'nombres' => $_SESSION['usuario']['nombre'] ,
         'foto' => $_SESSION['usuario']['foto_perfil'] ?? 'user.png',
         'isSuperUser' => $isSuperUser,
         'administradores' => $administradores,

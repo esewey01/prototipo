@@ -2,7 +2,9 @@
 session_start();
 require('../Model/Conexion.php');
 require('Constants.php');
-require_once __DIR__ . '/../config.php';
+
+
+
 
 
 function validarNumero($x)
@@ -35,12 +37,12 @@ function validarNumero($x)
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $con = new Conexion();
+    
     $respuesta = ""; //VERIFICAR SI EL USUARIO YA EXISTE
     $errores = []; //VALIDACIONES
     $mensaje = [];
 
-
+    $con = new Conexion();
     if (!$con) {
         $errores[] = "Error de conexión a la base de datos";
     }
@@ -116,16 +118,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     //--------------------------REGISTRAR USUARIO
 
     if (empty($errores)) {
-        $respuesta = verificar($con, $login, $telefono, $tipo, $nombre, $password, $fotoPath);
+        $respuesta = verificar($con, $nombre, $login,$password, $foto_perfil, $telefono);
 
         if ($respuesta === 'REGISTRADO') {
             $_SESSION['registro_pendiente'] = [
-                'login' => $login,
-                'tipo' => $tipo,
-                'password' => $password,
                 'nombre' => $nombre,
-                'telefono' => $telefono,
-                'foto' => $fotoPath
+                'login' => $login,
+                'password' => $password,
+
+                'foto' => $fotoPath,
+                'telefono' => $telefono
             ];
             $mensaje[] = "Registro completado";
             echo mostrarMensajes($mensaje, true);
@@ -141,15 +143,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 }
 
-function verificar($con, $login, $telefono, $tipo, $nombre, $password, $foto)
+function verificar($con, $nombre, $login,$password, $foto_perfil, $telefono)
+
 {
+    $id_rol=3;
     try {
         $existe = $con->searchUser($login);
 
         if (!empty($existe)) {
             return "El usuario ya existe";
         } else {
-            if ($con->RegisterNewUser($telefono, $login, $tipo, $nombre, $password, $foto)) {
+            if ($con->registerUserWithRole($nombre, $login, $password, $foto_perfil, $telefono, $id_rol)) {
                 return "REGISTRADO";
             } else {
                 return "Error al registrar el usuario";

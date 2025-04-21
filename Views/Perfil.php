@@ -33,6 +33,23 @@
                 <div class="row ">
                     <div class="col-lg-12">
                         <h3 class="page-header"><i class="fa fa-user"></i> MI PERFIL</h3>
+
+
+                        <!--FUNCION DE ALERTA DE MENSAJES-->
+                        <?php if (isset($_SESSION['mensaje'])): ?>
+                            <div class="alert <?= $_SESSION['alerta'] ?? 'alert-info' ?> alert-dismissible fade in" role="alert">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">×</span>
+                                </button>
+                                <strong><?= $_SESSION['mensaje'] ?></strong>
+                            </div>
+                        <?php
+                            unset($_SESSION['mensaje']);
+                            unset($_SESSION['alerta']);
+                        endif; ?>
+
+
+
                         <?php if (isset($_GET['success'])): ?>
                             <div class="alert alert-success" role="alert">
                                 <strong>¡Éxito!</strong> Los cambios se guardaron correctamente.
@@ -59,7 +76,7 @@
                                     <li class="active"><a href="#info" data-toggle="tab">Información</a></li>
                                     <li><a href="#password" data-toggle="tab">Contraseña</a></li>
                                     <li><a href="#social" data-toggle="tab">Redes Sociales</a></li>
-                                    <?php if ($id_rol == 3): ?>
+                                    <?php if ($id_rol['id_rol'] == 3): ?>
                                         <li><a href="#seller" data-toggle="tab">Ser Vendedor</a></li>
                                     <?php endif; ?>
                                 </ul>
@@ -72,7 +89,7 @@
 
                                             <div class="form-group text-center">
                                                 <div class="col-sm-12">
-                                                    <img src="<?= URL_VIEWS. $user_data['foto_perfil'] ?>" alt="Usuario"
+                                                    <img src="<?= URL_VIEWS . $user_data['foto_perfil'] ?>" alt="Usuario"
                                                         class="img-circle profile-pic" id="profileImage" style="width: 150px; height: 150px;">
                                                     <div class="mt-2">
                                                         <label class="btn btn-primary">
@@ -127,7 +144,8 @@
                                             <div class="form-group">
                                                 <label class="col-sm-2 control-label">Fecha Nacimiento</label>
                                                 <div class="col-sm-10">
-                                                    <input type="date" name="fecha_nacimiento" class="form-control" value="<?= $user_data['fecha_nacimiento'] ?>">
+                                                    <input type="date" name="fecha_nacimiento" class="form-control"
+                                                        value="<?= $user_data['fecha_nacimiento'] ?>">
                                                 </div>
                                             </div>
 
@@ -216,7 +234,7 @@
 
                                             <?php
                                             $social_data = $con->getSocialNetworks($_SESSION['usuario']['id_usuario']);
-                                            $social_data = !empty($social_data) ? $social_data[0] : ['facebook' => '', 'instagram' => '','linkedin' => '', 'twitter' => ''];
+                                            $social_data = !empty($social_data) ? $social_data[0] : ['facebook' => '', 'instagram' => '', 'linkedin' => '', 'twitter' => ''];
                                             ?>
 
                                             <div class="form-group">
@@ -256,7 +274,7 @@
                                     </div>
 
                                     <!-- Solicitud para ser Vendedor (solo para clientes) -->
-                                    <?php if ($id_rol== 3): ?>
+                                    <?php if ($id_rol['id_rol'] === 3): ?>
                                         <div class="tab-pane" id="seller">
                                             <form method="POST" class="form-horizontal" style="margin-top: 20px;">
                                                 <input type="hidden" name="action" value="seller_request">
@@ -267,7 +285,7 @@
                                                         <select name="categoria" class="form-control" required>
                                                             <option value="">Seleccione una categoría</option>
                                                             <?php foreach ($categories as $cat): ?>
-                                                                <option value="<?= $cat['id_categoria'] ?>"><?= $cat['nombre'] ?></option>
+                                                                <option value="<?= $cat['id_categoria'] ?>"><?= $cat['nombre_categoria'] ?></option>
                                                             <?php endforeach; ?>
                                                         </select>
                                                     </div>
@@ -291,10 +309,10 @@
                                                     <label class="col-sm-2 control-label">SOLICITUDES ENVIADAS</label>
                                                     <div class="col-sm-10">
                                                         <?php
-                                                        $solicitudes = $con->getSolicitudesUsuario($_SESSION['id_usuario']);
+                                                        $solicitudes = $con->getSolicitudesUsuario($_SESSION['usuario']['id_usuario']);
                                                         $ultimaSolicitud = !empty($solicitudes) ? $solicitudes[0] : null;
 
-                                                        if ($_SESSION['id_tipo'] == 2): ?>
+                                                        if ($id_rol['id_rol'] == 2): ?>
                                                             <p class="form-control-static text-success">
                                                                 <i class="fa fa-check"></i> Eres vendedor
                                                             </p>

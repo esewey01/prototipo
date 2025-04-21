@@ -1,16 +1,17 @@
 <?php
+session_start();
 require('../Model/Conexion.php');
 require('Constants.php');
 
-$errores = []; //MENSAJES DE ERROR
-$mensaje = [];
+$alerta = $_SESSION['alerta'] ?? '';
+$mensaje = $_SESSION['mensaje'] ?? '';
 
-session_start(); //SE INICIA SESIÓN
+
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    $mensaje = "Acceso no autorizado";
-    mostrarMensaje($mensaje);
-    require('../Views/LoginView.php');
+    $_SESSION['mensaje'] = "Acceso no autorizado";
+    $_SESSION['alerta'] = "alert-danger";
+    header('Location: ../Views/LoginView.php');
     exit();
 }
 
@@ -20,50 +21,49 @@ $login = trim($_POST['login']);
 $password = trim($_POST['password']);
 $con = new Conexion();
 
+
 // VALIDACIÓN DE CAMPOS VACÍOS
 if (empty($login) || empty($password)) {
-    $errores = "Ningún campo debe estar vacío";
-    mostrarMensaje($errores);
-    require('../Views/LoginView.php');
+    $_SESSION['mensaje'] = "Ningún campo debe estar vacío";
+    $_SESSION['alerta'] = "alert-danger";
+    header('Location: ../Views/LoginView.php');
     exit();
 }
 
 try {
-    $usuario = $con->getUserWithRole($login);
-    // BUSCAR USUARIO 
 
+    $usuario = $con->getUserWithRole($login); //BUSCAR USUARIO Y ROL
+
+    //VERIFICAR SI EXISTE
+    if (!$usuario) {
+        throw new Exception("Usuario o contraseña incorrectos");
+    }
 
     // VERIFICAR USUARIO Y CONTRASEÑA
-    if (!$usuario and $usuario['password'] !== $password) {
-        $errores = "Usuario o Password incorrectos, por favor intenta de nuevo";
-        mostrarMensaje($errores);
-        require('../Views/LoginView.php');
-        exit();
+    if ($usuario['password'] !== $password) {
+        throw new Exception("Usuario o Password incorrectos, por favor intenta de nuevo");
     }
 
     // VERIFICAR SI EL USUARIO ESTÁ ACTIVO
     if (!$usuario['activo']) {
-        $errores = "Tu cuenta está desactivada. Contacta al administrador.";
-        mostrarMensaje($errores);
-        require('../Views/LoginView.php');
-        exit();
+        throw new Exception("Tu cuenta está desactivada. Contacta al administrador");
     }
 
     // ALMACENAR DATOS EN SESIÓN
     $_SESSION['usuario'] = [
         'id_usuario' => $usuario['id_usuario'],
         'login' => $usuario['login'],
-        'password'=>$usuario['password'],
-        'email'=> $usuario['email'],
+        'password' => $usuario['password'],
+        'email' => $usuario['email'],
         'nombre' => $usuario['nombre'],
-        'apellido'=>$usuario['apellido'],
+        'apellido' => $usuario['apellido'],
         'telefono' => $usuario['telefono'],
-        'direccion'=>$usuario['direccion'],
-        'genero'=>$usuario['genero'],
-        'fecha_nacimiento' => isset($usuario['fecha_nacimiento']) ? $usuario['fecha_nacimiento'] : null,
+        'direccion' => $usuario['direccion'],
+        'genero' => $usuario['genero'],
+        'fecha_nacimiento' =>  $usuario['fecha_nacimiento']->format('Y-m-d'),
         'foto' => $usuario['foto_perfil'],
         'fecha_registro' => $usuario['fecha_registro']->format('Y-m-d H:i:s'),
-        'ultimo_registro'=>$usuario['ultimo_registro'] ?? ' ',
+        'ultimo_registro' => $usuario['ultimo_registro'] ?? ' ',
         'rol' => [
             'id_rol' => $usuario['id_rol'],
             'nombre_rol' => $usuario['nombre_rol']
@@ -71,6 +71,7 @@ try {
         'menu' => $con->getMenuByRol($usuario['id_rol'])
     ];
 
+    
 
 
 
@@ -88,24 +89,12 @@ try {
             require('../Views/WellcomeCliente.php');
             break;
         default:
-            $errores = "Rol no reconocido";
-            mostrarMensaje($errores);
-            require('../Views/LoginView.php');
+            throw new Exception("Rol no reconocido");
     }
-
     exit();
 } catch (Exception $e) {
-    error_log("Error en login: " . $e->getMessage());
-    $errores = "Error en el sistema. Por favor intenta más tarde.";
-    mostrarMensaje($errores);
-    require('../Views/LoginView.php');
-}
-
-
-
-function mostrarMensaje($mensaje)
-{
-    echo '<script language="javascript">
-        alert("' . addslashes($mensaje) . '");   
-    </script>';
+    $_SESSION ['mensaje'] = $e->getMessage();
+    $_SESSION ['alerta'] = "alert-danger";
+    header('Location: ../Views/LoginView.php');
+    exit();
 }

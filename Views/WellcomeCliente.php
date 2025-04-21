@@ -39,11 +39,12 @@
     </section>
 
     <!-- Contenido principal -->
-    <section class="main-content">
+    <section id="main-content">
+        <section class="wrapper">
             <div class="container">
-                <h1>Bienvenido, <?= $_SESSION['nombres'] ?></h1>
+                <h1>Bienvenido, <?= $_SESSION['usuario']['nombre'] ?></h1>
                 <p>Aquí puedes ver tus compras, puntos y gestionar tu perfil.</p>
-                
+
                 <div class="row">
                     <div class="col-md-4">
                         <div class="panel panel-default">
@@ -51,22 +52,23 @@
                                 <h3 class="panel-title">Mi Perfil</h3>
                             </div>
                             <div class="panel-body text-center">
-                                <img src="../fotoproducto/<?= $_SESSION['foto'] ?? 'user.png' ?>" 
-                                     class="img-circle" width="100" height="100">
-                                <h4><?= $_SESSION['nombres'] ?></h4>
+                                <img src="../fotoproducto/<?= $_SESSION['foto'] ?? 'user.png' ?>"
+                                    class="img-circle" width="100" height="100">
+                                <h4><?= $_SESSION['usuario']['nombre'] ?></h4>
                                 <p>Cliente</p>
                                 <a href="Profile.php" class="btn btn-primary">Editar perfil</a>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- Aquí puedes añadir más secciones como historial de compras, etc. -->
+                    </div> <!-- Aquí puedes añadir más secciones como historial de compras, etc. -->
                 </div>
             </div>
+
         </section>
+
     </section>
 
-    
+
+
     <?PHP include("LibraryJs.php"); ?>
 
 </body>

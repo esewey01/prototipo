@@ -43,8 +43,8 @@ class Conexion
 
 
 
-    // Métodos auxiliares para ejecutar consultas
-    public function executeQuery($sql, $params = array())
+    //EJECUTAR SELECT 
+    private function executeQuery($sql, $params = array())
     {
         $stmt = sqlsrv_query($this->connection, $sql, $params);
 
@@ -56,7 +56,8 @@ class Conexion
         return $stmt;
     }
 
-    public function getResults($stmt)
+    //CONVIERTE UN RESULTADO EN UN ARREGLO
+    private function getResults($stmt)
     {
         $retorno = array();
 
@@ -73,7 +74,8 @@ class Conexion
         return $retorno;
     }
 
-    public function executeNonQuery($sql, $params = array())
+    //PARA EJECUTAR UN INSERT/UPDATE O DELETE
+    private function executeNonQuery($sql, $params = array())
     {
         $stmt = sqlsrv_query($this->connection, $sql, $params);
 
@@ -87,9 +89,10 @@ class Conexion
     }
 
 
-    
+
     //FUNCION PARA OBTENER EL ULTIMO ID
-    public function getLastInsertId() {
+    public function getLastInsertId()
+    {
         $sql = "SELECT SCOPE_IDENTITY() AS last_id";
         $stmt = $this->executeQuery($sql);
         $result = $this->getResults($stmt);
@@ -97,25 +100,68 @@ class Conexion
     }
 
 
-
-
-    // FUNCIONES PARA LOS UUSARIOS 
-    public function getUser($login)
-    {
-        $sql = "SELECT * FROM USUARIOS WHERE login = ?";
+    public function getUser($login){
+        $sql="SELECT * FROM USUARIOS WHERE login = ?";
         $stmt = $this->executeQuery($sql, array($login));
-        return $this->getResults($stmt);
+        $result = $this->getResults($stmt);
+        return $result ?? null;
     }
 
+    // FUNCIONES PARA LOS UUSARIOS 
+    public function searchUser($login) {
+        $sql = "SELECT id_usuario FROM USUARIOS WHERE login = ?";
+        $stmt = $this->executeQuery($sql, [$login]);
+        $result = $this->getResults($stmt);
+        return !empty($result);
+    }
+    //REGISTRAR NUEVO USUARIO
+    public function registerUserWithRole($nombre, $login, $password, $foto_perfil, $telefono, $id_rol)
+    {
+        // Iniciar transacción para asegurar integridad
+        sqlsrv_begin_transaction($this->connection);
+
+        try {
+            // 1. Insertar el usuario y obtener el ID insertado directamente
+            $sql_user = "INSERT INTO USUARIOS 
+                    (nombre, login, password, foto_perfil, telefono, fecha_registro) 
+                    OUTPUT INSERTED.id_usuario
+                    VALUES (?, ?, ?, ?, ?, GETDATE())";
+            $result = $this->executeQuery($sql_user, array($nombre, $login, $password,  $telefono,$foto_perfil,));
+
+            // Obtener el ID del nuevo usuario desde el resultado
+            $row = $this->getResults($result);
+            if (!$row || !isset($row[0]['id_usuario'])) {
+                throw new Exception("No se pudo obtener el ID del nuevo usuario.");
+            }
+            
+
+            $id_usuario = $row[0]['id_usuario'];
+
+            // 2. Asignar el rol
+            $sql_role = "INSERT INTO ROLES_USUARIO (id_usuario, id_rol) VALUES (?, ?)";
+            $this->executeNonQuery($sql_role, array($id_usuario, $id_rol));
+
+            // Confirmar transacción si todo fue bien
+            sqlsrv_commit($this->connection);
+            return true;
+        } catch (Exception $e) {
+            // Revertir transacción en caso de error
+            sqlsrv_rollback($this->connection);
+            throw $e; // Relanzar la excepción para manejarla en el controlador
+        }
+    }
+    
+
     //FUNCION PARA OBTENER EL ROL DEL USUARIO
-    public function getRolUser($id_usuario) {
+    public function getRolUser($id_usuario)
+    {
         $sql = "SELECT r.id_rol, r.nombre_rol 
                 FROM ROLES_USUARIO ru
                 JOIN ROLES r ON ru.id_rol = r.id_rol
                 WHERE ru.id_usuario = ?";
         $stmt = $this->executeQuery($sql, array($id_usuario));
         $result = $this->getResults($stmt);
-        return $result[0] ?? null; // Retorna el primer rol encontrado o null
+        return $result[0] ?? null;
     }
 
 
@@ -134,38 +180,51 @@ class Conexion
 
     //FUNCION PARA OBTENER A TODOS LOS USUARIOS CON SU ROL
     // Obtener todos los usuarios con sus roles
-public function getAllUsersWithRoles() {
-    $sql = "SELECT u.*, r.nombre_rol 
+    public function getAllUsersWithRoles()
+    {
+        $sql = "SELECT u.*, r.nombre_rol 
             FROM USUARIOS u
             JOIN ROLES_USUARIO ru ON u.id_usuario = ru.id_usuario
             JOIN ROLES r ON ru.id_rol = r.id_rol
             ORDER BY r.nombre_rol, u.nombre";
-    $stmt = $this->executeQuery($sql);
-    return $this->getResults($stmt);
-}
+        $stmt = $this->executeQuery($sql);
+        return $this->getResults($stmt);
+    }
 
-// Obtener usuarios por tipo de rol
-public function getUsersByRoleType($roleType) {
-    $sql = "SELECT u.*, r.nombre_rol as tipo 
+    // Obtener usuarios por tipo de rol
+    public function getUsersByRoleType($roleType)
+    {
+        $sql = "SELECT u.*, r.nombre_rol as tipo 
             FROM USUARIOS u
             JOIN ROLES_USUARIO ru ON u.id_usuario = ru.id_usuario
             JOIN ROLES r ON ru.id_rol = r.id_rol
             WHERE r.nombre_rol = ?
             ORDER BY u.nombre";
-    $stmt = $this->executeQuery($sql, array($roleType));
-    return $this->getResults($stmt);
-}
+        $stmt = $this->executeQuery($sql, array($roleType));
+        return $this->getResults($stmt);
+    }
 
-// Verificar si el usuario actual es super usuario
-public function isSuperUser($userId) {
-    $sql = "SELECT COUNT(*) as is_super 
+    // Verificar si el usuario actual es super usuario
+    public function isSuperUser($userId)
+    {
+        $sql = "SELECT COUNT(*) as is_super 
             FROM ROLES_USUARIO ru
             JOIN ROLES r ON ru.id_rol = r.id_rol
             WHERE ru.id_usuario = ? AND r.nombre_rol = 'SUPER_USER'";
-    $stmt = $this->executeQuery($sql, array($userId));
-    $result = $this->getResults($stmt);
-    return ($result[0]['is_super'] > 0);
-}
+        $stmt = $this->executeQuery($sql, array($userId));
+        $result = $this->getResults($stmt);
+        return ($result[0]['is_super'] > 0);
+    }
+
+    //OBTENER ROLES 
+    public function getRoles()
+    {
+        $sql = "SELECT id_rol, nombre_rol from ROLES ";
+        $stmt = $this->executeQuery($sql);
+        return $this->getResults($stmt);
+    }
+
+
 
     public function getMenuByRol($id_rol)
     {
@@ -176,10 +235,50 @@ public function isSuperUser($userId) {
         return $this->getResults($stmt);
     }
 
-    
+
+    //CCREAR NUEVO USUARIO
+    public function createUserWithRole($nombre, $login, $password, $foto_perfil, $email, $id_rol)
+    {
+        // Iniciar transacción para asegurar integridad
+        sqlsrv_begin_transaction($this->connection);
+
+        try {
+            // 1. Insertar el usuario y obtener el ID insertado directamente
+            $sql_user = "INSERT INTO USUARIOS 
+                    (nombre, login, password, foto_perfil, email, fecha_registro) 
+                    OUTPUT INSERTED.id_usuario
+                    VALUES (?, ?, ?, ?, ?, GETDATE())";
+            $result = $this->executeQuery($sql_user, array($nombre, $login, $password, $foto_perfil, $email));
+
+            // Obtener el ID del nuevo usuario desde el resultado
+            $row = $this->getResults($result);
+            if (!$row || !isset($row[0]['id_usuario'])) {
+                throw new Exception("No se pudo obtener el ID del nuevo usuario.");
+            }
+            
+
+            $id_usuario = $row[0]['id_usuario'];
+
+            // 2. Asignar el rol
+            $sql_role = "INSERT INTO ROLES_USUARIO (id_usuario, id_rol) VALUES (?, ?)";
+            $this->executeNonQuery($sql_role, array($id_usuario, $id_rol));
+
+            // Confirmar transacción si todo fue bien
+            sqlsrv_commit($this->connection);
+            return $id_usuario;
+        } catch (Exception $e) {
+            // Revertir transacción en caso de error
+            sqlsrv_rollback($this->connection);
+            throw $e; // Relanzar la excepción para manejarla en el controlador
+        }
+    }
+
+
+
 
     // En tu clase Conexion.php
-    public function updateUserProfile($id_usuario, $data) {
+    public function updateUserProfile($id_usuario, $data)
+    {
         $sql = "UPDATE USUARIOS SET 
                     email = ?,
                     nombre = ?,
@@ -190,7 +289,7 @@ public function isSuperUser($userId) {
                     genero = ?,
                     foto_perfil = ?
                 WHERE id_usuario = ?";
-        
+
         $params = array(
             $data['email'],
             $data['nombre'],
@@ -202,34 +301,33 @@ public function isSuperUser($userId) {
             $data['foto_perfil'],
             $id_usuario
         );
-        
+
         return $this->executeNonQuery($sql, $params);
     }
 
     public function updatePassword($id_usuario, $new_password)
     {
-        $sql = "UPDATE USUARIOS SET password = ? WHERE id_usuario = ?";
-        $params = array($new_password, $id_usuario);
-        return $this->executeNonQuery($sql, $params);
+        $sql = "UPDATE USUARIOS SET password = ? WHERE id_usuario = ?";      
+        return $this->executeNonQuery($sql, array( $id_usuario,$new_password));
     }
 
-    public function updateSocialNetworks($id_usuario, $facebook, $instagram,$linkedin, $twitter)
+    public function updateSocialNetworks($id_usuario, $facebook, $instagram, $linkedin, $twitter)
     {
         // Primero verifica si ya existe registro
         $check = "SELECT * FROM REDES_SOCIALES WHERE id_usuario = ?";
         $exists = $this->getResults($this->executeQuery($check, array($id_usuario)));
 
         if ($exists) {
-            $sql = "UPDATE REDES_SOCIALES SET url = ? WHERE id_usuario = ? AND tipo = ?";
+            $sql = "UPDATE REDES_SOCIALES SET url_perfil = ? WHERE id_usuario = ? AND tipo_red = ?";
             $this->executeNonQuery($sql, array($facebook, $id_usuario, 'facebook'));
             $this->executeNonQuery($sql, array($instagram, $id_usuario, 'instagram'));
             $this->executeNonQuery($sql, array($linkedin, $id_usuario, 'linkedin'));
             $this->executeNonQuery($sql, array($twitter, $id_usuario, 'twitter'));
         } else {
-            $sql = "INSERT INTO REDES_SOCIALES (id_usuario, tipo, url) VALUES (?, ?, ?)";
+            $sql = "INSERT INTO REDES_SOCIALES (id_usuario, tipo_red, url_perfil) VALUES (?, ?, ?)";
             $this->executeNonQuery($sql, array($id_usuario, 'facebook', $facebook));
             $this->executeNonQuery($sql, array($id_usuario, 'instagram', $instagram));
-            $this->executeNonQuery($sql, array($id_usuario, 'linkedin',$linkedin));
+            $this->executeNonQuery($sql, array($id_usuario, 'linkedin', $linkedin));
             $this->executeNonQuery($sql, array($id_usuario, 'twitter', $twitter));
         }
     }
@@ -244,7 +342,7 @@ public function isSuperUser($userId) {
 
     public function getSolicitudesUsuario($id_usuario)
     {
-        $sql = "SELECT sv.*, c.nombre as categoria 
+        $sql = "SELECT sv.*, c.nombre_categoria as categoria 
             FROM SOLICITUDES_VENDEDOR sv
             JOIN CATEGORIAS c ON sv.id_categoria = c.id_categoria
             WHERE sv.id_usuario = ?
@@ -260,29 +358,49 @@ public function isSuperUser($userId) {
         return $this->getResults($stmt);
     }
 
-    public function getSocialNetworks($id_usuario) {
+    public function getSocialNetworks($id_usuario)
+    {
         $sql = "SELECT tipo_red, url_perfil FROM REDES_SOCIALES WHERE id_usuario = ?";
         $stmt = $this->executeQuery($sql, array($id_usuario));
         $redes = $this->getResults($stmt);
-        
+
         $resultado = array(
             'facebook' => '',
             'instagram' => '',
             'twitter' => '',
-            'linkedin'=>''
+            'linkedin' => ''
         );
-        
+
         foreach ($redes as $red) {
             if (isset($resultado[strtolower($red['tipo_red'])])) {
                 $resultado[strtolower($red['tipo_red'])] = $red['url_perfil'];
             }
         }
-
-        
-        
-        
         return array($resultado);
     }
+
+    //FUNCIONES PARA PRODUCTOS DE LA VISTA [RODUCTOSVIEWS.PHP]
+    public function getProductosByVendedor($id_vendedor) {
+        $sql = "SELECT p.*, c.nombre_categoria 
+                FROM PRODUCTOS p
+                JOIN CATEGORIAS c ON p.id_categoria = c.id_categoria
+                WHERE p.id_usuario = ?";
+        $stmt = $this->executeQuery($sql, [$id_vendedor]);
+        return $this->getResults($stmt);
+    }
     
+    public function getAllProductosWithVendedor() {
+        $sql = "SELECT p.*, c.nombre_categoria, u.nombre as nombre_vendedor
+                FROM PRODUCTOS p
+                JOIN CATEGORIAS c ON p.id_categoria = c.id_categoria
+                LEFT JOIN USUARIOS u ON p.id_usuario = u.id_usuario";
+        $stmt = $this->executeQuery($sql);
+        return $this->getResults($stmt);
+    }
     
+    public function getAllCategorias() {
+        $sql = "SELECT * FROM CATEGORIAS WHERE estado = 'ACTIVO'";
+        $stmt = $this->executeQuery($sql);
+        return $this->getResults($stmt);
+    }
 }

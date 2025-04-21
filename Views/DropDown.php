@@ -1,11 +1,13 @@
+<?PHP require('Constants.php'); ?>
+
 <!--MENU EXCLUSIVO PARA EL USUARIO-->
 <div class="top-nav notification-row">
     <ul class="nav pull-right top-menu">
         <li class="dropdown">
-            <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+            <a data-toggle="dropdown" class="dropdown-toggle" >
                 <span class="profile-ava">
 
-                <img src="<?PHP echo $urlViews .$_SESSION['usuario']['foto'];?>" alt="Usuario" height="20" width="20">
+                <img src="<?php echo URL_VIEWS .$_SESSION['usuario']['foto'];?>" alt="Usuario" height="20" width="20">
 
                     
                 </span>

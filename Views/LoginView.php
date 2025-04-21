@@ -1,7 +1,11 @@
+<?php
+session_start();
+?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-    
+
     <!---PROYECTO DE INGENIERÍA DE PRUEBAS 
     PROFESOR: OSKAR
     EQUIPO #3
@@ -21,13 +25,29 @@
 
 </head>
 
+
+
 <body class="contenedor_login">
+
+
+
+    <?php if (isset($_SESSION['mensaje'])): ?>
+        <div class="alert <?= $_SESSION['alerta'] ?? 'alert-info' ?> alert-dismissible fade in" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+            <strong><?= $_SESSION['mensaje'] ?></strong>
+        </div>
+    <?php
+        unset($_SESSION['mensaje']);
+        unset($_SESSION['alerta']);
+    endif; ?>
 
     <div class="container">
 
         <form class="login-form" action="/Prototipo/Controller/AccessUsers.php" method="POST">
             <div class="login-wrap">
-                
+
                 <p class="login-img"><i class="icon_like"></i></p>
                 <div class="input-group">
                     <span class="input-group-addon"><i class="icon_profile"></i></span>
@@ -50,5 +70,8 @@
         </form>
     </div>
 </body>
+
+<!--FUNCION DE ALERTA DE MENSAJES-->
+
 
 </html>

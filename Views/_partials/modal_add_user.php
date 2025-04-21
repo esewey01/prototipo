@@ -37,11 +37,8 @@
                                     <select class="form-control" name="id_rol" required>
                                         <option value="">Seleccione un tipo</option>
                                         <?php
-                                        // Obtener roles disponibles desde la base de datos
-                                        $con = new Conexion();
-                                        $roles = $con->getResults($con->executeQuery("SELECT id_rol, nombre_rol FROM ROLES"));
-                                        foreach ($roles as $rol) {
-                                            echo '<option value="'.$rol['id_rol'].'">'.$rol['nombre_rol'].'</option>';
+                                        foreach ($_SESSION['nombre_rol'] as $rol) {
+                                            echo '<option value="' . htmlspecialchars($rol['id_rol']) . '">' . htmlspecialchars($rol['nombre_rol']) . '</option>';
                                         }
                                         ?>
                                     </select>
