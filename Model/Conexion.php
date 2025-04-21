@@ -381,19 +381,20 @@ class Conexion
 
     //FUNCIONES PARA PRODUCTOS DE LA VISTA [RODUCTOSVIEWS.PHP]
     public function getProductosByVendedor($id_vendedor) {
-        $sql = "SELECT p.*, c.nombre_categoria 
-                FROM PRODUCTOS p
-                JOIN CATEGORIAS c ON p.id_categoria = c.id_categoria
-                WHERE p.id_usuario = ?";
+        $sql = "SELECT p.*, c.nombre_categoria, u.nombre AS nombre_usuario
+                  FROM PRODUCTOS p
+                  INNER JOIN CATEGORIAS c ON p.id_categoria = c.id_categoria
+                  INNER JOIN USUARIOS u ON p.id_usuario = u.id_usuario
+                  WHERE p.id_usuario = ?";
         $stmt = $this->executeQuery($sql, [$id_vendedor]);
         return $this->getResults($stmt);
     }
     
     public function getAllProductosWithVendedor() {
-        $sql = "SELECT p.*, c.nombre_categoria, u.nombre as nombre_vendedor
-                FROM PRODUCTOS p
-                JOIN CATEGORIAS c ON p.id_categoria = c.id_categoria
-                LEFT JOIN USUARIOS u ON p.id_usuario = u.id_usuario";
+        $sql = "SELECT p.*, c.nombre_categoria, u.nombre AS nombre_usuario
+                  FROM PRODUCTOS p
+                  INNER JOIN CATEGORIAS c ON p.id_categoria = c.id_categoria
+                  INNER JOIN USUARIOS u ON p.id_usuario = u.id_usuario";
         $stmt = $this->executeQuery($sql);
         return $this->getResults($stmt);
     }

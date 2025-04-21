@@ -1,6 +1,6 @@
 <?php
 session_start();
-require('../Model/Conexion.php');
+require_once('../Model/Conexion.php');
 require('Constants.php');
 
 // Verificar sesión y tipo de usuario
@@ -14,24 +14,32 @@ $con = new Conexion();
 $urlViews = URL_VIEWS;
 $mensaje = $_SESSION['mensaje'] ?? null;
 $alerta = $_SESSION['alerta'] ?? null;
+
+//DATOS DE USUARIO LOGUEADO
 $usuario = $_SESSION['usuario']['login'];
 $password = $_SESSION['usuario']['password'];
 $id_usuario = $_SESSION['usuario']['id_usuario'];
+$id_rol = $_SESSION['usuario']['rol']['id_rol'];
 $rol_usuario = $_SESSION['usuario']['rol']['nombre_rol'];
 
 
 
 try {
-    // Obtener productos según el rol
-    if (strtolower($rol_usuario) === 'vendedor') {
+
+    if ($id_rol==3){
         // Vendedor solo ve sus productos
         $productos = $con->getProductosByVendedor($id_usuario);
-    } else {
+
+    }else{
+
         // Admin ve todos los productos con info del vendedor
         $productos = $con->getAllProductosWithVendedor();
     }
 
-    // Obtener categorías para formularios
+
+    
+
+    //OBTENER CATEGORIAS PARA LOS FORMULARIOS
     $categorias = $con->getAllCategorias();
     
     // Preparar datos para la vista
