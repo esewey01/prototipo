@@ -2,24 +2,24 @@
 --UGARTE VELASQUEZ DAVID
 --UPIICSAFOOD
 
-SELECT*FROM USUARIOS
-SELECT*FROM PRODUCTOS
-SELECT p.*, c.nombre_categoria, u.nombre AS nombre_usuario
-                  FROM PRODUCTOS p
-                  INNER JOIN CATEGORIAS c ON p.id_categoria = c.id_categoria
-                  INNER JOIN USUARIOS u ON p.id_usuario = u.id_usuario
-
-
-
-SELECT p.*, c.nombre_categoria 
-                FROM PRODUCTOS p
-                JOIN CATEGORIAS c ON p.id_categoria = c.id_categoria
-                WHERE p.id_usuario = 3
-
-
-
 --CREATE DATABASE UPIICSAFOOD
 --------------------------TABLA DE ROLES PARA LOS USUARIOS
+USE UPIICSAFOOD
+
+
+SELECT*FROM PRODUCTOS
+
+
+
+
+
+
+
+
+
+
+
+----
 CREATE TABLE ROLES (
   id_rol INT IDENTITY(0,1) PRIMARY KEY,
   nombre_rol VARCHAR(50) NOT NULL UNIQUE,
@@ -33,13 +33,15 @@ INSERT INTO ROLES (nombre_rol, descripcion ) VALUES
 ('Vendedor', 'Puede gestionar productos y ventas'),
 ('Cliente', 'Puede realizar compras');
 
+
+
 --------------------------TABLA DE USUARIOS 
 CREATE TABLE USUARIOS (
   id_usuario INT IDENTITY(1,1) PRIMARY KEY,
-  login VARCHAR(50) UNIQUE NOT 
+  login VARCHAR(50) UNIQUE NOT NULL,
   email VARCHAR(100) ,
-  password VARCHAR(255) NOT 
-  nombre VARCHAR(100) NOT 
+  password VARCHAR(255) NOT NULL,
+  nombre VARCHAR(100) NOT NULL,
   apellido VARCHAR(100),
   telefono VARCHAR(20),
   direccion VARCHAR(255),
@@ -51,7 +53,7 @@ CREATE TABLE USUARIOS (
   activo BIT DEFAULT 1,
   verificado BIT DEFAULT 0,
   intentos_fallidos INT DEFAULT 0,
-  fecha_bloqueo DATETIME 
+  fecha_bloqueo DATETIME NULL,
   token_verificacion VARCHAR(100),
   fecha_expiracion_token DATETIME
 );
@@ -61,7 +63,7 @@ INSERT INTO USUARIOS (login, email, password, nombre, apellido, telefono, direcc
 fecha_nacimiento, genero, foto_perfil, activo, verificado) VALUES
 -- Administradores
 ('2020601052', 'david.ugarte@empresa.com', 'david', 'David', 'Ugarte', '55-6158-4615', 'Av. Principal 123, Ciudad', '1985-05-15', 'M', 'fotoproducto/user.png', 1, 1),
-('henry', 'henry@empresa.com', 'henry', 'Henrych',  '55-1234-5678', 'Calle Secundaria 456, Ciudad', '1990-08-20', 'M', 'fotoproducto/user02.jpg', 1, 1),
+('henry', 'henry@empresa.com', 'henry', 'Henrych',NULL, '55-1234-5678', 'Calle Secundaria 456, Ciudad', '1990-08-20', 'M', 'fotoproducto/user02.jpg', 1, 1),
 
 -- Vendedores
 ('2017106441', 'david.vendedor@empresa.com', 'david', 'David', 'Ugarte', '55-6158-4615', 'Av. Comercial 789, Ciudad', '1988-03-10', 'M', 'fotoproducto/user.png', 1, 1),
@@ -72,14 +74,13 @@ fecha_nacimiento, genero, foto_perfil, activo, verificado) VALUES
 
 -- Clientes
 ('2020605213', 'lety.calani@cliente.com', '2020605213', 'Lety', 'Calani', '33-5678-9012', 'Residencial Las Flores 258, Ciudad', '1995-02-14', 'F', 'fotoproducto/user.png', 1, 1),
-('2017656456', 'test.user@cliente.com', '123', 'Test', 'User', '81-7654-3210', 'Privada Jardines 369, Ciudad',   'fotoproducto/userM3.jpg', 1, 0);
-SELECT*FROM USUARIOS
-SELECT*FROM ROLES_USUARIO
+('2017656456', 'test.user@cliente.com', '123', 'Test', 'User', '81-7654-3210', 'Privada Jardines 369, Ciudad', NULL, NULL, 'fotoproducto/userM3.jpg', 1, 0);
+
 --------------------------TABLA DE ROLES DE USUARIO
 CREATE TABLE ROLES_USUARIO (
   id_usuario_rol INT IDENTITY(1,1) PRIMARY KEY,
-  id_usuario INT NOT 
-  id_rol INT NOT 
+  id_usuario INT NOT NULL,
+  id_rol INT NOT NULL,
   fecha_asignacion DATETIME DEFAULT GETDATE(),
   FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
   FOREIGN KEY (id_rol) REFERENCES roles(id_rol) ON DELETE CASCADE,
@@ -105,7 +106,7 @@ INSERT INTO ROLES_USUARIO(id_usuario, id_rol) VALUES
 
 CREATE TABLE REDES_SOCIALES(
   id_red_social INT IDENTITY(1,1) PRIMARY KEY,
-  id_usuario INT NOT 
+  id_usuario INT NOT NULL ,
   tipo_red VARCHAR(50) ,
   url_perfil VARCHAR(255) ,
   nombre_usuario VARCHAR(100),
@@ -121,30 +122,26 @@ INSERT INTO REDES_SOCIALES (id_usuario, tipo_red, url_perfil, nombre_usuario ) V
 (7, 'Facebook', 'https://facebook.com/thais.calani', 'thais.calani'),
 (8, 'Instagram', 'https://instagram.com/lety_calani', 'lety_calani');
 
+
+DROP TABLE MENU
 --------------------------TABLA MENU 
 CREATE TABLE MENU (
   id_menu INT IDENTITY(1,1) PRIMARY KEY,
-  opcion VARCHAR(100) NOT 
+  opcion VARCHAR(100) NOT NULL,
   estado VARCHAR(50) NOT NULL DEFAULT 'Activo',
-  icono VARCHAR(100) NOT 
-  ubicacion VARCHAR(150) 
+  icono VARCHAR(100) NOT NULL,
+  ubicacion VARCHAR(150) ,
   color VARCHAR(150) NOT NULL DEFAULT '#ffffff',
   acceso VARCHAR(50) NOT NULL DEFAULT 'A',
   orden INT NOT NULL DEFAULT 0,
-  id_rol INT  -- NULL = para todos los roles
+  id_rol INT, -- NULL = para todos los roles
   FOREIGN KEY (id_rol) REFERENCES ROLES(id_rol)
 );
 
-
-UPDATE MENU SET
-icono='icon_house'
-where opcion='principal'
-
-
 -- Opciones para todos los usuarios (id_rol = NULL)
 INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden) VALUES
-('Principal', 'Activo', 'icon_house', 'PrincipalController.php', '#ffffff', 'A',  1),
-('Perfil', 'Activo', 'icon_profile', 'PerfilController.php', '#ffffff', 'A',  2);
+('Principal', 'Activo', 'icon_house', 'PrincipalController.php', '#ffffff', 'A',  1, 0),
+('Perfil', 'Activo', 'icon_profile', 'PerfilController.php', '#ffffff', 'A',  2,0);
 
 -- Opciones solo para administradores (id_rol = 1)
 INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden) VALUES
@@ -154,7 +151,7 @@ INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden
 
 -- Opciones para vendedores (id_rol = 2)
 INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden) VALUES
-('Productos', 'Activo', 'icon_box', 'ProductoController.php', '#ffffff', 'A', 2, 3),
+('Productos', 'Activo', 'icon_inbox', 'ProductoController.php', '#ffffff', 'A', 2, 3),
 ('Ventas', 'Activo', 'icon_cart', 'VentasController.php', '#ffffff', 'A', 2, 4),
 ('Clientes', 'Activo', 'icon_users', 'ClientesController.php', '#ffffff', 'A', 2, 5);
 
@@ -165,8 +162,12 @@ INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden
 
 
 
+select*from menu
+UPDATE MENU
+SET icono = 'icon_datareport_alt'
+WHERE icono='fa-inbox'
 
-
+icon_datareport_alt
 
 
 
@@ -174,7 +175,7 @@ INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden
 
 CREATE TABLE CATEGORIAS (
   id_categoria INT IDENTITY(1,1) PRIMARY KEY,
-  nombre_categoria VARCHAR(100) NOT 
+  nombre_categoria VARCHAR(100) NOT NULL,
   descripcion VARCHAR(255),
   estado VARCHAR(20) DEFAULT 'ACTIVO',
   fecha_creacion DATETIME DEFAULT GETDATE()
@@ -186,36 +187,39 @@ INSERT INTO CATEGORIAS (nombre_categoria, descripcion) VALUES
 ('Dulces', 'Golosinas de tamaños pequeños'),
 ('Otros', 'Otros productos diversos');
 
---------------------------TABLA DE PROVEEDORES
-CREATE TABLE PROVEEDORES (
-  id_proveedor INT IDENTITY(1,1) PRIMARY KEY,
-  nombre_proveedor VARCHAR(100) NOT 
-  contacto VARCHAR(100),
-  telefono VARCHAR(20),
-  direccion VARCHAR(255),
-  estado VARCHAR(20) DEFAULT 'ACTIVO',
-  fecha_registro DATETIME DEFAULT GETDATE()
-);
 
-INSERT INTO PROVEEDORES (nombre_proveedor) VALUES
-('POLLOS IMBA SRL'),
-('ARIEL SA'),
-('Arroz Okinawa');
 
 
 --------------------------SOLICITUDESVENDEDOR
 CREATE TABLE SOLICITUDES_VENDEDOR (
   id_solicitud INT IDENTITY(1,1) PRIMARY KEY,
-  id_usuario INT NOT 
+  id_usuario INT NOT NULL,
   descripcion TEXT,
   estado VARCHAR(20) NOT NULL DEFAULT 'PENDIENTE' CHECK (estado IN ('PENDIENTE', 'APROBADA', 'RECHAZADA')),
   fecha_solicitud DATETIME DEFAULT GETDATE(),
-  fecha_revision DATETIME 
-  id_revisor INT 
-  comentarios TEXT 
+  fecha_revision DATETIME ,
+  id_revisor INT ,
+  comentarios TEXT NULL,
   FOREIGN KEY (id_usuario) REFERENCES USUARIOS(id_usuario),
   FOREIGN KEY (id_revisor) REFERENCES USUARIOS(id_usuario)
 );
+
+DELETE SOLICITUDES_VENDEDOR
+SELECT*FROM SOLICITUDES_VENDEDOR
+
+-- Solicitud pendiente
+INSERT INTO SOLICITUDES_VENDEDOR (id_usuario, descripcion, estado) 
+VALUES (5, 'Quiero vender mis productos de repostería', 'PENDIENTE');
+
+-- Vendedor aprobado
+INSERT INTO SOLICITUDES_VENDEDOR (id_usuario, descripcion, estado, fecha_revision, id_revisor, comentarios) 
+VALUES (6, 'Venta de artículos electrónicos', 'APROBADA', GETDATE(), 1, 'Documentación completa');
+
+-- Solicitud rechazada
+INSERT INTO SOLICITUDES_VENDEDOR (id_usuario, descripcion, estado, fecha_revision, id_revisor, comentarios) 
+VALUES (7, 'Venta de ropa usada', 'RECHAZADA', GETDATE(), 1, 'No cumple políticas de calidad');
+
+
 --------------------------TABLA DE PRODUCTOS
 CREATE TABLE PRODUCTOS (
   id_producto INT IDENTITY(1,1) PRIMARY KEY,
@@ -268,33 +272,3 @@ INSERT INTO PRODUCTOS (
 
 
 
-
------------TABLA DE SOLICITUD DE VENDEDORES
-CREATE TABLE VENDEDORES (
-  id_vendedor INT IDENTITY(1,1) PRIMARY KEY,
-  id_usuario INT NOT NULL UNIQUE,
-  descripcion TEXT 
-  estado VARCHAR(20) NOT NULL DEFAULT 'PENDIENTE' 
-    CHECK (estado IN ('PENDIENTE', 'APROBADO', 'RECHAZADO', 'INACTIVO', 'SUSPENDIDO')),
-  fecha_solicitud DATETIME DEFAULT GETDATE(),
-  fecha_revision DATETIME 
-  id_revisor INT 
-  comentarios TEXT 
-  comision DECIMAL(5,2) DEFAULT 0.00,
-  rating DECIMAL(3,2) DEFAULT 5.00,
-  FOREIGN KEY (id_usuario) REFERENCES USUARIOS(id_usuario),
-  FOREIGN KEY (id_revisor) REFERENCES USUARIOS(id_usuario)
-);
-
-
--- Solicitud pendiente
-INSERT INTO VENDEDORES (id_usuario, descripcion, estado) 
-VALUES (5, 'Quiero vender mis productos de repostería', 'PENDIENTE');
-
--- Vendedor aprobado
-INSERT INTO VENDEDORES (id_usuario, descripcion, estado, fecha_revision, id_revisor, comision, comentarios) 
-VALUES (6, 'Venta de artículos electrónicos', 'APROBADO', GETDATE(), 1, 10.00, 'Documentación completa');
-
--- Solicitud rechazada
-INSERT INTO VENDEDORES (id_usuario, descripcion, estado, fecha_revision, id_revisor, comentarios) 
-VALUES (7, 'Venta de ropa usada', 'RECHAZADO', GETDATE(), 1, 'No cumple políticas de calidad');

@@ -9,7 +9,7 @@ class Conexion
     public function __construct()
     {
         // Configuración del servidor
-        $this->server = "localhost";
+        $this->server = "MPMLW10DELF6Z2";
         $this->database = "UPIICSAFOOD";
         $this->user = "david";  //USUARIO DE SQL SERVER
         $this->password = "6441";
@@ -403,5 +403,76 @@ class Conexion
         $sql = "SELECT * FROM CATEGORIAS WHERE estado = 'ACTIVO'";
         $stmt = $this->executeQuery($sql);
         return $this->getResults($stmt);
+    }
+
+    public function newProduct(
+        int $id_usuario,
+        int $id_categoria,
+        string $codigo,
+        string $nombre_producto,
+        string $descripcion,
+        int $cantidad,
+        float $precio_venta,
+        float $precio_compra,
+        string $imagen = 'fotoproducto/default.jpg'
+    ): bool {
+        try {
+            // 1. Verificar que existan las relaciones (usuario y categoría)
+            if (!$this->existeUsuario($id_usuario)) {
+                throw new Exception("El usuario no existe");
+            }
+            
+            if (!$this->existeCategoria($id_categoria)) {
+                throw new Exception("La categoría no existe");
+            }
+    
+            // 2. Preparar la consulta SQL con parámetros
+            $query = "INSERT INTO PRODUCTOS (
+                        id_usuario, 
+                        id_categoria, 
+                        codigo, 
+                        nombre_producto, 
+                        descripcion, 
+                        cantidad, 
+                        precio_venta, 
+                        precio_compra, 
+                        imagen,
+                        fecha_registro,
+                        estado
+                    ) VALUES (
+                        :id_usuario, 
+                        :id_categoria, 
+                        :codigo, 
+                        :nombre_producto, 
+                        :descripcion, 
+                        :cantidad, 
+                        :precio_venta, 
+                        :precio_compra, 
+                        :imagen,
+                        GETDATE(),
+                        'ACTIVO'
+                    )";
+    
+            // 3. Preparar y ejecutar la sentencia
+            $stmt = $this->conn->prepare($query);
+            
+            $stmt->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
+            $stmt->bindParam(':id_categoria', $id_categoria, PDO::PARAM_INT);
+            $stmt->bindParam(':codigo', $codigo);
+            $stmt->bindParam(':nombre_producto', $nombre_producto);
+            $stmt->bindParam(':descripcion', $descripcion);
+            $stmt->bindParam(':cantidad', $cantidad, PDO::PARAM_INT);
+            $stmt->bindParam(':precio_venta', $precio_venta);
+            $stmt->bindParam(':precio_compra', $precio_compra);
+            $stmt->bindParam(':imagen', $imagen);
+    
+            // 4. Ejecutar y retornar resultado
+            return $stmt->execute();
+            
+        } catch (PDOException $e) {
+            // Registrar el error en logs
+            error_log("Error al insertar producto: " . $e->getMessage());
+            return false;
+        }
     }
 }

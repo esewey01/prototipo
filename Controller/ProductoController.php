@@ -3,66 +3,143 @@ session_start();
 require_once('../Model/Conexion.php');
 require('Constants.php');
 
-// Verificar sesión y tipo de usuario
-if (!isset($_SESSION['usuario']['login'])){
-    header("Location: /Prototipo/index.php");
-    exit();
+class ProductoController {
+    private $con;
+    private $urlViews;
+    
+    public function __construct() {
+        $this->con = new Conexion();
+        $this->urlViews = URL_VIEWS;
+        
+        // Verificar sesión
+        if (!isset($_SESSION['usuario']['login'])) {
+            header("Location: /Prototipo/index.php");
+            exit();
+        }
+    }
+    
+    public function index() {
+        try {
+            //MENSAJES DE ERROR
+            $mensaje=$_SESSION['mensaje'] ?? '';
+            $alerta=$_SESSION['alerta']??'';
+            $urlViews=URL_VIEWS;
+
+            // Datos del usuario logueado
+            $usuario = $_SESSION['usuario']['login'];
+            $password = $_SESSION['usuario']['password'];
+            $id_usuario = $_SESSION['usuario']['id_usuario'];
+            $id_rol = $_SESSION['usuario']['rol']['id_rol'];
+            $rol_usuario = $_SESSION['usuario']['rol']['nombre_rol'];
+            
+            // Obtener productos según el rol
+            if ($id_rol == 3) { // Vendedor
+                $productos = $this->con->getProductosByVendedor($id_usuario);
+            } else { // Admin/Super User
+                $productos = $this->con->getAllProductosWithVendedor();
+            }
+            
+            // Obtener categorías para los formularios
+            $categorias = $this->con->getAllCategorias();
+            
+            // Preparar datos para la vista
+            $data = [
+                'productos' => $productos,
+                'categorias' => $categorias,
+                'urlViews' => $this->urlViews,
+                'userLogueado' => $_SESSION['usuario']['nombre'] ?? 'Usuario',
+                'imageUser' => $_SESSION['usuario']['foto'] ?? 'default.png',
+                'esAdministrador' => (strtolower($rol_usuario) === 'administrador'),
+                'esVendedor' => (strtolower($rol_usuario) === 'vendedor'),
+                'mensaje' => $_SESSION['mensaje'] ?? null,
+                'alerta' => $_SESSION['alerta'] ?? null
+            ];
+            
+            // Limpiar mensajes después de mostrarlos
+            unset($_SESSION['mensaje']);
+            unset($_SESSION['alerta']);
+            
+            // Cargar vista
+            require("../Views/ProductoViews.php");
+            
+        } catch (Exception $e) {
+            $_SESSION['error'] = "Error al cargar productos: " . $e->getMessage();
+            header("Location: Error.php");
+            exit();
+        }
+    }
+    
+    public function guardar() {
+        try {
+            // Validar método de envío
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                throw new Exception("Método no permitido");
+            }
+            
+            // Validar datos del formulario
+            $requiredFields = ['tipoproducto', 'codigo', 'descripcion', 'cantidad', 'pventa', 'pcompra'];
+            foreach ($requiredFields as $field) {
+                if (empty($_POST[$field])) {
+                    throw new Exception("El campo $field es requerido");
+                }
+            }
+            
+            // Procesar imagen
+            $imagen = 'fotoproducto/default.jpg';
+            if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
+                $extension = pathinfo($_FILES['imagen']['name'], PATHINFO_EXTENSION);
+                $nombreArchivo = uniqid() . '.' . $extension;
+                $rutaDestino = '../fotoproducto/' . $nombreArchivo;
+                
+                if (move_uploaded_file($_FILES['imagen']['tmp_name'], $rutaDestino)) {
+                    $imagen = 'fotoproducto/' . $nombreArchivo;
+                }
+            }
+            
+            // Insertar producto
+            $resultado = $this->con->insertProducto(
+                $_SESSION['usuario']['id_usuario'],
+                $_POST['tipoproducto'],
+                $_POST['nombre_producto'],
+                $_POST['codigo'],
+                 // O podría ser $_POST['nombre_producto'] si cambias el formulario
+                $_POST['descripcion'],
+                $_POST['cantidad'],
+                $_POST['pventa'],
+                $_POST['pcompra'],
+                $imagen
+            );
+            
+            if ($resultado) {
+                $_SESSION['mensaje'] = "Producto registrado correctamente";
+                $_SESSION['alerta'] = "alert-success";
+            } else {
+                throw new Exception("No se pudo registrar el producto");
+            }
+            
+            header("Location: ProductoViews.php");
+            exit();
+            
+        } catch (Exception $e) {
+            $_SESSION['mensaje'] = "Producto no guardado correctamente";
+            $_SESSION['alerta'] = "alert-warning";
+            $_SESSION['error'] = $e->getMessage();
+            header("Location: ProductoController.php");
+            exit();
+        }
+    }
 }
 
-$con = new Conexion();
-// Variables para la vista
-$urlViews = URL_VIEWS;
-$mensaje = $_SESSION['mensaje'] ?? null;
-$alerta = $_SESSION['alerta'] ?? null;
+// Uso del controlador
+$action = $_GET['action'] ?? 'index';
+$controller = new ProductoController();
 
-//DATOS DE USUARIO LOGUEADO
-$usuario = $_SESSION['usuario']['login'];
-$password = $_SESSION['usuario']['password'];
-$id_usuario = $_SESSION['usuario']['id_usuario'];
-$id_rol = $_SESSION['usuario']['rol']['id_rol'];
-$rol_usuario = $_SESSION['usuario']['rol']['nombre_rol'];
-
-
-
-try {
-
-    if ($id_rol==3){
-        // Vendedor solo ve sus productos
-        $productos = $con->getProductosByVendedor($id_usuario);
-
-    }else{
-
-        // Admin ve todos los productos con info del vendedor
-        $productos = $con->getAllProductosWithVendedor();
-    }
-
-
-    
-
-    //OBTENER CATEGORIAS PARA LOS FORMULARIOS
-    $categorias = $con->getAllCategorias();
-    
-    // Preparar datos para la vista
-    $data = [
-        'productos' => $productos,
-        'categorias' => $categorias,
-        'urlViews' => URL_VIEWS,
-        'userLogueado' => $_SESSION['usuario']['nombre'] ?? 'Usuario',
-        'imageUser' => $_SESSION['usuario']['foto'] ?? 'default.png',
-        'esAdministrador' => (strtolower($rol_usuario) === 'administrador'),
-        'esVendedor' => (strtolower($rol_usuario) === 'vendedor')
-    ];
-
-    
-    
-    
-    
-
-    // Cargar vista
-    require("../Views/ProductoViews.php");
-    
-} catch (Exception $e) {
-    $_SESSION['error'] = "Error al cargar productos: " . $e->getMessage();
-    header("Location: Error.php");
-    exit();
+switch ($action) {
+    case 'guardar':
+        $controller->guardar();
+        break;
+    case 'index':
+    default:
+        $controller->index();
+        break;
 }

@@ -76,7 +76,7 @@
                     <!--FUNCION DE AGREGAR UN PRODUCTO -->
                     <div id="add" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
                         aria-hidden="true">
-                        <form action="RegistroProducto.php" method="post" enctype="multipart/form-data">
+                        <form action="ProductoController.php?action=guardar" method="POST" enctype="multipart/form-data" >
                             <input name="usuarioLogin" value="<?php echo $usuario; ?>" type="hidden">
                             <input name="passwordLogin" value="<?php echo $password; ?>" type="hidden">
                             <div class="modal-dialog" id="mdialTamanio">
@@ -100,12 +100,17 @@
                                             <div class="col-lg-8">
                                                 <section class="panel">
                                                     <div class="form-group">
-                                                        <label class="col-sm-2 control-label">Tipo Producto:</label>
+                                                        <label class="col-sm-2 control-label">Categoria:</label>
                                                         <div class="col-sm-4">
-                                                            <select class="form-control input-lg m-bot15"
-                                                                name="tipoproducto">
+                                                            <select class="form-control input-lg m-bot12"
+                                                                name="id_categoria" required>
+                                                                <option value="">Seleccionar Categoría</option>
+                                                                <?php foreach ($categorias as $categoria): ?>
+                                                                    <option value="<?php echo $categoria['id_categoria']; ?>">
+                                                                        <?php echo $categoria['nombre_categoria']; ?>
+                                                                    </option>
+                                                                <?php endforeach; ?>
 
-                                                                ?>
                                                             </select>
                                                         </div>
                                                         <label class="col-sm-2 control-label">Codigo:</label>
@@ -114,6 +119,17 @@
                                                                 name="codigo" type="text" required />
                                                         </div>
                                                     </div>
+
+                                                    <div class="form-group">
+                                                        <label class="col-sm-2 control-label">Nombre del Producto:</label>
+                                                        <div class="col-sm-10">
+                                                            <input class="form-control input-lg m-bot15"
+                                                                id="nombre_producto" name="nombre_producto" type="text"
+                                                                required />
+                                                        </div>
+
+                                                    </div>
+
                                                     <div class="form-group">
                                                         <label class="col-sm-2 control-label">Descripcion:</label>
                                                         <div class="col-sm-10">
@@ -200,7 +216,7 @@
 
                         <?php foreach ($productos as $product): ?>
                             <tr>
-                                <td><img src="<?php echo $urlViews . $product['imagen'] ?>" height="50"
+                                <td><img src="<?php echo URL_VIEWS . $product['imagen'] ?>" height="50"
                                         width="50"></td>
                                 <td> <?PHP echo $product['codigo']; ?></td>
                                 <td> <?PHP echo $product['nombre_producto']; ?></td>
@@ -224,8 +240,7 @@
                             <div id="a<?php echo $product[0]; ?>" class="modal fade" tabindex="-1" role="dialog"
                                 aria-labelledby="myModalLabel" aria-hidden="true">
                                 <form class="form-validate form-horizontal" name="form2" enctype="multipart/form-data"
-                                    action="RegistroProducto.php"
-                                    method="post">
+                                    action="RegistroProducto.php" method="POST">
                                     <input type="hidden" id="idproducto" name="idproducto"
                                         value="<?php echo $product['idproducto']; ?>">
                                     <input type="hidden" name="imagen" value="<?php echo $product['imagen']; ?>">
