@@ -1,149 +1,162 @@
 <?php
-require('../Model/Conexion.php');
-require('Constants.php');
+require_once('../Model/Conexion.php');
+require_once('Constants.php');
 
-if (!isset($_SESSION)) {
-    session_start();
-}
-
-$usuarioLogin = $_POST['usuarioLogin'];
-$passwordLogin = $_POST['passwordLogin'];
-
-$con = new conexion();
-
-if (isset($_POST['nuevo_Producto'])) {
-    $tipoproducto = $_POST['tipoproducto'];
-    $codigo= $_POST['codigo'];
-    $nombreProducto= $_POST['descripcion'];
-    $cantidad = $_POST['cantidad'];
-    $precioVenta = $_POST['pventa'];
-    $precioCompra = $_POST['pcompra'];
-    $fechaRegistro = $_POST['fechaRegistro'];
-    $proveedor =null;
-
-
-    if($_FILES['userfile']['name']!=""){
-
-        $ruta = "fotoproducto/";
-        opendir($ruta);
-        $destino = $ruta.$_FILES['userfile']['name'];
-
-
-        $nombre_archivo = ADDRESS . $_FILES['userfile']['name'];
-        $tipo_archivo = $_FILES['userfile']['type'];
-        $tamano_archivo = $_FILES['userfile']['size'];
-
-
-        $nuevo_archivo= "fotoproducto/" . substr($tipo_archivo,6,4);
-
-
-        if (!((strpos($tipo_archivo, "gif") || strpos($tipo_archivo, "jpeg") || strpos($tipo_archivo, "png")) && ($tamano_archivo < 5000000))) {
-            cuadro_error("La extensión o el tamaño de los archivos no es correcta, Se permiten archivos .gif o .jpg de 5 Mb máximo");
-
-        }else{
-            if (move_uploaded_file($_FILES['userfile']['tmp_name'], $nombre_archivo)){
-                rename($nombre_archivo,$nuevo_archivo);
-                //  cuadro_mensaje("El archivo ha sido cargado correctamente");
-            }else{
-                cuadro_error("Ocurrió algún error al subir el archivo. No pudo guardarse");
+class ProductoController {
+    private $con;
+    private $usuario;
+    private $password;
+    
+    public function __construct() {
+        if (!isset($_SESSION)) {
+            session_start();
+        }
+        
+        $this->con = new Conexion();
+        $this->usuario = $_POST['usuario'] ?? $_GET['usuario'] ?? null;
+        $this->password = $_POST['password'] ?? $_GET['password'] ?? null;
+    }
+    
+    public function handleRequest() {
+        try {
+            if (isset($_POST['nuevo_Producto'])) {
+                $this->crearProducto();
+            } elseif (isset($_GET['idborrar'])) {
+                $this->eliminarProducto();
+            } elseif (isset($_POST['update_producto'])) {
+                $this->actualizarProducto();
             }
+            
+            $this->redirectToProductList();
+            
+        } catch (Exception $e) {
+            $this->handleError($e->getMessage());
         }
     }
-
-    else{
-        $destino = "fotoUsuario/user.png";
+    
+    private function crearProducto() {
+        $datosProducto = $this->validarDatosProducto();
+        $imagen = $this->procesarImagen('userfile', 'fotoproducto/default.jpg');
+        
+        $resultado = $this->con->registerNewProducto(
+            $imagen,
+            $datosProducto['codigo'],
+            $datosProducto['nombre_producto'],
+            $datosProducto['cantidad'],
+            $datosProducto['fecha_registro'],
+            $datosProducto['precio_venta'],
+            $datosProducto['categoria'],
+            null, // proveedor
+            $datosProducto['precio_compra']
+        );
+        
+        if (!$resultado) {
+            throw new Exception("Error al registrar el producto");
+        }
+        
+        $this->setMensajeExito("Se registró un nuevo producto correctamente");
     }
-
-    $mensaje = "Se registro un nuevo producto  correctamente !!!";
-    $alerta = "alert alert-success";
-
-    $updateMensaje = $con->updateMensajeAlert($mensaje, $alerta);
-    $registerNewProducto = $con->registerNewProducto($destino,$codigo,$nombreProducto,$cantidad,$fechaRegistro,$precioVenta,$tipoproducto,$proveedor,$precioCompra);
-}
-
-
-if (isset($_GET['idborrar'])) {
-    $usuarioLogin = $_GET['usuarioLogin'];
-    $passwordLogin = $_GET['passwordLogin'];
-    $idborrar = $_GET['idborrar'];
-
-    $mensaje = "Se elimino  los datos del producto correctamente !!!";
-    $alerta = "alert alert-danger";
-    $updateMensaje = $con->updateMensajeAlert($mensaje, $alerta);
-
-    $deleteProducto = $con->deleteProduct($idborrar);
-
-
-}
-
-if (isset($_POST['update_producto'])) {
-    $idproducto = $_POST['idproducto'];
-    $imagen = $_POST['imagen'];
-    $tipoproducto = $_POST['tipoproducto'];
-    $codigo= $_POST['codigo'];
-    $nombreProducto= $_POST['descripcion'];
-    $cantidad = $_POST['cantidad'];
-    $precioVenta = $_POST['pventa'];
-    $precioCompra = $_POST['pcompra'];
-    $fechaRegistro = date("Y-m-d");
-    $proveedor =null;
-
-
-    if($_FILES['userfileEdit']['name']!=""){
-
-        $ruta = "fotoproducto/";
-        opendir($ruta);
-        $destino = $ruta.$_FILES['userfileEdit']['name'];
-
-
-        $nombre_archivo = ADDRESS . $_FILES['userfileEdit']['name'];
-        $tipo_archivo = $_FILES['userfileEdit']['type'];
-        $tamano_archivo = $_FILES['userfileEdit']['size'];
-
-
-        $nuevo_archivo= "fotoproducto/" . substr($tipo_archivo,6,4);
-
-
-        if (!((strpos($tipo_archivo, "gif") || strpos($tipo_archivo, "jpeg") || strpos($tipo_archivo, "png")) && ($tamano_archivo < 5000000))) {
-            cuadro_error("La extensión o el tamaño de los archivos no es correcta, Se permiten archivos .gif o .jpg de 5 Mb máximo");
-
-        }else{
-            if (move_uploaded_file($_FILES['userfileEdit']['tmp_name'], $nombre_archivo)){
-                rename($nombre_archivo,$nuevo_archivo);
-            }else{
-                cuadro_error("Ocurrió algún error al subir el archivo. No pudo guardarse");
+    
+    private function actualizarProducto() {
+        $datosProducto = $this->validarDatosProducto();
+        $idProducto = $_POST['id_producto'];
+        $imagenActual = $_POST['imagen'];
+        
+        $imagen = $this->procesarImagen('userfileEdit', $imagenActual);
+        
+        $resultado = $this->con->updateProducto(
+            $datosProducto['id_categoria'],
+            $datosProducto['codigo'],  
+            $datosProducto['nombre_producto'],
+            $datosProducto['descripcion'],
+            $datosProducto['cantidad'],
+            $datosProducto['precio_venta'],
+            $datosProducto['precio_compra'],
+            $idProducto  // Este parámetro va al final, no al inicio
+        );
+        
+        if (!$resultado) {
+            throw new Exception("Error al actualizar el producto");
+        }
+        
+        $this->setMensajeExito("Se actualizaron los datos del producto correctamente");
+    }
+    
+    private function eliminarProducto() {
+        $idProducto = $_GET['idborrar'];
+        
+        $resultado = $this->con->deleteProduct($idProducto);
+        
+        if (!$resultado) {
+            throw new Exception("Error al eliminar el producto");
+        }
+        
+        $this->setMensajeExito("Se eliminó el producto correctamente", "alert-success");
+    }
+    
+    private function validarDatosProducto() {/*
+        $requiredFields = [
+            'id_categoria', 'codigo', 'nombre_producto', 'descripcion', 
+            'cantidad', 'precio_venta', 'precio_compra'
+        ];
+        
+        foreach ($requiredFields as $field) {
+            if (empty($_POST[$field])) {
+                throw new Exception("El campo $field es requerido");
             }
         }
+        */
+        return [
+            'id_categoria' => $_POST['id_categoria'],
+            'codigo' => $_POST['codigo'],
+            'nombre_producto' => $_POST['nombre_producto'],
+            'descripcion' => $_POST['descripcion'],
+            'cantidad' => $_POST['cantidad'],
+            'precio_venta' => $_POST['precio_venta'],
+            'precio_compra' => $_POST['precio_compra']
+        ];
     }
-
-    else{
-        $destino = $imagen;
+    
+    private function procesarImagen($inputName, $defaultImage) {
+        if (empty($_FILES[$inputName]['name'])) {
+            return $defaultImage;
+        }
+        
+        $ruta = "fotoproducto/";
+        $archivo = $_FILES[$inputName];
+        $extension = pathinfo($archivo['name'], PATHINFO_EXTENSION);
+        $nombreUnico = uniqid() . '.' . $extension;
+        $destino = $ruta . $nombreUnico;
+        
+        // Validar tipo y tamaño
+        $permitidos = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!in_array($archivo['type'], $permitidos) || $archivo['size'] > 5000000) {
+            throw new Exception("Solo se permiten imágenes JPG, PNG o GIF menores a 5MB");
+        }
+        
+        if (!move_uploaded_file($archivo['tmp_name'], $destino)) {
+            throw new Exception("Error al subir la imagen");
+        }
+        
+        return $destino;
     }
-
-
-    $mensaje = "Se Actualizo  los datos del Producto correctamente !!!";
-    $alerta = "alert alert-info";
-
-    $updateMensaje = $con->updateMensajeAlert($mensaje, $alerta);
-
-    $updateProductoData = $con->updateProduct($destino,$codigo,$nombreProducto,$cantidad,$fechaRegistro,$precioVenta,$tipoproducto,$proveedor,$precioCompra,$idproducto);
-
+    
+    private function setMensajeExito($mensaje, $tipo = "alert-success") {
+        $_SESSION['mensaje'] = $mensaje;
+        $_SESSION['alerta'] = "alert $tipo";
+    }
+    
+    private function redirectToProductList() {
+        header("Location: ProductoController.php");
+        exit();
+    }
+    
+    private function handleError($mensaje) {
+        $_SESSION['error'] = $mensaje;
+        $this->redirectToProductList();
+    }
 }
 
-$searchUser = $con->getUser($usuarioLogin, $passwordLogin);
-$allUsuarios = $con->getAllUserData();
-
-foreach ($searchUser as $user) {
-    $tipo = $user['tipo'];
-    $id_usuario = $user['id_usu'];
-    $nombres = $user['nombre'];
-    $password = $user['password'];
-    $foto = $user['foto'];
-}
-
-
-$menuMain = $con->getMenuMain();
-header("Location: producto.php?usuario=$usuarioLogin&password=$passwordLogin&estado='Activo'");
-
-
-?>
+// Uso del controlador
+$controller = new ProductoController();
+$controller->handleRequest();

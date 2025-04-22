@@ -9,7 +9,7 @@ class Conexion
     public function __construct()
     {
         // Configuración del servidor
-        $this->server = "localhost";
+        $this->server = "MPMLW10DELF6Z2";
         $this->database = "UPIICSAFOOD";
         $this->user = "david";  //USUARIO DE SQL SERVER
         $this->password = "6441";
@@ -80,12 +80,12 @@ class Conexion
         $stmt = sqlsrv_query($this->connection, $sql, $params);
 
         if ($stmt === false) {
-            die("Error en operación: " . print_r(sqlsrv_errors(), true));
+            $errors = sqlsrv_errors();
+            error_log("Error en consulta SQL: " . print_r($errors, true));
+            return false;
         }
 
-        $rowsAffected = sqlsrv_rows_affected($stmt);
-        sqlsrv_free_stmt($stmt);
-        return $rowsAffected;
+        return true;
     }
 
 
@@ -438,7 +438,7 @@ class Conexion
                     ) VALUES (
                         ?, ?, ?, ?, ?, ?, ?, ?, ?,GETDATE(),'ACTIVO')";
 
-        
+
         $params = array(
             $id_usuario,
             $id_categoria,
@@ -451,6 +451,97 @@ class Conexion
             $imagen
         );
 
-        $stmt = $this->executeNonQuery($sql, $params);
+        return $this->executeNonQuery($sql, $params);
+    }
+
+    public function updateProducto(
+        $id_categoria,
+        $codigo,
+        $nombre_producto,
+        $descripcion,
+        $cantidad,
+        $precio_venta,
+        $precio_compra,
+        $id_producto
+    ) {
+
+        $sql = "UPDATE PRODUCTOS SET 
+            id_categoria = ?,
+            codigo = ?,
+            nombre_producto = ?,
+            descripcion = ?,
+            cantidad = ?,
+            precio_venta = ?,
+            precio_compra = ?,
+            fecha_registro = GETDATE()
+            where id_producto=?";
+
+        $params = array(
+            $id_categoria,
+            $codigo,
+            $nombre_producto,
+            $descripcion,
+            $cantidad,
+            $precio_venta,
+            $precio_compra,
+            $id_producto
+        );
+        return $this->executeNonQuery($sql, $params);
+    }
+
+    public function deleteProduct($id_producto)
+    {
+        $sql = "DELETE FROM PRODUCTOS WHERE id_producto = ?";
+
+        // Asegúrate de pasar un array como parámetro
+        return $this->executeNonQuery($sql, array($id_producto));
+    }
+
+    public function newReport(
+        $id_producto,
+        $id_usuario,
+        $id_admin,
+        $motivo,
+        $accion_tomada,
+    ) {
+        $sql = "INSERT INTO REPORTES(
+            id_producto, id_usuario_reportado, id_administrador,
+            motivo, accion_tomada, estado
+            ) VALUES (?, ?, ?, ?, ?, 'PROCESADO')";
+        $params = [
+            $id_producto,
+            $id_usuario,
+            $id_admin,
+            $motivo,
+            $accion_tomada,
+        ];
+
+        return $this->executeNonQuery($sql, $params);
+    }
+
+    //FUNCION PARA ACCIONES
+    public function desactivarProd($id_producto){
+        $sql="UPDATE PRODUCTOS SET ESTADO='INACTIVO'
+        WHERE ID_PRODUCTO=?";
+        return $this->executeNonQuery($sql, $id_producto);
+    }
+    
+    public function suspenderUser($id_usuario){
+        $sql="UPDATE USUARIOS SET ACTIVO=0,
+         WHERE id_usuario=?";
+         return $this->executeNonQuery($sql,$id_usuario);
+    }
+    //FUNCION PARA REPORTES
+    public function getReportes()
+    {
+        $sql = "SELECT r.*, p.nombre_producto, u.nombre as nombre_reportado, 
+                       a.nombre as nombre_administrador
+                FROM REPORTES r
+                JOIN PRODUCTOS p ON r.id_producto = p.id_producto
+                JOIN USUARIOS u ON r.id_usuario_reportado = u.id_usuario
+                JOIN USUARIOS a ON r.id_administrador = a.id_usuario
+                ORDER BY r.fecha_reporte DESC";
+
+        return $this->executeQuery($sql);
     }
 }

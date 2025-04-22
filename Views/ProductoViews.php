@@ -35,9 +35,10 @@
             <!--SUBMENU-->
             <div class="row">
                 <div class="col-lg-12">
-                    <h3 class="page-header"><i class="fa fa-laptop"></i> PRINCIPAL</h3>
+                    <h3 class="page-header"><i class="fa fa-laptop"></i>Productos para Vender</h3>
                     <div class="<?PHP echo $alerta; ?>" role="alert">
                         <strong><?PHP echo $mensaje; ?></strong>
+                        <strong><?PHP echo $error; ?></strong>
                     </div>
 
                     <ol class="breadcrumb">
@@ -57,7 +58,7 @@
 
 
             <!-- ELEMENTOS -->
-            <header class="panel-heading"> Lista de Productos del Sistema</header>
+            <header class="panel-heading">LISTA DE PRODUCTOS CARGADOS AL SISTEMA</header>
             <header class="panel heading">
                 <div class="panel-body">
                     <!--BOTONES-->
@@ -66,11 +67,12 @@
                         <a href="ReporteProductosPdf.php?productos=productos" target="_blank"
                             class="btn btn-danger tooltips"><i
                                 class="fa fa-rotate-right"></i> EXPORTAR PDF </a>
-
-                        <button href="#add" title="" data-placement="top" data-toggle="modal"
-                            class="btn btn-primary tooltips" type="button" data-original-title="Nuevo Producto">
-                            <span class="icon_bag_alt"></span>AGREGAR NUEVO PRODUCTO
-                        </button>
+                        <?php if ($id_rol == 2): ?>
+                            <button href="#add" title="" data-placement="top" data-toggle="modal"
+                                class="btn btn-primary tooltips" type="button" data-original-title="Nuevo Producto">
+                                <span class="icon_bag_alt"></span>AGREGAR NUEVO PRODUCTO
+                            </button>
+                        <?php endif; ?>
                     </div>
 
                     <!--FUNCION DE AGREGAR UN PRODUCTO -->
@@ -139,7 +141,7 @@
 
                                                     </div>
 
-                                                    
+
                                                     <div class="form-group">
                                                         <label for="cantidad" class="control-label col-lg-2">Cantidad
                                                             :</label>
@@ -221,34 +223,51 @@
                             <tr>
                                 <td><img src="<?php echo URL_VIEWS . $product['imagen'] ?>" height="50"
                                         width="50"></td>
-                                <td> <?PHP echo $product['codigo']; ?></td>
-                                <td> <?PHP echo $product['nombre_producto']; ?></td>
-                                <td> <?PHP echo $product['nombre_usuario']; ?></td>
-                                <td> <?PHP echo $product['descripcion']; ?></td>
-                                <td> <?PHP echo $product['nombre_categoria']; ?></td>
-                                <td> <?PHP echo $product['cantidad']; ?></td>
-                                <td> <?PHP echo $product['precio_compra']; ?></td>
-                                <td> <?PHP echo $product['precio_venta']; ?></td>
-                                <td> <?PHP echo $product['fecha_registro']->format('Y-m-d H:i:s'); ?></td>
+                                <td> <?PHP echo htmlspecialchars($product['codigo']); ?></td>
+                                <td> <?PHP echo htmlspecialchars($product['nombre_producto']); ?></td>
+                                <td> <?PHP echo htmlspecialchars($product['nombre_usuario']); ?></td>
+                                <td> <?PHP echo htmlspecialchars($product['descripcion']); ?></td>
+                                <td> <?PHP echo htmlspecialchars($product['nombre_categoria']); ?></td>
+                                <td> <?PHP echo htmlspecialchars($product['cantidad']); ?></td>
+                                <td> <?PHP echo htmlspecialchars($product['precio_compra']); ?></td>
+                                <td> <?PHP echo htmlspecialchars($product['precio_venta']); ?></td>
+                                <td> <?PHP echo htmlspecialchars($product['fecha_registro']->format('Y-m-d H:i:s')); ?></td>
                                 <td>
-                                    <a href="#a<?php echo $product[0]; ?>" role="button"
-                                        class="btn btn-success" data-toggle="modal">
-                                        <i class="icon_check_alt2"></i> </a>
-                                    <a href="RegistroProducto.php?idborrar=<?PHP echo $product[0]; ?>&usuarioLogin=<?PHP echo $usuario; ?>&passwordLogin=<?PHP echo $password; ?>"
-                                        role="button" class="btn btn-danger"> <i class="icon_close_alt2"></i>
-                                    </a>
+                                    <?php if ($id_rol == 2): // Si es vendedor 
+                                    ?>
+                                        <a href="#editProduct<?php echo $product['id_producto']; ?>"
+                                            class="btn btn-success" data-toggle="modal">
+                                            <i class="icon_check_alt2"></i>
+                                        </a>
+                                        <a href="RegistroProducto.php?idborrar=<?php echo $product['id_producto']; ?>&usuarioLogin=<?php echo urlencode($usuario); ?>&passwordLogin=<?php echo urlencode($password); ?>"
+                                            role="button" class="btn btn-danger"
+                                            onclick="return confirm('¿Estás seguro de eliminar este producto?')">
+                                            <i class="icon_close_alt2"></i>
+                                        </a>
+                                    <?php else: // Para administradores 
+                                    ?>
+                                        <!-- Solo vista para admin -->
+                                        <button class="btn btn-danger btn-sm"
+                                            onclick="cargarDatosReporte(
+                                                '<?= $product['id_producto'] ?>',
+                                                '<?= htmlspecialchars($product['nombre_producto']) ?>',
+                                                '<?= $product['id_usuario'] ?>',
+                                                '<?= htmlspecialchars($product['nombre_usuario']) ?>'
+                                            )">
+                                            Reportar
+                                        </button>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
-
-                            <div id="a<?php echo $product[0]; ?>" class="modal fade" tabindex="-1" role="dialog"
-                                aria-labelledby="myModalLabel" aria-hidden="true">
+                            <!-- Modal de edición -->
+                            <div id="editProduct<?php echo $product['id_producto']; ?>" class="modal fade">
                                 <form class="form-validate form-horizontal" name="form2" enctype="multipart/form-data"
                                     action="RegistroProducto.php" method="POST">
-                                    <input type="hidden" id="idproducto" name="idproducto"
-                                        value="<?php echo $product['idproducto']; ?>">
-                                    <input type="hidden" name="imagen" value="<?php echo $product['imagen']; ?>">
-                                    <input name="usuarioLogin" value="<?php echo $usuario; ?>" type="hidden">
-                                    <input name="passwordLogin" value="<?php echo $password; ?>" type="hidden">
+                                    <!-- Campos ocultos necesarios -->
+                                    <input type="hidden" name="id_producto" value="<?php echo $product['id_producto']; ?>">
+                                    <input type="hidden" name="imagen" value="<?php echo htmlspecialchars($product['imagen']); ?>">
+                                    <input type="hidden" name="usuarioLogin" value="<?php echo htmlspecialchars($usuario); ?>">
+                                    <input type="hidden" name="passwordLogin" value="<?php echo htmlspecialchars($password); ?>">
 
                                     <div class="modal-dialog" id="mdialTamanio">
                                         <div class="modal-content">
@@ -275,11 +294,11 @@
                                                             <div class="form-group">
                                                                 <label class="col-sm-2 control-label">Categoria:</label>
                                                                 <div class="col-sm-4">
-                                                                    <select class="form-control input-lg m-bot15"
-                                                                        name="tipoproducto">
+                                                                    <select class="form-control input-lg m-bot15" id="id_categoria" name="id_categoria">
                                                                         <option value="">Seleccionar Categoría</option>
                                                                         <?php foreach ($categorias as $categoria): ?>
-                                                                            <option value="<?php echo $categoria['id_categoria']; ?>">
+                                                                            <option value="<?php echo $categoria['id_categoria']; ?>"
+                                                                                <?php echo ($categoria['id_categoria'] == $product['id_categoria']) ? 'selected="selected"' : ''; ?>>
                                                                                 <?php echo $categoria['nombre_categoria']; ?>
                                                                             </option>
                                                                         <?php endforeach; ?>
@@ -294,12 +313,22 @@
                                                                 </div>
                                                             </div>
                                                             <div class="form-group">
+                                                                <label class="col-sm-2 control-label">Nombre:</label>
+                                                                <div class="col-sm-10">
+                                                                    <input class="form-control input-lg m-bot15"
+                                                                        id="nombre_producto" name="nombre_producto"
+                                                                        type="text"
+                                                                        value="<?php echo $product['nombre_producto']; ?>" />
+                                                                </div>
+
+                                                            </div>
+                                                            <div class="form-group">
                                                                 <label class="col-sm-2 control-label">Descripcion:</label>
                                                                 <div class="col-sm-10">
                                                                     <input class="form-control input-lg m-bot15"
                                                                         id="descripcion" name="descripcion"
                                                                         type="text"
-                                                                        value="<?php echo $product['nombreProducto']; ?>" />
+                                                                        value="<?php echo $product['descripcion']; ?>" />
                                                                 </div>
 
                                                             </div>
@@ -317,9 +346,9 @@
                                                                     Venta:</label>
                                                                 <div class="col-lg-4">
                                                                     <input class="form-control input-lg m-bot15"
-                                                                        id="pcompra" name="pcompra"
+                                                                        id="precio_venta" name="precio_venta"
                                                                         placeholder="0.00" type="text"
-                                                                        value="<?php echo $product['precioCompra']; ?>" />
+                                                                        value="<?php echo $product['precio_venta']; ?>" />
                                                                 </div>
 
                                                             </div>
@@ -331,17 +360,17 @@
                                                                     compra:</label>
                                                                 <div class="col-lg-4">
                                                                     <input class="form-control input-lg m-bot15"
-                                                                        id="pventa"
-                                                                        name="pventa" placeholder="0.00"
+                                                                        id="precio_compra"
+                                                                        name="precio_compra" placeholder="0.00"
                                                                         type="text"
-                                                                        value="<?php echo $product['precioVenta']; ?>" />
+                                                                        value="<?php echo $product['precio_compra']; ?>" />
                                                                 </div>
-                                                                <label for="pventa"
+                                                                <label for="fecha_registro"
                                                                     class="control-label col-lg-2">Fecha:</label>
                                                                 <div class="col-lg-4">
                                                                     <input class="form-control input-lg m-bot15"
                                                                         type="date"
-                                                                        readonly name="fechaRegistro"
+                                                                        readonly name="fecha_registro"
                                                                         autocomplete="off"
                                                                         value="<?php echo date('Y-m-d'); ?>">
                                                                 </div>
@@ -373,6 +402,75 @@
                 </div>
             </div>
 
+            <!--MODAL PARA REPORTES-->
+            <!-- Modal para Reportar -->
+            <div class="modal fade" id="reportarModal" tabindex="-1" role="dialog" aria-labelledby="reportarModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <form action="RegistroReporteController.php" method="POST">
+                            <input type="hidden" name="id_producto" id="reporte_id_producto">
+                            <input type="hidden" name="id_usuario_reportado" id="reporte_id_usuario">
+                            <input type="hidden" name="id_administrador" value="<?= $_SESSION['usuario']['id_usuario'] ?>">
+
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                <h4 class="modal-title" id="reportarModalLabel">Reportar Producto</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label>Producto:</label>
+                                    <p class="form-control-static" id="reporte_nombre_producto"></p>
+                                </div>
+                                <div class="form-group">
+                                    <label>Vendedor:</label>
+                                    <p class="form-control-static" id="reporte_nombre_vendedor"></p>
+                                </div>
+                                <div class="form-group">
+                                    <label for="motivo">Motivo del reporte:</label>
+                                    <select class="form-control" name="motivo" required>
+                                        <option value="">Seleccione un motivo</option>
+                                        <option value="Contenido inapropiado">Contenido inapropiado</option>
+                                        <option value="Información falsa">Información falsa</option>
+                                        <option value="Precio incorrecto">Precio incorrecto</option>
+                                        <option value="Otro">Otro</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="accion_tomada">Acción a tomar:</label>
+                                    <select class="form-control" name="accion_tomada" required>
+                                        <option value="">Seleccione una acción</option>
+                                        <option value="Advertencia">Enviar advertencia</option>
+                                        <option value="Desactivar producto">Desactivar producto</option>
+                                        <option value="Suspender cuenta">Suspender cuenta temporalmente</option>
+                                        <option value="Banear cuenta">Banear cuenta permanentemente</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="comentarios">Comentarios adicionales:</label>
+                                    <textarea class="form-control" name="comentarios" rows="3"></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-danger">Enviar Reporte</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                // Función para cargar datos en el modal
+                function cargarDatosReporte(idProducto, nombreProducto, idUsuario, nombreUsuario) {
+                    $('#reporte_id_producto').val(idProducto);
+                    $('#reporte_id_usuario').val(idUsuario);
+                    $('#reporte_nombre_producto').text(nombreProducto);
+                    $('#reporte_nombre_vendedor').text(nombreUsuario);
+                    $('#reportarModal').modal('show');
+                }
+            </script>
 
 
 

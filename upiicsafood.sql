@@ -6,8 +6,10 @@
 --------------------------TABLA DE ROLES PARA LOS USUARIOS
 USE UPIICSAFOOD
 
-
+select*from usuarios
 SELECT*FROM PRODUCTOS
+SELECT*FROM ROLES
+SELECT*FROM ROLES_USUARIO
 
 
 
@@ -122,8 +124,8 @@ INSERT INTO REDES_SOCIALES (id_usuario, tipo_red, url_perfil, nombre_usuario ) V
 (7, 'Facebook', 'https://facebook.com/thais.calani', 'thais.calani'),
 (8, 'Instagram', 'https://instagram.com/lety_calani', 'lety_calani');
 
-
-DROP TABLE MENU
+USE UPIICSAFOOD
+SELECT*FROM MENU
 --------------------------TABLA MENU 
 CREATE TABLE MENU (
   id_menu INT IDENTITY(1,1) PRIMARY KEY,
@@ -138,22 +140,33 @@ CREATE TABLE MENU (
   FOREIGN KEY (id_rol) REFERENCES ROLES(id_rol)
 );
 
+--ACTUALIZAR EL FORMATO DEL MENU
+SELECT * FROM MENU 
+WHERE id_rol = 1 OR id_rol IS NULL
+
+UPDATE MENU SET
+icono='icon_organigrama'
+where icono='icon_users' --Perfil y Principal(null)
+
+icon_organigrama
+DROP TABLE MENU
 -- Opciones para todos los usuarios (id_rol = NULL)
 INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden) VALUES
-('Principal', 'Activo', 'icon_house', 'PrincipalController.php', '#ffffff', 'A',  1, 0),
-('Perfil', 'Activo', 'icon_profile', 'PerfilController.php', '#ffffff', 'A',  2,0);
+('Principal', 'Activo', 'icon_house', 'PrincipalController.php', '#ffffff', 'A',  NULL, 0),
+('Perfil', 'Activo', 'icon_profile', 'PerfilController.php', '#ffffff', 'A',  NULL,0);
 
 -- Opciones solo para administradores (id_rol = 1)
 INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden) VALUES
-('Usuarios', 'Activo', 'icon_users', 'UsuariosController.php', '#ffffff', 'A', 1, 3),
+('Usuarios', 'Activo', 'icon_organigrama', 'UsuariosController.php', '#ffffff', 'A', 1, 3),
+('Productos', 'Activo', 'icon_datareport_alt', 'ProductoController.php', '#ffffff', 'A', 1, 3),--TAMBIEN PARA ADMIN
 ('Configuración', 'Activo', 'icon_tools', 'ConfiguracionController.php', '#ffffff', 'A', 1, 4),
 ('Reportes', 'Activo', 'icon_chart', 'ReportesController.php', '#ffffff', 'A', 1, 5);
 
 -- Opciones para vendedores (id_rol = 2)
 INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden) VALUES
-('Productos', 'Activo', 'icon_inbox', 'ProductoController.php', '#ffffff', 'A', 2, 3),
+('Productos', 'Activo', 'icon_datareport_alt', 'ProductoController.php', '#ffffff', 'A', 2, 3),--TAMBIEN PARA ADMIN
 ('Ventas', 'Activo', 'icon_cart', 'VentasController.php', '#ffffff', 'A', 2, 4),
-('Clientes', 'Activo', 'icon_users', 'ClientesController.php', '#ffffff', 'A', 2, 5);
+('Clientes', 'Activo', 'icon_organigrama', 'ClientesController.php', '#ffffff', 'A', 2, 5);
 
 -- Opciones para clientes (id_rol = 3)
 INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden) VALUES
@@ -271,3 +284,37 @@ INSERT INTO PRODUCTOS (
 ( 3,4,   'Pepsi de 500 ml', 'Pepsi de 500 ml', 0, 12.00, 11.00, 'fotoproducto/pepsi.jpg', '2020-07-06', 'ACTIVO');
 
 
+SELECT*FROM PRODUCTOS
+
+DELETE FROM PRODUCTOS
+WHERE id_producto=22
+
+SELECT*from Productos
+
+UPDATE PRODUCTO SET 
+            id_categoria = ?,
+            codigo = ?,
+            nombre_producto = ?,
+            descripcion = ?,
+            cantidad = ?,
+            precio_venta = ?,
+            precio_compra = ?,
+            fecha_registro = GETDATE()
+            where id_producto=
+
+--TABLA PARA REPORTES DE PRODUCTOS DEL USUARIO
+CREATE TABLE REPORTES (
+    id_reporte INT IDENTITY(1,1) PRIMARY KEY,
+    id_producto INT NOT NULL,
+    id_usuario_reportado INT NOT NULL,
+    id_administrador INT NOT NULL,
+    motivo VARCHAR(255) NOT NULL,
+    accion_tomada VARCHAR(100) NOT NULL,
+    fecha_reporte DATETIME DEFAULT GETDATE(),
+    estado VARCHAR(20) DEFAULT 'PENDIENTE',
+    FOREIGN KEY (id_producto) REFERENCES PRODUCTOS(id_producto),
+    FOREIGN KEY (id_usuario_reportado) REFERENCES USUARIOS(id_usuario),
+    FOREIGN KEY (id_administrador) REFERENCES USUARIOS(id_usuario)
+);
+
+SELECT*FROM REPORTES
