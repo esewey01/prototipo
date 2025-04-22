@@ -76,13 +76,13 @@ class ProductoController {
                 throw new Exception("Método no permitido");
             }
             
-            // Validar datos del formulario
+            /* Validar datos del formulario
             $requiredFields = ['tipoproducto', 'codigo', 'descripcion', 'cantidad', 'pventa', 'pcompra'];
             foreach ($requiredFields as $field) {
                 if (empty($_POST[$field])) {
                     throw new Exception("El campo $field es requerido");
                 }
-            }
+            }*/
             
             // Procesar imagen
             $imagen = 'fotoproducto/default.jpg';
@@ -97,18 +97,26 @@ class ProductoController {
             }
             
             // Insertar producto
-            $resultado = $this->con->insertProducto(
+            $resultado = $this->con->newProduct(
                 $_SESSION['usuario']['id_usuario'],
-                $_POST['tipoproducto'],
-                $_POST['nombre_producto'],
+                $_POST['id_categoria'],
                 $_POST['codigo'],
-                 // O podría ser $_POST['nombre_producto'] si cambias el formulario
+                $_POST['nombre_producto'],
+                
                 $_POST['descripcion'],
                 $_POST['cantidad'],
                 $_POST['pventa'],
                 $_POST['pcompra'],
                 $imagen
             );
+
+            if ($resultado) {
+                echo "Producto insertado correctamente.";
+            } else {
+                echo "Error al insertar producto.";
+            }
+
+            //print_r($resultado); // Debugging line to check the result of the insertion
             
             if ($resultado) {
                 $_SESSION['mensaje'] = "Producto registrado correctamente";

@@ -9,7 +9,7 @@ class Conexion
     public function __construct()
     {
         // Configuración del servidor
-        $this->server = "MPMLW10DELF6Z2";
+        $this->server = "localhost";
         $this->database = "UPIICSAFOOD";
         $this->user = "david";  //USUARIO DE SQL SERVER
         $this->password = "6441";
@@ -100,15 +100,17 @@ class Conexion
     }
 
 
-    public function getUser($login){
-        $sql="SELECT * FROM USUARIOS WHERE login = ?";
+    public function getUser($login)
+    {
+        $sql = "SELECT * FROM USUARIOS WHERE login = ?";
         $stmt = $this->executeQuery($sql, array($login));
         $result = $this->getResults($stmt);
         return $result ?? null;
     }
 
     // FUNCIONES PARA LOS UUSARIOS 
-    public function searchUser($login) {
+    public function searchUser($login)
+    {
         $sql = "SELECT id_usuario FROM USUARIOS WHERE login = ?";
         $stmt = $this->executeQuery($sql, [$login]);
         $result = $this->getResults($stmt);
@@ -126,14 +128,14 @@ class Conexion
                     (nombre, login, password, foto_perfil, telefono, fecha_registro) 
                     OUTPUT INSERTED.id_usuario
                     VALUES (?, ?, ?, ?, ?, GETDATE())";
-            $result = $this->executeQuery($sql_user, array($nombre, $login, $password,  $telefono,$foto_perfil,));
+            $result = $this->executeQuery($sql_user, array($nombre, $login, $password,  $telefono, $foto_perfil,));
 
             // Obtener el ID del nuevo usuario desde el resultado
             $row = $this->getResults($result);
             if (!$row || !isset($row[0]['id_usuario'])) {
                 throw new Exception("No se pudo obtener el ID del nuevo usuario.");
             }
-            
+
 
             $id_usuario = $row[0]['id_usuario'];
 
@@ -150,7 +152,7 @@ class Conexion
             throw $e; // Relanzar la excepción para manejarla en el controlador
         }
     }
-    
+
 
     //FUNCION PARA OBTENER EL ROL DEL USUARIO
     public function getRolUser($id_usuario)
@@ -255,7 +257,7 @@ class Conexion
             if (!$row || !isset($row[0]['id_usuario'])) {
                 throw new Exception("No se pudo obtener el ID del nuevo usuario.");
             }
-            
+
 
             $id_usuario = $row[0]['id_usuario'];
 
@@ -307,8 +309,8 @@ class Conexion
 
     public function updatePassword($id_usuario, $new_password)
     {
-        $sql = "UPDATE USUARIOS SET password = ? WHERE id_usuario = ?";      
-        return $this->executeNonQuery($sql, array( $id_usuario,$new_password));
+        $sql = "UPDATE USUARIOS SET password = ? WHERE id_usuario = ?";
+        return $this->executeNonQuery($sql, array($id_usuario, $new_password));
     }
 
     public function updateSocialNetworks($id_usuario, $facebook, $instagram, $linkedin, $twitter)
@@ -380,7 +382,8 @@ class Conexion
     }
 
     //FUNCIONES PARA PRODUCTOS DE LA VISTA [RODUCTOSVIEWS.PHP]
-    public function getProductosByVendedor($id_vendedor) {
+    public function getProductosByVendedor($id_vendedor)
+    {
         $sql = "SELECT p.*, c.nombre_categoria, u.nombre AS nombre_usuario
                   FROM PRODUCTOS p
                   INNER JOIN CATEGORIAS c ON p.id_categoria = c.id_categoria
@@ -389,8 +392,9 @@ class Conexion
         $stmt = $this->executeQuery($sql, [$id_vendedor]);
         return $this->getResults($stmt);
     }
-    
-    public function getAllProductosWithVendedor() {
+
+    public function getAllProductosWithVendedor()
+    {
         $sql = "SELECT p.*, c.nombre_categoria, u.nombre AS nombre_usuario
                   FROM PRODUCTOS p
                   INNER JOIN CATEGORIAS c ON p.id_categoria = c.id_categoria
@@ -398,36 +402,28 @@ class Conexion
         $stmt = $this->executeQuery($sql);
         return $this->getResults($stmt);
     }
-    
-    public function getAllCategorias() {
+
+    public function getAllCategorias()
+    {
         $sql = "SELECT * FROM CATEGORIAS WHERE estado = 'ACTIVO'";
         $stmt = $this->executeQuery($sql);
         return $this->getResults($stmt);
     }
 
     public function newProduct(
-        int $id_usuario,
-        int $id_categoria,
-        string $codigo,
-        string $nombre_producto,
-        string $descripcion,
-        int $cantidad,
-        float $precio_venta,
-        float $precio_compra,
-        string $imagen = 'fotoproducto/default.jpg'
-    ): bool {
-        try {
-            // 1. Verificar que existan las relaciones (usuario y categoría)
-            if (!$this->existeUsuario($id_usuario)) {
-                throw new Exception("El usuario no existe");
-            }
-            
-            if (!$this->existeCategoria($id_categoria)) {
-                throw new Exception("La categoría no existe");
-            }
-    
-            // 2. Preparar la consulta SQL con parámetros
-            $query = "INSERT INTO PRODUCTOS (
+        $id_usuario,
+        $id_categoria,
+        $codigo,
+        $nombre_producto,
+        $descripcion,
+        $cantidad,
+        $precio_venta,
+        $precio_compra,
+        $imagen = 'fotoproducto/default.jpg'
+    ) {
+
+        // 2. Preparar la consulta SQL con parámetros
+        $sql = "INSERT INTO PRODUCTOS (
                         id_usuario, 
                         id_categoria, 
                         codigo, 
@@ -440,39 +436,21 @@ class Conexion
                         fecha_registro,
                         estado
                     ) VALUES (
-                        :id_usuario, 
-                        :id_categoria, 
-                        :codigo, 
-                        :nombre_producto, 
-                        :descripcion, 
-                        :cantidad, 
-                        :precio_venta, 
-                        :precio_compra, 
-                        :imagen,
-                        GETDATE(),
-                        'ACTIVO'
-                    )";
-    
-            // 3. Preparar y ejecutar la sentencia
-            $stmt = $this->conn->prepare($query);
-            
-            $stmt->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
-            $stmt->bindParam(':id_categoria', $id_categoria, PDO::PARAM_INT);
-            $stmt->bindParam(':codigo', $codigo);
-            $stmt->bindParam(':nombre_producto', $nombre_producto);
-            $stmt->bindParam(':descripcion', $descripcion);
-            $stmt->bindParam(':cantidad', $cantidad, PDO::PARAM_INT);
-            $stmt->bindParam(':precio_venta', $precio_venta);
-            $stmt->bindParam(':precio_compra', $precio_compra);
-            $stmt->bindParam(':imagen', $imagen);
-    
-            // 4. Ejecutar y retornar resultado
-            return $stmt->execute();
-            
-        } catch (PDOException $e) {
-            // Registrar el error en logs
-            error_log("Error al insertar producto: " . $e->getMessage());
-            return false;
-        }
+                        ?, ?, ?, ?, ?, ?, ?, ?, ?,GETDATE(),'ACTIVO')";
+
+        
+        $params = array(
+            $id_usuario,
+            $id_categoria,
+            $codigo,
+            $nombre_producto,
+            $descripcion,
+            $cantidad,
+            $precio_venta,
+            $precio_compra,
+            $imagen
+        );
+
+        $stmt = $this->executeNonQuery($sql, $params);
     }
 }

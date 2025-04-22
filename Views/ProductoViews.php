@@ -76,7 +76,7 @@
                     <!--FUNCION DE AGREGAR UN PRODUCTO -->
                     <div id="add" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
                         aria-hidden="true">
-                        <form action="ProductoController.php?action=guardar" method="POST" enctype="multipart/form-data" >
+                        <form action="ProductoController.php?action=guardar" method="POST" enctype="multipart/form-data">
                             <input name="usuarioLogin" value="<?php echo $usuario; ?>" type="hidden">
                             <input name="passwordLogin" value="<?php echo $password; ?>" type="hidden">
                             <div class="modal-dialog" id="mdialTamanio">
@@ -121,7 +121,7 @@
                                                     </div>
 
                                                     <div class="form-group">
-                                                        <label class="col-sm-2 control-label">Nombre del Producto:</label>
+                                                        <label class="col-sm-2 control-label">Nombre:</label>
                                                         <div class="col-sm-10">
                                                             <input class="form-control input-lg m-bot15"
                                                                 id="nombre_producto" name="nombre_producto" type="text"
@@ -129,7 +129,6 @@
                                                         </div>
 
                                                     </div>
-
                                                     <div class="form-group">
                                                         <label class="col-sm-2 control-label">Descripcion:</label>
                                                         <div class="col-sm-10">
@@ -139,6 +138,8 @@
                                                         </div>
 
                                                     </div>
+
+                                                    
                                                     <div class="form-group">
                                                         <label for="cantidad" class="control-label col-lg-2">Cantidad
                                                             :</label>
@@ -147,6 +148,8 @@
                                                                 id="cantidad" name="cantidad"
                                                                 placeholder="0.00" type="text" required />
                                                         </div>
+
+
                                                         <label for="pVenta" class="control-label col-lg-2">Precio
                                                             de Venta:</label>
                                                         <div class="col-lg-4">

@@ -271,4 +271,3 @@ INSERT INTO PRODUCTOS (
 ( 3,4,   'Pepsi de 500 ml', 'Pepsi de 500 ml', 0, 12.00, 11.00, 'fotoproducto/pepsi.jpg', '2020-07-06', 'ACTIVO');
 
 
-
