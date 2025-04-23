@@ -2,7 +2,7 @@
 session_start();
 require_once('../Model/Conexion.php');
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_SESSION['usuario']['id_rol'] == 1) {
+if ($_SERVER['REQUEST_METHOD'] == 'POST' ) {
     try {
         $con = new Conexion();
         
@@ -12,6 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_SESSION['usuario']['id_rol'] == 1)
         $_POST['id_usuario_reportado'],
         $_POST['id_administrador'],
         $_POST['motivo'],
+        $_POST['comentarios'],
         $_POST['accion_tomada']);
 
         if($respuesta){
@@ -48,8 +49,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_SESSION['usuario']['id_rol'] == 1)
         }
         
         $_SESSION['mensaje'] = "Reporte registrado y acciones aplicadas correctamente";
+        $_SESSION['alerta']="alert-success";
     } catch (Exception $e) {
         $_SESSION['error'] = "Error al procesar el reporte: " . $e->getMessage();
+        $_SESSION['alerta']="alert-danger";
     }
 }
 

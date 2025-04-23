@@ -3,7 +3,7 @@
 <?php include('Head.php'); ?>
 
 <body>
-    <section id="container" clas="">
+    <section id="container" class="">
         <!-- Header -->
         <header class="header dark-bg">
             <div class="toggle-nav">
@@ -49,6 +49,7 @@
                         <ol class="breadcrumb">
                             <?php include("MenuOpcionesConfiguracion.php"); ?>
                         </ol>
+                    </div>
                     </div>
 
                     <!-- Pestañas -->
@@ -106,44 +107,44 @@
                         </div>
                     </div>
                 </div>
-                </div>
+
             </section>
+
         </section>
-    </section>
 
-    <!-- Modal para Agregar Usuario -->
-    <?php include("_partials/modal_add_user.php"); ?>
+        <!-- Modal para Agregar Usuario -->
+        <?php include("_partials/modal_add_user.php"); ?>
 
-    <?php include("LibraryJs.php"); ?>
+        <?php include("LibraryJs.php"); ?>
 
-    <!-- Script para DataTables -->
-    <script>
-        $(document).ready(function() {
-            // Inicializar DataTables en todas las tablas
-            $('.table-usuarios').DataTable({
-                responsive: true,
-                dom: '<"top"lf>rt<"bottom"ip>',
-                lengthMenu: [
-                    [5, 10, 25, 50, -1],
-                    [5, 10, 25, 50, "Todos"]
-                ],
-                language: {
-                    "search": "Buscar:",
-                    "lengthMenu": "Mostrar _MENU_ registros por página",
-                    "zeroRecords": "No se encontraron resultados",
-                    "info": "Mostrando página _PAGE_ de _PAGES_",
-                    "infoEmpty": "No hay registros disponibles",
-                    "infoFiltered": "(filtrado de _MAX_ registros totales)",
-                    "paginate": {
-                        "first": "Primera",
-                        "last": "Última",
-                        "next": "Siguiente",
-                        "previous": "Anterior"
+        <!-- Script para DataTables -->
+        <script>
+            $(document).ready(function() {
+                // Inicializar DataTables en todas las tablas
+                $('.table-usuarios').DataTable({
+                    responsive: true,
+                    dom: '<"top"lf>rt<"bottom"ip>',
+                    lengthMenu: [
+                        [5, 10, 25, 50, -1],
+                        [5, 10, 25, 50, "Todos"]
+                    ],
+                    language: {
+                        "search": "Buscar:",
+                        "lengthMenu": "Mostrar _MENU_ registros por página",
+                        "zeroRecords": "No se encontraron resultados",
+                        "info": "Mostrando página _PAGE_ de _PAGES_",
+                        "infoEmpty": "No hay registros disponibles",
+                        "infoFiltered": "(filtrado de _MAX_ registros totales)",
+                        "paginate": {
+                            "first": "Primera",
+                            "last": "Última",
+                            "next": "Siguiente",
+                            "previous": "Anterior"
+                        }
                     }
-                }
+                });
             });
-        });
-    </script>
+        </script>
 </body>
 
 </html>

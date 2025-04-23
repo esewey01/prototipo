@@ -60,6 +60,7 @@ CREATE TABLE USUARIOS (
   fecha_expiracion_token DATETIME
 );
 
+SELECT*FROM USUARIOS
 
 INSERT INTO USUARIOS (login, email, password, nombre, apellido, telefono, direccion, 
 fecha_nacimiento, genero, foto_perfil, activo, verificado) VALUES
@@ -145,8 +146,10 @@ SELECT * FROM MENU
 WHERE id_rol = 1 OR id_rol IS NULL
 
 UPDATE MENU SET
-icono='icon_organigrama'
-where icono='icon_users' --Perfil y Principal(null)
+icono='icon_clipboard'
+where icono='icon_datareport' --Perfil y Principal(null)
+icon_clipboard
+icon_datareport
 
 icon_organigrama
 DROP TABLE MENU
@@ -312,9 +315,39 @@ CREATE TABLE REPORTES (
     accion_tomada VARCHAR(100) NOT NULL,
     fecha_reporte DATETIME DEFAULT GETDATE(),
     estado VARCHAR(20) DEFAULT 'PENDIENTE',
+    comentarios text,
     FOREIGN KEY (id_producto) REFERENCES PRODUCTOS(id_producto),
     FOREIGN KEY (id_usuario_reportado) REFERENCES USUARIOS(id_usuario),
     FOREIGN KEY (id_administrador) REFERENCES USUARIOS(id_usuario)
 );
 
+USE UPIICSAFOOD
 SELECT*FROM REPORTES
+drop table reportes
+
+SELECT r.*, p.nombre_producto, u.nombre as nombre_reportado, 
+                       a.nombre as nombre_administrador
+                FROM REPORTES r
+                JOIN PRODUCTOS p ON r.id_producto = p.id_producto
+                JOIN USUARIOS u ON r.id_usuario_reportado = u.id_usuario
+                JOIN USUARIOS a ON r.id_administrador = a.id_usuario
+                ORDER BY r.fecha_reporte DESC
+
+
+                SELECT r.*, p.nombre_producto, 
+                   u.nombre as nombre_reportado, 
+                   a.nombre as nombre_administrador
+            FROM REPORTES r
+            JOIN PRODUCTOS p ON r.id_producto = p.id_producto
+            JOIN USUARIOS u ON r.id_usuario_reportado = u.id_usuario
+            JOIN USUARIOS a ON r.id_administrador = a.id_usuario
+            WHERE r.id_reporte = 1
+
+           SELECT r.*, p.nombre_producto, 
+                       u.nombre as nombre_reportado, 
+                       a.nombre as nombre_administrador
+                FROM REPORTES r
+                JOIN PRODUCTOS p ON r.id_producto = p.id_producto
+                JOIN USUARIOS u ON r.id_usuario_reportado = u.id_usuario
+                JOIN USUARIOS a ON r.id_administrador = a.id_usuario
+                WHERE r.id_reporte = 1

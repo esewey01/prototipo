@@ -3,98 +3,128 @@ session_start();
 require('../Model/Conexion.php');
 require('Constants.php');
 
-$alerta = $_SESSION['alerta'] ?? '';
-$mensaje = $_SESSION['mensaje'] ?? '';
-
-
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    $_SESSION['mensaje'] = "Acceso no autorizado";
-    $_SESSION['alerta'] = "alert-danger";
-    header('Location: ../Views/LoginView.php');
-    exit();
-}
-
-// OBTENER DATOS DEL FORMULARIO
-$urlViews = URL_VIEWS;
-$login = trim($_POST['login']);
-$password = trim($_POST['password']);
-$con = new Conexion();
-
-
-// VALIDACIÓN DE CAMPOS VACÍOS
-if (empty($login) || empty($password)) {
-    $_SESSION['mensaje'] = "Ningún campo debe estar vacío";
-    $_SESSION['alerta'] = "alert-danger";
-    header('Location: ../Views/LoginView.php');
-    exit();
-}
-
-try {
-
-    $usuario = $con->getUserWithRole($login); //BUSCAR USUARIO Y ROL
-
-    //VERIFICAR SI EXISTE
-    if (!$usuario) {
-        throw new Exception("Usuario o contraseña incorrectos");
-    }
-
-    // VERIFICAR USUARIO Y CONTRASEÑA
-    if ($usuario['password'] !== $password) {
-        throw new Exception("Usuario o Password incorrectos, por favor intenta de nuevo");
-    }
-
-    // VERIFICAR SI EL USUARIO ESTÁ ACTIVO
-    if (!$usuario['activo']) {
-        throw new Exception("Tu cuenta está desactivada. Contacta al administrador");
-    }
-
-    // ALMACENAR DATOS EN SESIÓN
-    $_SESSION['usuario'] = [
-        'id_usuario' => $usuario['id_usuario'],
-        'login' => $usuario['login'],
-        'password' => $usuario['password'],
-        'email' => $usuario['email'],
-        'nombre' => $usuario['nombre'],
-        'apellido' => $usuario['apellido'],
-        'telefono' => $usuario['telefono'],
-        'direccion' => $usuario['direccion'],
-        'genero' => $usuario['genero'],
-        'fecha_nacimiento' =>  $usuario['fecha_nacimiento']->format('Y-m-d'),
-        'foto' => $usuario['foto_perfil'],
-        'fecha_registro' => $usuario['fecha_registro']->format('Y-m-d H:i:s'),
-        'ultimo_registro' => $usuario['ultimo_registro'] ?? ' ',
-        'rol' => [
-            'id_rol' => $usuario['id_rol'],
-            'nombre_rol' => $usuario['nombre_rol']
-        ],
-        'menu' => $con->getMenuByRol($usuario['id_rol'])
-    ];
-
+class AuthController {
+    private $conexion;
     
-
-
-
-    switch (strtolower($usuario['nombre_rol'])) {
-        case 'administrador':
-            $mensaje = "ADMINISTRADOR: " . $usuario['nombre'];
-            require('../Views/Wellcome.php');
-            break;
-        case 'vendedor':
-            $mensaje = "VENDEDOR: " . $usuario['nombre'];
-            require('../Views/WellcomeVendedor.php');
-            break;
-        case 'cliente':
-            $mensaje = "CLIENTE: " . $usuario['nombre'];
-            require('../Views/WellcomeCliente.php');
-            break;
-        default:
-            throw new Exception("Rol no reconocido");
+    private $alerta;
+    private $mensaje;
+    
+    public function __construct(Conexion $conexion) {
+        $this->conexion = $conexion;
+        $this->alerta = $_SESSION['alerta'] ?? '';
+        $this->mensaje = $_SESSION['mensaje'] ?? '';
+       
     }
-    exit();
-} catch (Exception $e) {
-    $_SESSION ['mensaje'] = $e->getMessage();
-    $_SESSION ['alerta'] = "alert-danger";
-    header('Location: ../Views/LoginView.php');
-    exit();
+    
+    public function handleRequest() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->setErrorSession("Acceso no autorizado");
+            $this->redirectToLogin();
+            return;
+        }
+        
+        $login = trim($_POST['login']);
+        $password = trim($_POST['password']);
+        
+        if (!$this->validateInputs($login, $password)) {
+            return;
+        }
+        
+        try {
+            $this->authenticateUser($login, $password);
+        } catch (Exception $e) {
+            $this->setErrorSession($e->getMessage());
+            $this->redirectToLogin();
+        }
+    }
+    
+    private function validateInputs($login, $password) {
+        if (empty($login) || empty($password)) {
+            $this->setErrorSession("Ningún campo debe estar vacío");
+            $this->redirectToLogin();
+            return false;
+        }
+        return true;
+    }
+    
+    private function authenticateUser($login, $password) {
+        $usuario = $this->conexion->getUserWithRole($login);
+        
+        if (!$usuario) {
+            throw new Exception("Usuario o contraseña incorrectos");
+        }
+        
+        $this->validatePassword($usuario, $password);
+        $this->checkAccountStatus($usuario);
+        $this->setupUserSession($usuario);
+        $this->redirectBasedOnRole($usuario);
+    }
+    
+    private function validatePassword($usuario, $password) {
+        if ($usuario['password'] !== $password) {
+            throw new Exception("Usuario o Password incorrectos, por favor intenta de nuevo");
+        }
+    }
+    
+    private function checkAccountStatus($usuario) {
+        if (!$usuario['activo']) {
+            throw new Exception("Tu cuenta está desactivada. Contacta al administrador");
+        }
+    }
+    
+    private function setupUserSession($usuario) {
+        $_SESSION['usuario'] = [
+            'id_usuario' => $usuario['id_usuario'],
+            'login' => $usuario['login'],
+            'password' => $usuario['password'],
+            'email' => $usuario['email'],
+            'nombre' => $usuario['nombre'],
+            'apellido' => $usuario['apellido'],
+            'telefono' => $usuario['telefono'],
+            'direccion' => $usuario['direccion'],
+            'genero' => $usuario['genero'],
+            'fecha_nacimiento' => $usuario['fecha_nacimiento']->format('Y-m-d'),
+            'foto' => $usuario['foto_perfil'],
+            'fecha_registro' => $usuario['fecha_registro']->format('Y-m-d H:i:s'),
+            'ultimo_registro' => $usuario['ultimo_registro'] ?? ' ',
+            'rol' => [
+                'id_rol' => $usuario['id_rol'],
+                'nombre_rol' => $usuario['nombre_rol']
+            ],
+            'menu' => $this->conexion->getMenuByRol($usuario['id_rol'])
+        ];
+    }
+    
+    private function redirectBasedOnRole($usuario) {
+        $roleName = strtolower($usuario['nombre_rol']);
+        $this->mensaje = strtoupper($roleName) . ": " . $usuario['nombre'];
+        
+        $viewMap = [
+            'administrador' => '../Views/Wellcome.php',
+            'vendedor' => '../Views/WellcomeVendedor.php',
+            'cliente' => '../Views/WellcomeCliente.php'
+        ];
+        
+        if (!isset($viewMap[$roleName])) {
+            throw new Exception("Rol no reconocido");
+        }
+        
+        require($viewMap[$roleName]);
+        exit();
+    }
+    
+    private function setErrorSession($message) {
+        $_SESSION['mensaje'] = $message;
+        $_SESSION['alerta'] = "alert-danger";
+    }
+    
+    private function redirectToLogin() {
+        header('Location: ../Views/LoginView.php');
+        exit();
+    }
 }
+
+// Uso del controlador
+$con = new Conexion();
+$authController = new AuthController($con);
+$authController->handleRequest();

@@ -128,7 +128,7 @@ class Conexion
                     (nombre, login, password, foto_perfil, telefono, fecha_registro) 
                     OUTPUT INSERTED.id_usuario
                     VALUES (?, ?, ?, ?, ?, GETDATE())";
-            $result = $this->executeQuery($sql_user, array($nombre, $login, $password,  $telefono, $foto_perfil,));
+            $result = $this->executeQuery($sql_user, array($nombre, $login, $password, $foto_perfil,$telefono));
 
             // Obtener el ID del nuevo usuario desde el resultado
             $row = $this->getResults($result);
@@ -502,17 +502,19 @@ class Conexion
         $id_usuario,
         $id_admin,
         $motivo,
+        $comentarios,
         $accion_tomada,
     ) {
         $sql = "INSERT INTO REPORTES(
             id_producto, id_usuario_reportado, id_administrador,
-            motivo, accion_tomada, estado
-            ) VALUES (?, ?, ?, ?, ?, 'PROCESADO')";
+            motivo, comentarios, accion_tomada, estado
+            ) VALUES (?, ?, ?, ?,?, ?, 'PROCESADO')";
         $params = [
             $id_producto,
             $id_usuario,
             $id_admin,
             $motivo,
+            $comentarios,
             $accion_tomada,
         ];
 
@@ -542,6 +544,22 @@ class Conexion
                 JOIN USUARIOS a ON r.id_administrador = a.id_usuario
                 ORDER BY r.fecha_reporte DESC";
 
-        return $this->executeQuery($sql);
+        $stmt= $this->executeQuery($sql);
+        return $this->getResults($stmt);
+    }
+
+    public function getDetalleReporte($idReporte) {
+        $sql = "SELECT r.*, p.nombre_producto, 
+                       u.nombre as nombre_reportado, 
+                       a.nombre as nombre_administrador
+                FROM REPORTES r
+                JOIN PRODUCTOS p ON r.id_producto = p.id_producto
+                JOIN USUARIOS u ON r.id_usuario_reportado = u.id_usuario
+                JOIN USUARIOS a ON r.id_administrador = a.id_usuario
+                WHERE r.id_reporte = ?";
+        
+        $result = $this->executeQuery($sql,array($idReporte));
+//return $result[0] ?? null;
+     return $this->getResults($result);
     }
 }
