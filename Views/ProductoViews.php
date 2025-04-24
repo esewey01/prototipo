@@ -408,6 +408,7 @@
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <form action="RegistroReporteController.php" method="POST">
+                            <input type="hidden" name="tipo_reporte" value ="PRODUCTO">
                             <input type="hidden" name="id_producto" id="reporte_id_producto">
                             <input type="hidden" name="id_usuario_reportado" id="reporte_id_usuario">
                             <input type="hidden" name="id_administrador" value="<?= $_SESSION['usuario']['id_usuario'] ?>">

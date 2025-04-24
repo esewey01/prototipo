@@ -3,32 +3,13 @@
 --UPIICSAFOOD
 
 --CREATE DATABASE UPIICSAFOOD
---------------------------TABLA DE ROLES PARA LOS USUARIOS
-USE UPIICSAFOOD
-
-select*from usuarios
-SELECT*FROM PRODUCTOS
-SELECT*FROM ROLES
-SELECT*FROM ROLES_USUARIO
-
-
-
-
-
-
-
-
-
-
-
-----
+--TABLA DE ROLES PARA LOS USUARIOS
 CREATE TABLE ROLES (
   id_rol INT IDENTITY(0,1) PRIMARY KEY,
   nombre_rol VARCHAR(50) NOT NULL UNIQUE,
   descripcion VARCHAR(255),
 );
 --TABLA PARA DEFINIR LOS ROLES 
-
 INSERT INTO ROLES (nombre_rol, descripcion ) VALUES
 ('Super User','Acceso completo al sistema'),
 ('Administrador', 'Funciones autorizadas del manejo del sistema'),
@@ -37,7 +18,7 @@ INSERT INTO ROLES (nombre_rol, descripcion ) VALUES
 
 
 
---------------------------TABLA DE USUARIOS 
+--TABLA DE USUARIOS 
 CREATE TABLE USUARIOS (
   id_usuario INT IDENTITY(1,1) PRIMARY KEY,
   login VARCHAR(50) UNIQUE NOT NULL,
@@ -60,8 +41,6 @@ CREATE TABLE USUARIOS (
   fecha_expiracion_token DATETIME
 );
 
-SELECT*FROM USUARIOS
-
 INSERT INTO USUARIOS (login, email, password, nombre, apellido, telefono, direccion, 
 fecha_nacimiento, genero, foto_perfil, activo, verificado) VALUES
 -- Administradores
@@ -79,7 +58,7 @@ fecha_nacimiento, genero, foto_perfil, activo, verificado) VALUES
 ('2020605213', 'lety.calani@cliente.com', '2020605213', 'Lety', 'Calani', '33-5678-9012', 'Residencial Las Flores 258, Ciudad', '1995-02-14', 'F', 'fotoproducto/user.png', 1, 1),
 ('2017656456', 'test.user@cliente.com', '123', 'Test', 'User', '81-7654-3210', 'Privada Jardines 369, Ciudad', NULL, NULL, 'fotoproducto/userM3.jpg', 1, 0);
 
---------------------------TABLA DE ROLES DE USUARIO
+--TABLA DE ROLES DE USUARIO
 CREATE TABLE ROLES_USUARIO (
   id_usuario_rol INT IDENTITY(1,1) PRIMARY KEY,
   id_usuario INT NOT NULL,
@@ -105,7 +84,7 @@ INSERT INTO ROLES_USUARIO(id_usuario, id_rol) VALUES
 (9, 3); -- Test123334
 
 
---------------------------TABLA DE REDES SOCIALES
+--TABLA DE REDES SOCIALES
 
 CREATE TABLE REDES_SOCIALES(
   id_red_social INT IDENTITY(1,1) PRIMARY KEY,
@@ -125,9 +104,8 @@ INSERT INTO REDES_SOCIALES (id_usuario, tipo_red, url_perfil, nombre_usuario ) V
 (7, 'Facebook', 'https://facebook.com/thais.calani', 'thais.calani'),
 (8, 'Instagram', 'https://instagram.com/lety_calani', 'lety_calani');
 
-USE UPIICSAFOOD
-SELECT*FROM MENU
---------------------------TABLA MENU 
+
+--TABLA MENU 
 CREATE TABLE MENU (
   id_menu INT IDENTITY(1,1) PRIMARY KEY,
   opcion VARCHAR(100) NOT NULL,
@@ -141,17 +119,6 @@ CREATE TABLE MENU (
   FOREIGN KEY (id_rol) REFERENCES ROLES(id_rol)
 );
 
---ACTUALIZAR EL FORMATO DEL MENU
-SELECT * FROM MENU 
-WHERE id_rol = 1 OR id_rol IS NULL
-
-UPDATE MENU SET
-icono='icon_clipboard'
-where icono='icon_datareport' --Perfil y Principal(null)
-icon_clipboard
-icon_datareport
-
-icon_organigrama
 DROP TABLE MENU
 -- Opciones para todos los usuarios (id_rol = NULL)
 INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden) VALUES
@@ -163,7 +130,7 @@ INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden
 ('Usuarios', 'Activo', 'icon_organigrama', 'UsuariosController.php', '#ffffff', 'A', 1, 3),
 ('Productos', 'Activo', 'icon_datareport_alt', 'ProductoController.php', '#ffffff', 'A', 1, 3),--TAMBIEN PARA ADMIN
 ('Configuración', 'Activo', 'icon_tools', 'ConfiguracionController.php', '#ffffff', 'A', 1, 4),
-('Reportes', 'Activo', 'icon_chart', 'ReportesController.php', '#ffffff', 'A', 1, 5);
+('Reportes', 'Activo', 'icon_clipboard', 'ReportesController.php', '#ffffff', 'A', 1, 5);
 
 -- Opciones para vendedores (id_rol = 2)
 INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden) VALUES
@@ -176,18 +143,7 @@ INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden
 ('Compras', 'Activo', 'icon_shopping_bag', 'ComprasController.php', '#ffffff', 'A', 3, 3),
 ('Historial', 'Activo', 'icon_history', 'HistorialController.php', '#ffffff', 'A', 3, 4);
 
-
-
-select*from menu
-UPDATE MENU
-SET icono = 'icon_datareport_alt'
-WHERE icono='fa-inbox'
-
-icon_datareport_alt
-
-
-
---------------------------TABLA PARA CATEGORIZAR PRODUCTOS 
+--TABLA PARA CATEGORIZAR PRODUCTOS 
 
 CREATE TABLE CATEGORIAS (
   id_categoria INT IDENTITY(1,1) PRIMARY KEY,
@@ -203,9 +159,6 @@ INSERT INTO CATEGORIAS (nombre_categoria, descripcion) VALUES
 ('Dulces', 'Golosinas de tamaños pequeños'),
 ('Otros', 'Otros productos diversos');
 
-
-
-
 --------------------------SOLICITUDESVENDEDOR
 CREATE TABLE SOLICITUDES_VENDEDOR (
   id_solicitud INT IDENTITY(1,1) PRIMARY KEY,
@@ -220,9 +173,6 @@ CREATE TABLE SOLICITUDES_VENDEDOR (
   FOREIGN KEY (id_revisor) REFERENCES USUARIOS(id_usuario)
 );
 
-DELETE SOLICITUDES_VENDEDOR
-SELECT*FROM SOLICITUDES_VENDEDOR
-
 -- Solicitud pendiente
 INSERT INTO SOLICITUDES_VENDEDOR (id_usuario, descripcion, estado) 
 VALUES (5, 'Quiero vender mis productos de repostería', 'PENDIENTE');
@@ -236,7 +186,7 @@ INSERT INTO SOLICITUDES_VENDEDOR (id_usuario, descripcion, estado, fecha_revisio
 VALUES (7, 'Venta de ropa usada', 'RECHAZADA', GETDATE(), 1, 'No cumple políticas de calidad');
 
 
---------------------------TABLA DE PRODUCTOS
+---TABLA DE PRODUCTOS
 CREATE TABLE PRODUCTOS (
   id_producto INT IDENTITY(1,1) PRIMARY KEY,
   id_usuario INT NOT NULL,  -- NULL para productos del sistema
@@ -286,14 +236,6 @@ INSERT INTO PRODUCTOS (
 ( 3,4,    'Coca Cola 500 gr', 'Coca Cola 500 gr', 0, 7.00, 6.00, 'fotoproducto/cocacola.jpg', '2020-06-12', 'ACTIVO'),
 ( 3,4,   'Pepsi de 500 ml', 'Pepsi de 500 ml', 0, 12.00, 11.00, 'fotoproducto/pepsi.jpg', '2020-07-06', 'ACTIVO');
 
-
-SELECT*FROM PRODUCTOS
-
-DELETE FROM PRODUCTOS
-WHERE id_producto=22
-
-SELECT*from Productos
-
 UPDATE PRODUCTO SET 
             id_categoria = ?,
             codigo = ?,
@@ -305,49 +247,23 @@ UPDATE PRODUCTO SET
             fecha_registro = GETDATE()
             where id_producto=
 
+
 --TABLA PARA REPORTES DE PRODUCTOS DEL USUARIO
 CREATE TABLE REPORTES (
     id_reporte INT IDENTITY(1,1) PRIMARY KEY,
-    id_producto INT NOT NULL,
+    tipo_reporte VARCHAR(20) CHECK(tipo_reporte IN ('PRODUCTO', 'USUARIO')),
+    id_producto INT NOT NULL UNIQUE,
     id_usuario_reportado INT NOT NULL,
     id_administrador INT NOT NULL,
     motivo VARCHAR(255) NOT NULL,
     accion_tomada VARCHAR(100) NOT NULL,
     fecha_reporte DATETIME DEFAULT GETDATE(),
     estado VARCHAR(20) DEFAULT 'PENDIENTE',
-    comentarios text,
+    comentarios text, 
     FOREIGN KEY (id_producto) REFERENCES PRODUCTOS(id_producto),
     FOREIGN KEY (id_usuario_reportado) REFERENCES USUARIOS(id_usuario),
     FOREIGN KEY (id_administrador) REFERENCES USUARIOS(id_usuario)
 );
-
-USE UPIICSAFOOD
-SELECT*FROM REPORTES
-drop table reportes
-
-SELECT r.*, p.nombre_producto, u.nombre as nombre_reportado, 
-                       a.nombre as nombre_administrador
-                FROM REPORTES r
-                JOIN PRODUCTOS p ON r.id_producto = p.id_producto
-                JOIN USUARIOS u ON r.id_usuario_reportado = u.id_usuario
-                JOIN USUARIOS a ON r.id_administrador = a.id_usuario
-                ORDER BY r.fecha_reporte DESC
+------------PRUEBAS 
 
 
-                SELECT r.*, p.nombre_producto, 
-                   u.nombre as nombre_reportado, 
-                   a.nombre as nombre_administrador
-            FROM REPORTES r
-            JOIN PRODUCTOS p ON r.id_producto = p.id_producto
-            JOIN USUARIOS u ON r.id_usuario_reportado = u.id_usuario
-            JOIN USUARIOS a ON r.id_administrador = a.id_usuario
-            WHERE r.id_reporte = 1
-
-           SELECT r.*, p.nombre_producto, 
-                       u.nombre as nombre_reportado, 
-                       a.nombre as nombre_administrador
-                FROM REPORTES r
-                JOIN PRODUCTOS p ON r.id_producto = p.id_producto
-                JOIN USUARIOS u ON r.id_usuario_reportado = u.id_usuario
-                JOIN USUARIOS a ON r.id_administrador = a.id_usuario
-                WHERE r.id_reporte = 1

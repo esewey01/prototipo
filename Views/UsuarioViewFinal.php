@@ -85,6 +85,7 @@
                             <?php
                             $tipo_actual = 'administrador';
                             $usuarios = $administradores;
+                             
                             include("_partials/tabla_usuarios.php");
                             ?>
                         </div>
@@ -93,6 +94,7 @@
                             <?php
                             $tipo_actual = 'vendedor';
                             $usuarios = $vendedores;
+                           
                             include("_partials/tabla_usuarios.php");
                             ?>
                         </div>
@@ -102,6 +104,7 @@
                             <?php
                             $tipo_actual = 'cliente';
                             $usuarios = $clientes;
+                           
                             include("_partials/tabla_usuarios.php");
                             ?>
                         </div>

@@ -498,27 +498,41 @@ class Conexion
     }
 
     public function newReport(
+        
         $id_producto,
         $id_usuario,
         $id_admin,
         $motivo,
         $comentarios,
         $accion_tomada,
+        $tipo_reporte,
+        $estado
     ) {
         $sql = "INSERT INTO REPORTES(
-            id_producto, id_usuario_reportado, id_administrador,
-            motivo, comentarios, accion_tomada, estado
-            ) VALUES (?, ?, ?, ?,?, ?, 'PROCESADO')";
+            tipo_reporte,id_producto, id_usuario_reportado, 
+            id_administrador,
+            motivo,  accion_tomada, comentarios,estado
+            ) VALUES (?,?, ?, ?, ?,?, ?, ?)";
         $params = [
+            $tipo_reporte,
             $id_producto,
             $id_usuario,
             $id_admin,
             $motivo,
-            $comentarios,
             $accion_tomada,
+            $comentarios,
+            $estado
         ];
 
         return $this->executeNonQuery($sql, $params);
+    }
+    
+    public function verificarReporte($id_producto){
+        $sql="SELECT id_producto FROM REPORTES
+        WHERE ID_PRODUCTO=?";
+        $stmt =$this->executeQuery($sql ,[$id_producto]);
+        $result = $this->getResults($stmt);
+        return !empty($result);
     }
 
     //FUNCION PARA ACCIONES
@@ -529,11 +543,11 @@ class Conexion
     }
     
     public function suspenderUser($id_usuario){
-        $sql="UPDATE USUARIOS SET ACTIVO=0,
+        $sql="UPDATE USUARIOS SET ACTIVO=0
          WHERE id_usuario=?";
-         return $this->executeNonQuery($sql,$id_usuario);
+         return $this->executeNonQuery($sql,array($id_usuario));
     }
-    //FUNCION PARA REPORTES
+    //FUNCION PARA REPORTESs
     public function getReportes()
     {
         $sql = "SELECT r.*, p.nombre_producto, u.nombre as nombre_reportado, 

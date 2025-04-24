@@ -38,7 +38,7 @@
             <!--ELEMENTOS-->
             <div class="row">
                 <div class="col-lg-12">
-                    <h3 class="page-header"><i class="fa fa-laptop"></i>Productos para Vender</h3>
+                    <h3 class="page-header"><i class="fa fa-laptop"></i>Reportes registrados</h3>
                     <div class="<?PHP echo $alerta; ?>" role="alert">
                         <strong><?PHP echo $mensaje; ?></strong>
                         <strong><?PHP echo $error; ?></strong>

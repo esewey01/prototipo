@@ -16,9 +16,7 @@ if ($idReporte <= 0) {
 // 3. Obtener datos
 $con = new Conexion();
 $reporte = $con->getDetalleReporte($idReporte);
-echo "<pre>";
-print_r($reporte);
-echo "</pre>";
+
 
 // 4. Verificar si se encontró el reporte
 if (!$reporte) {
