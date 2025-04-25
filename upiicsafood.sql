@@ -252,7 +252,7 @@ UPDATE PRODUCTO SET
 CREATE TABLE REPORTES (
     id_reporte INT IDENTITY(1,1) PRIMARY KEY,
     tipo_reporte VARCHAR(20) CHECK(tipo_reporte IN ('PRODUCTO', 'USUARIO')),
-    id_producto INT NOT NULL UNIQUE,
+    id_producto INT NULL,
     id_usuario_reportado INT NOT NULL,
     id_administrador INT NOT NULL,
     motivo VARCHAR(255) NOT NULL,
@@ -265,5 +265,5 @@ CREATE TABLE REPORTES (
     FOREIGN KEY (id_administrador) REFERENCES USUARIOS(id_usuario)
 );
 ------------PRUEBAS 
-
-
+SELECT*FROM REPORTES
+DROP TABLE REPORTES

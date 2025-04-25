@@ -17,6 +17,7 @@ if (!isset($_SESSION['usuario']['login'])) {
 $urlViews = URL_VIEWS;
 $alerta = $_SESSION['alerta'] ?? '';
 $mensaje = $_SESSION['mensaje'] ?? '';
+$error=$_SESSION['error']??'';
 
 
 
@@ -53,7 +54,10 @@ try {
 
     // Cargar vista
     require("../Views/UsuarioViewFinal.php");
-    unset($_SESSION['alerta'], $_SESSION['mensaje']); // Limpiar después de mostrar
+    unset($_SESSION['error']);
+    unset($_SESSION['mensaje']);
+    unset($_SESSION['alerta']);
+   
 } catch (Exception $e) {
     die("Error: " . $e->getMessage());
 }

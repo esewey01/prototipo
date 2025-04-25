@@ -1,97 +1,62 @@
 <?php
-session_start();
 require_once('../Model/Conexion.php');
 
-// 1. Validar sesión
-if (!isset($_SESSION['usuario'])) {
-    die(json_encode(['error' => 'Acceso no autorizado']));
-}
+$id = $_GET['id'] ?? 0;
+$tipo = $_GET['tipo'] ?? 'PRODUCTO';
 
-// 2. Validar y obtener ID
-$idReporte = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-if ($idReporte <= 0) {
-    die(json_encode(['error' => 'ID de reporte inválido']));
-}
-
-// 3. Obtener datos
 $con = new Conexion();
-$reporte = $con->getDetalleReporte($idReporte);
 
-
-// 4. Verificar si se encontró el reporte
-if (!$reporte) {
-    die(json_encode(['error' => 'Reporte no encontrado']));
+if ($tipo == 'PRODUCTO') {
+    $query = "SELECT r.*, p.nombre_producto, u.nombre as nombre_usuario, a.nombre as nombre_administrador 
+              FROM REPORTES r
+              JOIN PRODUCTOS p ON r.id_producto = p.id_producto
+              JOIN USUARIOS u ON r.id_usuario_reportado = u.id_usuario
+              JOIN USUARIOS a ON r.id_administrador = a.id_usuario
+              WHERE r.id_reporte = ?";
+} else {
+    $query = "SELECT r.*, u.nombre as nombre_usuario, a.nombre as nombre_administrador 
+              FROM REPORTES r
+              JOIN USUARIOS u ON r.id_usuario_reportado = u.id_usuario
+              JOIN USUARIOS a ON r.id_administrador = a.id_usuario
+              WHERE r.id_reporte = ?";
 }
 
-// Función auxiliar para mostrar datos
-function mostrarCampo($valor, $esFecha = false) {
-    if ($valor === null) return 'N/A';
-    if ($esFecha && $valor instanceof DateTime) {
-        return $valor->format('d/m/Y H:i');
-    }
-    return htmlspecialchars($valor);
+$reporte = $con->getRow($query, [$id]);
+
+if (!$reporte) {
+    die("<div class='alert alert-danger'>Reporte no encontrado</div>");
 }
 ?>
 
 <div class="row">
     <div class="col-md-6">
         <h4>Información del Reporte</h4>
-        <p><strong>ID:</strong> <?= mostrarCampo($reporte[0]['id_reporte']) ?></p>
-        <p><strong>Fecha:</strong> <?= mostrarCampo($reporte[0]['fecha_reporte'], true) ?></p>
+        <p><strong>ID:</strong> <?= $reporte['id_reporte'] ?></p>
+        <p><strong>Fecha:</strong> <?=$reporte['fecha_reporte']->format('d/m/Y H:i')?></p>
         <p><strong>Estado:</strong> 
             <span class="label label-<?= 
-                $reporte[0]['estado'] == 'PENDIENTE' ? 'warning' : 
-                ($reporte[0]['estado'] == 'PROCESADO' ? 'success' : 'default')
+                ($reporte['estado'] == 'PENDIENTE') ? 'warning' : 
+                (($reporte['estado'] == 'PROCESADO') ? 'info' : 'success') 
             ?>">
-                <?= mostrarCampo($reporte[0]['estado']) ?>
+                <?= $reporte['estado'] ?>
             </span>
         </p>
+        <p><strong>Motivo:</strong> <?= htmlspecialchars($reporte['motivo']) ?></p>
+        <p><strong>Acción Tomada:</strong> <?= htmlspecialchars($reporte['accion_tomada']) ?></p>
     </div>
     
     <div class="col-md-6">
-        <h4>Acciones</h4>
-        <p><strong>Acción tomada:</strong> <?= mostrarCampo($reporte[0]['accion_tomada']) ?></p>
-        <p><strong>Administrador:</strong> <?= mostrarCampo($reporte[0]['nombre_administrador']) ?></p>
+        <h4>Información del <?= $tipo == 'PRODUCTO' ? 'Producto' : 'Usuario' ?></h4>
+        <?php if ($tipo == 'PRODUCTO'): ?>
+            <p><strong>Producto:</strong> <?= htmlspecialchars($reporte['nombre_producto']) ?></p>
+        <?php else: ?>
+            <p><strong>Usuario:</strong> <?= htmlspecialchars($reporte['nombre_usuario']) ?></p>
+        <?php endif; ?>
+        
+        <h4>Información del Administrador</h4>
+        <p><strong>Reportado por:</strong> <?= htmlspecialchars($reporte['nombre_administrador']) ?></p>
+        
+        <h4>Comentarios</h4>
+        <div class="well"><?= nl2br(htmlspecialchars($reporte['comentarios'])) ?></div>
     </div>
 </div>
-
-<div class="row">
-    <div class="col-md-12">
-        <h4>Detalles</h4>
-        <div class="well">
-            <p><strong>Producto:</strong> <?= mostrarCampo($reporte[0]['nombre_producto']) ?></p>
-            <p><strong>Usuario reportado:</strong> <?= mostrarCampo($reporte[0]['nombre_reportado']) ?></p>
-            <p><strong>Motivo:</strong> <?= mostrarCampo($reporte[0]['motivo']) ?></p>
-            <?php if (!empty($reporte[0]['comentarios'])): ?>
-                <p><strong>Comentarios:</strong> <?= mostrarCampo($reporte[0]['comentarios']) ?></p>
-            <?php endif; ?>
-        </div>
-    </div>
-</div>
-
-<?php if ($reporte[0]['estado'] == 'PENDIENTE'): ?>
-<div class="row">
-    <div class="col-md-12 text-right">
-        <button class="btn btn-success" onclick="resolverReporte(<?= $idReporte ?>)">
-            <i class="fa fa-check"></i> Marcar como Resuelto
-        </button>
-    </div>
-</div>
-
-<script>
-function resolverReporte(idReporte) {
-    if (confirm('¿Estás seguro de marcar este reporte como resuelto?')) {
-        $.post('ResolverReporte.php', {id: idReporte}, function(response) {
-            if (response.success) {
-                $('#detalleModal').modal('hide');
-                location.reload();
-            } else {
-                alert('Error: ' + (response.error || 'Ocurrió un problema'));
-            }
-        }, 'json').fail(function() {
-            alert('Error en la comunicación con el servidor');
-        });
-    }
-}
-</script>
-<?php endif; ?>

@@ -55,6 +55,7 @@ class Conexion
 
         return $stmt;
     }
+    
 
     //CONVIERTE UN RESULTADO EN UN ARREGLO
     private function getResults($stmt)
@@ -72,6 +73,17 @@ class Conexion
 
 
         return $retorno;
+    }
+
+    public function getRow($sql, $params = []) {
+        $stmt = sqlsrv_query($this->connection, $sql, $params);
+        if ($stmt === false) {
+            // Manejar el error de la consulta
+            return false; // O lanzar una excepción
+        }
+        $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+        sqlsrv_free_stmt($stmt);
+        return $row;
     }
 
     //PARA EJECUTAR UN INSERT/UPDATE O DELETE
@@ -537,15 +549,17 @@ class Conexion
 
     //FUNCION PARA ACCIONES
     public function desactivarProd($id_producto){
+        
         $sql="UPDATE PRODUCTOS SET ESTADO='INACTIVO'
         WHERE ID_PRODUCTO=?";
         return $this->executeNonQuery($sql, $id_producto);
     }
     
-    public function suspenderUser($id_usuario){
-        $sql="UPDATE USUARIOS SET ACTIVO=0
+    public function suspenderUser($id_usuario,$permanente=false){
+        $estado = $permanente ? 0:2;//0=BANEADO 2=SUSPENDIDO
+        $sql="UPDATE USUARIOS SET ACTIVO=?
          WHERE id_usuario=?";
-         return $this->executeNonQuery($sql,array($id_usuario));
+         return $this->executeNonQuery($sql,array($estado, $id_usuario));
     }
     //FUNCION PARA REPORTESs
     public function getReportes()

@@ -32,7 +32,7 @@
     <section id="main-content">
         <section class="wrapper">
 
-            <!--SUBMENU-->
+            <!--ELEMENTOS Y CONTROL DE ERRORES-->
             <div class="row">
                 <div class="col-lg-12">
                     <h3 class="page-header"><i class="fa fa-laptop"></i>Productos para Vender</h3>
@@ -403,12 +403,11 @@
             </div>
 
             <!--MODAL PARA REPORTES-->
-            <!-- Modal para Reportar -->
             <div class="modal fade" id="reportarModal" tabindex="-1" role="dialog" aria-labelledby="reportarModalLabel">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <form action="RegistroReporteController.php" method="POST">
-                            <input type="hidden" name="tipo_reporte" value ="PRODUCTO">
+                            <input type="hidden" name="tipo_reporte" value="PRODUCTO">
                             <input type="hidden" name="id_producto" id="reporte_id_producto">
                             <input type="hidden" name="id_usuario_reportado" id="reporte_id_usuario">
                             <input type="hidden" name="id_administrador" value="<?= $_SESSION['usuario']['id_usuario'] ?>">

@@ -45,6 +45,11 @@
             <div class="row">
                 <div class="col-lg-12">
                     <h3 class="page-header"><i class="fa fa-laptop"></i> PRINCIPAL</h3>
+                    <!--FUNCION DE ALERTA DE MENSAJES-->
+                    <div class="<?PHP echo $alerta; ?>" role="alert">
+                            <strong><?PHP echo $mensaje; ?></strong>
+                            <strong><?PHP echo $error; ?></strong>
+                        </div>
                     <ol class="breadcrumb">
                         <li><i class="fa fa-home"></i><a href="principal.php">Inicio</a></li>
                         <li><i class="fa fa-laptop"></i> Principal</li>

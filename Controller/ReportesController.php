@@ -7,7 +7,7 @@ require ('Constants.php');
 
 if ($_SESSION['usuario']['rol']['id_rol']!=1){
     $_SESSION['error']="NO POSEES PERMISOS DE ADMINISTRADOR";
-    header("Location: ../Views/Wellcome.php");
+    header("Location: PrincipalController.php");
     exit();
 }
 
@@ -32,7 +32,7 @@ $mensaje=$_SESSION['mensaje']??'';
     unset($_SESSION['mensaje']);
     unset($_SESSION['error']);
 
-    require("../Views/ReportesUsuarios.php");
+    require("../Views/ReportesRegistrados.php");
 
 }catch(Exception $e){
     $_SESSION['error']="ERROR AL OBTENER REPORTES: ".$e->getMessage();
