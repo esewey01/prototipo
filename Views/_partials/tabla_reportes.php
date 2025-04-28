@@ -24,7 +24,7 @@
                     <?php if ($tipo_reporte == 'PRODUCTO'): ?>
                         <td><?= htmlspecialchars($reporte['nombre_producto']) ?></td>
                     <?php else: ?>
-                        <td><?= htmlspecialchars($reporte['nombre_usuario']) ?></td>
+                        <td><?= htmlspecialchars($reporte['nombre_reportado']) ?></td>
                     <?php endif; ?>
                     <td><?= htmlspecialchars($reporte['nombre_administrador']) ?></td>
                     <td><?= htmlspecialchars($reporte['motivo']) ?></td>

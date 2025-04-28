@@ -41,8 +41,9 @@ include('Head.php');
                 </div>
 
                 <ol class="breadcrumb">
-                    <li><i class="fa fa-home"></i><a href="principal.php">Inicio</a></li>
-                    <li><i class="fa fa-truck"></i>Reporte de Ventas</li>
+                    <li><i class="fa fa-home"></i><a href="PrincipalController.php">Inicio</a></li>
+                    <li><i class="fa fa-flag"></i><a href="ReportesController.php">Reportes</a></li>
+                    
 
                 </ol>
             </div>

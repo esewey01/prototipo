@@ -61,10 +61,6 @@ class ProductoController {
                 'alerta' => $_SESSION['alerta'] ?? null
             ];
             
-            // Limpiar mensajes después de mostrarlos
-            unset($_SESSION['error']);
-            unset($_SESSION['mensaje']);
-            unset($_SESSION['alerta']);
             
             // Cargar vista
             require("../Views/ProductoViews.php");
@@ -82,19 +78,19 @@ class ProductoController {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 throw new Exception("Método no permitido");
             }
-            $productos = $this->con->getProductosByVendedor($this->id_usuario);
-            foreach($productos as $product){
-                $product['nombre_producto'];
-            }
+            
             
             $requiredFields = ['id_categoria', 'codigo','nombre_producto', 'descripcion', 'cantidad', 'pventa', 'pcompra'];
             foreach ($requiredFields as $field) {
                 if (empty($_POST[$field])) {
                     throw new Exception("El campo $field es requerido");
-                }
-                if ($_POST[$field]===$product[$field]){
-                    throw new Exception("$field repetido, ya guardado en la base de datos ");
-                }
+                } 
+                
+            }
+            $verificarProducto = $this->con->verificarProducto($_SESSION['usuario']['id_usuario'],
+            $_POST['codigo'], $_POST['nombre_producto']);
+            if ($verificarProducto) {
+                throw new Exception("Producto ya existente ");
             }
 
             
@@ -123,7 +119,8 @@ class ProductoController {
                 $_POST['pcompra'],
                 $imagen
             );
-           
+            
+            
             if ($resultado) {
                 $_SESSION['mensaje'] = "Producto registrado correctamente";
                 $_SESSION['alerta'] = "alert-success";
@@ -135,9 +132,9 @@ class ProductoController {
             exit();
             
         } catch (Exception $e) {
-            $_SESSION['mensaje'] = "Producto no guardado correctamente ";
+            $_SESSION['mensaje'] = "Error al guardar: " . $e->getMessage();
             $_SESSION['alerta'] = "alert-danger";
-            $_SESSION['error'] = $e->getMessage();
+            //$_SESSION['mensaje'] = $e->getMessage();
             header("Location: ProductoController.php");
             exit();
         }

@@ -13,6 +13,7 @@ if (!isset($_SESSION['usuario'])) {
 
 
 
+
 $con = new Conexion();
 $alerta = $_SESSION['alerta'] ?? '';
 $mensaje = $_SESSION['mensaje'] ?? '';

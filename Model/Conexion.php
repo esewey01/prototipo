@@ -9,7 +9,7 @@ class Conexion
     public function __construct()
     {
         // Configuración del servidor
-        $this->server = "MPMLW10DELF6Z2";
+        $this->server = "localhost";
         $this->database = "UPIICSAFOOD";
         $this->user = "david";  //USUARIO DE SQL SERVER
         $this->password = "6441";
@@ -55,7 +55,7 @@ class Conexion
 
         return $stmt;
     }
-    
+
 
     //CONVIERTE UN RESULTADO EN UN ARREGLO
     private function getResults($stmt)
@@ -75,7 +75,8 @@ class Conexion
         return $retorno;
     }
 
-    public function getRow($sql, $params = []) {
+    public function getRow($sql, $params = [])
+    {
         $stmt = sqlsrv_query($this->connection, $sql, $params);
         if ($stmt === false) {
             // Manejar el error de la consulta
@@ -140,7 +141,7 @@ class Conexion
                     (nombre, login, password, foto_perfil, telefono, fecha_registro) 
                     OUTPUT INSERTED.id_usuario
                     VALUES (?, ?, ?, ?, ?, GETDATE())";
-            $result = $this->executeQuery($sql_user, array($nombre, $login, $password, $foto_perfil,$telefono));
+            $result = $this->executeQuery($sql_user, array($nombre, $login, $password, $foto_perfil, $telefono));
 
             // Obtener el ID del nuevo usuario desde el resultado
             $row = $this->getResults($result);
@@ -404,6 +405,13 @@ class Conexion
         $stmt = $this->executeQuery($sql, [$id_vendedor]);
         return $this->getResults($stmt);
     }
+    public function verificarProducto($id_usuario, $codigo, $nombre_producto)
+    {
+        $sql = "SELECT id_producto FROM PRODUCTOS WHERE id_usuario = ? AND (codigo = ? OR nombre_producto = ?)";
+        $stmt = $this->executeQuery($sql, array($id_usuario, $codigo, $nombre_producto));
+        $result = $this->getResults($stmt);
+        return !empty($result);
+    }
 
     public function getAllProductosWithVendedor()
     {
@@ -421,6 +429,7 @@ class Conexion
         $stmt = $this->executeQuery($sql);
         return $this->getResults($stmt);
     }
+
 
     public function newProduct(
         $id_usuario,
@@ -510,7 +519,7 @@ class Conexion
     }
 
     public function newReport(
-        
+
         $id_producto,
         $id_usuario,
         $id_admin,
@@ -538,28 +547,31 @@ class Conexion
 
         return $this->executeNonQuery($sql, $params);
     }
-    
-    public function verificarReporte($id_producto){
-        $sql="SELECT id_producto FROM REPORTES
+
+    public function verificarReporte($id_producto)
+    {
+        $sql = "SELECT id_producto FROM REPORTES
         WHERE ID_PRODUCTO=?";
-        $stmt =$this->executeQuery($sql ,[$id_producto]);
+        $stmt = $this->executeQuery($sql, [$id_producto]);
         $result = $this->getResults($stmt);
         return !empty($result);
     }
 
     //FUNCION PARA ACCIONES
-    public function desactivarProd($id_producto){
-        
-        $sql="UPDATE PRODUCTOS SET ESTADO='INACTIVO'
+    public function desactivarProd($id_producto)
+    {
+
+        $sql = "UPDATE PRODUCTOS SET ESTADO='INACTIVO'
         WHERE ID_PRODUCTO=?";
         return $this->executeNonQuery($sql, $id_producto);
     }
-    
-    public function suspenderUser($id_usuario,$permanente=false){
-        $estado = $permanente ? 0:2;//0=BANEADO 2=SUSPENDIDO
-        $sql="UPDATE USUARIOS SET ACTIVO=?
+
+    public function suspenderUser($id_usuario, $permanente = false)
+    {
+        $estado = $permanente ? 0 : 2; //0=BANEADO 2=SUSPENDIDO
+        $sql = "UPDATE USUARIOS SET ACTIVO=?
          WHERE id_usuario=?";
-         return $this->executeNonQuery($sql,array($estado, $id_usuario));
+        return $this->executeNonQuery($sql, array($estado, $id_usuario));
     }
     //FUNCION PARA REPORTESs
     public function getReportes()
@@ -572,11 +584,12 @@ class Conexion
                 JOIN USUARIOS a ON r.id_administrador = a.id_usuario
                 ORDER BY r.fecha_reporte DESC";
 
-        $stmt= $this->executeQuery($sql);
+        $stmt = $this->executeQuery($sql);
         return $this->getResults($stmt);
     }
 
-    public function getDetalleReporte($idReporte) {
+    public function getDetalleReporte($idReporte)
+    {
         $sql = "SELECT r.*, p.nombre_producto, 
                        u.nombre as nombre_reportado, 
                        a.nombre as nombre_administrador
@@ -585,9 +598,276 @@ class Conexion
                 JOIN USUARIOS u ON r.id_usuario_reportado = u.id_usuario
                 JOIN USUARIOS a ON r.id_administrador = a.id_usuario
                 WHERE r.id_reporte = ?";
-        
-        $result = $this->executeQuery($sql,array($idReporte));
-//return $result[0] ?? null;
-     return $this->getResults($result);
+
+        $result = $this->executeQuery($sql, array($idReporte));
+        //return $result[0] ?? null;
+        return $this->getResults($result);
     }
+    ///FUNCIONES DE SOLICITUDES
+
+    /**
+     * Obtiene todas las solicitudes de vendedor con información de usuario
+     */
+    public function getAllSellerRequestsPend($estado = null)
+    {
+        $sql = "SELECT sv.*, u.nombre, u.login, u.email, u.telefono, 
+                  r.nombre_rol as rol_actual
+            FROM SOLICITUDES_VENDEDOR sv
+            JOIN USUARIOS u ON sv.id_usuario = u.id_usuario
+            JOIN ROLES_USUARIO ru ON u.id_usuario = ru.id_usuario
+            JOIN ROLES r ON ru.id_rol = r.id_rol
+            WHERE (? IS NULL OR sv.estado = ?)
+            ORDER BY sv.fecha_solicitud DESC";
+
+        $params = $estado ? [$estado, $estado] : [null, null];
+        $stmt = $this->executeQuery($sql, $params);
+        return $this->getResults($stmt);
+    }
+    public function getAllSellerRequests($estado = null)
+    {
+        $sql = "SELECT sv.*, u.nombre, u.login, u.email, u.telefono,a.nombre as nombre_revisor,
+                  r.nombre_rol as rol_actual
+            FROM SOLICITUDES_VENDEDOR sv
+            JOIN USUARIOS u ON sv.id_usuario = u.id_usuario 
+            JOIN USUARIOS a ON sv.id_revisor = a.id_usuario
+            JOIN ROLES_USUARIO ru ON u.id_usuario = ru.id_usuario
+            JOIN ROLES r ON ru.id_rol = r.id_rol
+            WHERE (? IS NULL OR sv.estado = ?)
+            ORDER BY sv.fecha_solicitud DESC";
+
+        $params = $estado ? [$estado, $estado] : [null, null];
+        $stmt = $this->executeQuery($sql, $params);
+        return $this->getResults($stmt);
+    }
+
+    /**
+     * Actualiza el estado de una solicitud de vendedor
+     */
+    public function updateSellerRequestStatus($id_solicitud, $estado, $id_revisor, $comentarios = null)
+    {
+        $sql = "UPDATE SOLICITUDES_VENDEDOR 
+                SET estado = ?, 
+                    fecha_revision = GETDATE(), 
+                    id_revisor = ?, 
+                    comentarios = ?
+                WHERE id_solicitud = ?";
+
+        return $this->executeNonQuery($sql, [$estado, $id_revisor, $comentarios, $id_solicitud]);
+    }
+
+    /**
+     * Cambia el rol de un usuario (para cuando se aprueba como vendedor)
+     */
+    public function changeUserRole($id_usuario, $id_nuevo_rol)
+    {
+        // Primero eliminamos cualquier rol existente para evitar duplicados
+        $sqlDelete = "DELETE FROM ROLES_USUARIO WHERE id_usuario = ?";
+        $this->executeNonQuery($sqlDelete, [$id_usuario]);
+
+        // Luego insertamos el nuevo rol
+        $sqlInsert = "INSERT INTO ROLES_USUARIO (id_usuario, id_rol) VALUES (?, ?)";
+        return $this->executeNonQuery($sqlInsert, [$id_usuario, $id_nuevo_rol]);
+    }
+
+    /**
+     * Obtiene una solicitud específica con detalles del usuario
+     */
+    public function getSellerRequestDetails($id_solicitud)
+    {
+        $sql = "SELECT sv.*, u.*, a.nombre as nombre_revisor, r.nombre_rol as rol_actual
+                FROM SOLICITUDES_VENDEDOR sv
+                JOIN USUARIOS u ON sv.id_usuario = u.id_usuario
+                LEFT JOIN USUARIOS a ON sv.id_revisor = a.id_usuario
+                JOIN ROLES_USUARIO ru ON u.id_usuario = ru.id_usuario
+                JOIN ROLES r ON ru.id_rol = r.id_rol
+                WHERE sv.id_solicitud = ?";
+
+        $stmt = $this->executeQuery($sql, [$id_solicitud]);
+        return $this->getResults($stmt)[0] ?? null;
+    }
+
+    /*FUNCIONES DE CARRITOS*/ 
+    // PRODUCTOS
+public function getProductosByCategoria($id_categoria = null) {
+    $sql = "SELECT p.*, u.nombre as nombre_vendedor, c.nombre_categoria
+            FROM PRODUCTOS p
+            JOIN USUARIOS u ON p.id_usuario = u.id_usuario
+            JOIN CATEGORIAS c ON p.id_categoria = c.id_categoria
+            WHERE p.estado = 'ACTIVO' AND (? IS NULL OR p.id_categoria = ?)";
+    
+    $params = $id_categoria ? [$id_categoria, $id_categoria] : [null, null];
+    $stmt = $this->executeQuery($sql, $params);
+    return $this->getResults($stmt);
+}
+
+public function getProductoById($id_producto) {
+    $sql = "SELECT p.*, u.nombre as nombre_vendedor, c.nombre_categoria
+            FROM PRODUCTOS p
+            JOIN USUARIOS u ON p.id_usuario = u.id_usuario
+            JOIN CATEGORIAS c ON p.id_categoria = c.id_categoria
+            WHERE p.id_producto = ?";
+    
+    $stmt = $this->executeQuery($sql, [$id_producto]);
+    return $this->getResults($stmt)[0] ?? null;
+}
+
+// CARRITO
+public function getOrCreateCarrito($id_usuario) {
+    // Buscar carrito activo
+    $sql = "SELECT * FROM CARRITO WHERE id_usuario = ?";
+    $carrito = $this->getRow($sql, [$id_usuario]);
+    
+    if (!$carrito) {
+        // Crear nuevo carrito
+        $sql = "INSERT INTO CARRITO (id_usuario) OUTPUT INSERTED.id_carrito VALUES (?)";
+        $stmt = $this->executeQuery($sql, [$id_usuario]);
+        $result = $this->getResults($stmt);
+        return $result[0]['id_carrito'];
+    }
+    
+    return $carrito['id_carrito'];
+}
+
+public function addToCarrito($id_carrito, $id_producto, $cantidad) {
+    $producto = $this->getProductoById($id_producto);
+    if (!$producto) return false;
+    
+    // Verificar si ya existe en el carrito
+    $sql = "SELECT * FROM CARRITO_ITEMS 
+            WHERE id_carrito = ? AND id_producto = ?";
+    $existente = $this->getRow($sql, [$id_carrito, $id_producto]);
+    
+    if ($existente) {
+        // Actualizar cantidad
+        $sql = "UPDATE CARRITO_ITEMS SET cantidad = cantidad + ? 
+                WHERE id_item = ?";
+        return $this->executeNonQuery($sql, [$cantidad, $existente['id_item']]);
+    } else {
+        // Agregar nuevo item
+        $sql = "INSERT INTO CARRITO_ITEMS 
+                (id_carrito, id_producto, cantidad, precio_unitario)
+                VALUES (?, ?, ?, ?)";
+        return $this->executeNonQuery($sql, [
+            $id_carrito, 
+            $id_producto, 
+            $cantidad, 
+            $producto['precio_venta']
+        ]);
+    }
+}
+
+public function getCarritoItems($id_carrito) {
+    $sql = "SELECT ci.*, p.nombre_producto, p.imagen, u.nombre as nombre_vendedor
+            FROM CARRITO_ITEMS ci
+            JOIN PRODUCTOS p ON ci.id_producto = p.id_producto
+            JOIN USUARIOS u ON p.id_usuario = u.id_usuario
+            WHERE ci.id_carrito = ?";
+    
+    $stmt = $this->executeQuery($sql, [$id_carrito]);
+    return $this->getResults($stmt);
+}
+
+// ÓRDENES
+public function createOrden($id_usuario, $id_vendedor, $items, $direccion_envio, $notas) {
+    // Calcular total
+    $total = 0;
+    foreach ($items as $item) {
+        $total += $item['precio_unitario'] * $item['cantidad'];
+    }
+    
+    // Iniciar transacción
+    sqlsrv_begin_transaction($this->connection);
+    
+    try {
+        // Crear orden
+        $sql = "INSERT INTO ORDENES 
+                (id_usuario, id_vendedor, total, direccion_envio, notas)
+                OUTPUT INSERTED.id_orden
+                VALUES (?, ?, ?, ?, ?)";
+        $stmt = $this->executeQuery($sql, [
+            $id_usuario, $id_vendedor, $total, $direccion_envio, $notas
+        ]);
+        $orden = $this->getResults($stmt);
+        $id_orden = $orden[0]['id_orden'];
+        
+        // Agregar items
+        foreach ($items as $item) {
+            $sql = "INSERT INTO ORDEN_DETALLES
+                    (id_orden, id_producto, cantidad, precio_unitario)
+                    VALUES (?, ?, ?, ?)";
+            $this->executeNonQuery($sql, [
+                $id_orden, 
+                $item['id_producto'], 
+                $item['cantidad'], 
+                $item['precio_unitario']
+            ]);
+            
+            // Reducir stock
+            $sql = "UPDATE PRODUCTOS SET cantidad = cantidad - ? 
+                    WHERE id_producto = ?";
+            $this->executeNonQuery($sql, [
+                $item['cantidad'], 
+                $item['id_producto']
+            ]);
+        }
+        
+        // Vaciar carrito
+        $sql = "DELETE FROM CARRITO_ITEMS WHERE id_carrito IN 
+                (SELECT id_carrito FROM CARRITO WHERE id_usuario = ?)";
+        $this->executeNonQuery($sql, [$id_usuario]);
+        
+        // Confirmar transacción
+        sqlsrv_commit($this->connection);
+        return $id_orden;
+    } catch (Exception $e) {
+        sqlsrv_rollback($this->connection);
+        throw $e;
+    }
+}
+
+// MENSAJES
+public function sendMessage($id_remitente, $id_destinatario, $id_orden, $asunto, $mensaje) {
+    $sql = "INSERT INTO MENSAJES 
+            (id_remitente, id_destinatario, id_orden, asunto, mensaje)
+            VALUES (?, ?, ?, ?, ?)";
+    return $this->executeNonQuery($sql, [
+        $id_remitente, $id_destinatario, $id_orden, $asunto, $mensaje
+    ]);
+}
+
+public function getMessages($id_usuario, $tipo = 'recibidos') {
+    $sql = $tipo == 'recibidos' 
+        ? "SELECT m.*, u.nombre as remitente_nombre 
+           FROM MENSAJES m
+           JOIN USUARIOS u ON m.id_remitente = u.id_usuario
+           WHERE m.id_destinatario = ? ORDER BY m.fecha_envio DESC"
+        : "SELECT m.*, u.nombre as destinatario_nombre 
+           FROM MENSAJES m
+           JOIN USUARIOS u ON m.id_destinatario = u.id_usuario
+           WHERE m.id_remitente = ? ORDER BY m.fecha_envio DESC";
+    
+    $stmt = $this->executeQuery($sql, [$id_usuario]);
+    return $this->getResults($stmt);
+}
+
+// VALORACIONES
+public function addValoracion($id_orden, $id_producto, $id_usuario, $id_vendedor, $calificacion, $comentario) {
+    $sql = "INSERT INTO VALORACIONES 
+            (id_orden, id_producto, id_usuario, id_vendedor, calificacion, comentario)
+            VALUES (?, ?, ?, ?, ?, ?)";
+    return $this->executeNonQuery($sql, [
+        $id_orden, $id_producto, $id_usuario, $id_vendedor, $calificacion, $comentario
+    ]);
+}
+
+public function getValoracionesProducto($id_producto) {
+    $sql = "SELECT v.*, u.nombre as usuario_nombre
+            FROM VALORACIONES v
+            JOIN USUARIOS u ON v.id_usuario = u.id_usuario
+            WHERE v.id_producto = ?
+            ORDER BY v.fecha_valoracion DESC";
+    
+    $stmt = $this->executeQuery($sql, [$id_producto]);
+    return $this->getResults($stmt);
+}
 }

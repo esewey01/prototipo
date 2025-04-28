@@ -61,7 +61,7 @@
                             </div>
                         <?php endif; ?>
                         <ol class="breadcrumb">
-                            <li><i class="fa fa-home"></i><a href="WellcomeCliente.php">Inicio</a></li>
+                            <li><i class="fa fa-home"></i><a href="PrincipalController.php">Inicio</a></li>
                             <li><i class="fa fa-user"></i>Perfil</li>
                         </ol>
                     </div>
@@ -76,7 +76,7 @@
                                     <li class="active"><a href="#info" data-toggle="tab">Información</a></li>
                                     <li><a href="#password" data-toggle="tab">Contraseña</a></li>
                                     <li><a href="#social" data-toggle="tab">Redes Sociales</a></li>
-                                    <?php if ($id_rol['id_rol'] == 3): ?>
+                                    <?php if ($id_rol['id_rol'] == 3 or $id_rol['id_rol']==2): ?>
                                         <li><a href="#seller" data-toggle="tab">Ser Vendedor</a></li>
                                     <?php endif; ?>
                                 </ul>
@@ -274,7 +274,7 @@
                                     </div>
 
                                     <!-- Solicitud para ser Vendedor (solo para clientes) -->
-                                    <?php if ($id_rol['id_rol'] === 3): ?>
+                                    <?php if ($id_rol['id_rol'] === 3 or $id_rol['id_rol'] === 2): ?>
                                         <div class="tab-pane" id="seller">
                                             <form method="POST" class="form-horizontal" style="margin-top: 20px;">
                                                 <input type="hidden" name="action" value="seller_request">
@@ -306,7 +306,7 @@
 
                                                 <!-- SOLICITUD DE EVENTO -->
                                                 <div class="form-group">
-                                                    <label class="col-sm-2 control-label">SOLICITUDES ENVIADAS</label>
+                                                    <label class="col-sm-2 control-label">ESTADIO DE SOLICITUD</label>
                                                     <div class="col-sm-10">
                                                         <?php
                                                         $solicitudes = $con->getSolicitudesUsuario($_SESSION['usuario']['id_usuario']);
@@ -324,7 +324,7 @@
                                                                     <?= $ultimaSolicitud['estado'] ?>
                                                                 </span><br>
                                                                 <small>Categoría: <?= $ultimaSolicitud['categoria'] ?></small><br>
-                                                                <small>Intentos: <?= count($solicitudes) ?></small>
+                                                                <small>Solicitudes: <?= count($solicitudes) ?></small>
                                                             </p>
                                                         <?php else: ?>
                                                             <p class="form-control-static text-muted">No has solicitado ser vendedor</p>

@@ -15,13 +15,8 @@ if (!isset($_SESSION['usuario']['login'])) {
 $con = new Conexion();
 
 
-$error=$_SESSION['error']??'';
-$mensaje=$_SESSION['mensaje']??'';
-
-require('Location: ../Views/Wellcome.php');
-
-
-
-
+require('../Views/Wellcome.php');
+unset($_SESSION['error']);
+unset($_SESSION['mensaje']);
 exit();
 ?>

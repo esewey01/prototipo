@@ -98,11 +98,14 @@ class AuthController {
     private function redirectBasedOnRole($usuario) {
         $roleName = strtolower($usuario['nombre_rol']);
         $this->mensaje = strtoupper($roleName) . ": " . $usuario['nombre'];
+        $_SESSION['mensaje'] = "Conexion exitosa, bienvenido a la plataforma";
+        $_SESSION['alerta'] = "alert-success";
         
         $viewMap = [
+            'superuser' => '../Views/Wellcome.php',
             'administrador' => '../Views/Wellcome.php',
-            'vendedor' => '../Views/WellcomeVendedor.php',
-            'cliente' => '../Views/WellcomeCliente.php'
+            'vendedor' => '../Views/Wellcome.php',
+            'cliente' => '../Views/Wellcome.php'
         ];
         
         if (!isset($viewMap[$roleName])) {
@@ -110,7 +113,12 @@ class AuthController {
         }
         
         require($viewMap[$roleName]);
+        unset($_SESSION['mensaje']);
+        unset($_SESSION['alerta']);
+    
         exit();
+        
+
     }
     
     private function setErrorSession($message) {
@@ -119,6 +127,7 @@ class AuthController {
     }
     
     private function redirectToLogin() {
+       
         header('Location: ../Views/LoginView.php');
         exit();
     }

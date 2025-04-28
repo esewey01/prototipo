@@ -41,40 +41,48 @@
 
     <section id="main-content">
         <section class="wrapper">
-            <?php echo "test"; ?>
+
             <div class="row">
                 <div class="col-lg-12">
                     <h3 class="page-header"><i class="fa fa-laptop"></i> PRINCIPAL</h3>
                     <!--FUNCION DE ALERTA DE MENSAJES-->
-                    <div class="<?PHP echo $alerta; ?>" role="alert">
-                            <strong><?PHP echo $mensaje; ?></strong>
-                            <strong><?PHP echo $error; ?></strong>
+                    <?php if (isset($_SESSION['mensaje'])): ?>
+                        <div class="alert <?= $_SESSION['alerta'] ?? 'alert-info' ?> alert-dismissible fade in" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                            <strong><?= $_SESSION['mensaje'].': '.$_SESSION['usuario']['rol']['nombre_rol'] ?></strong>
                         </div>
+                    <?php
+                        unset($_SESSION['mensaje']);
+                        unset($_SESSION['alerta']);
+                    endif; ?>
                     <ol class="breadcrumb">
-                        <li><i class="fa fa-home"></i><a href="principal.php">Inicio</a></li>
+                        <li><i class="fa fa-home"></i><a href="PrincipalController.php">Inicio</a></li>
                         <li><i class="fa fa-laptop"></i> Principal</li>
                     </ol>
                 </div>
             </div>
 
             <div class="row">
-
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                     <div class="info-box blue-bg">
                         <i class="fa fa-truck"></i>
-                        <div class="count"><?PHP
-                                            echo $t_pro;
-
-                                            ?></div>
-                        <div class="title"> Proveedores</div>
+                        <div class="count"><span style="font-size: xx-small; "><?PHP
+                                                                                //echo $ventastotales;
+                                                                                ?> </span>
+                        </div>
+                        <div class="title"> Proveedores </div>
                     </div><!--/.info-box-->
                 </div><!--/.col-->
+
+                
 
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                     <div class="info-box brown-bg">
                         <i class="icon_piechart"></i>
                         <div class="count"><span style="font-size: xx-small; "><?PHP
-                                                                                echo $ventastotales;
+                                                                                //echo $ventastotales;
                                                                                 ?> </span>
                         </div>
                         <div class="title"> Reportes de Ventas </div>
@@ -86,7 +94,7 @@
                         <i class="fa fa-money"></i>
                         <div class="count"><?PHP
                                             //echo $gastototales;
-                                            ?>$us.
+                                            ?>
                         </div>
                         <div class="title">Gastos y Entradas</div>
                     </div><!--/.info-box-->
@@ -186,6 +194,7 @@
 
 
     <?PHP include("LibraryJs.php"); ?>
+
 
 </body>
 

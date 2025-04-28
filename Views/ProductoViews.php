@@ -3,7 +3,7 @@
 <?php include('Head.php'); ?>
 
 <body>
-    <section id="container" clas="">
+    <section id="container" class="">
         <!-- CABECERAAAA -->
         <header class="header dark-bg">
             <div class="toggle-nav">
@@ -31,15 +31,33 @@
     <!--CONTENIDO DE LA PAGINA -->
     <section id="main-content">
         <section class="wrapper">
-
             <!--ELEMENTOS Y CONTROL DE ERRORES-->
             <div class="row">
                 <div class="col-lg-12">
-                    <h3 class="page-header"><i class="fa fa-laptop"></i>Productos para Vender</h3>
-                    <div class="<?PHP echo $alerta; ?>" role="alert">
-                        <strong><?PHP echo $mensaje; ?></strong>
-                        <strong><?PHP echo $error; ?></strong>
-                    </div>
+                    <h3 class="page-header">
+                        <i class="fa fa-laptop"></i>
+                        <?php
+                        if ($_SESSION['usuario']['rol']['id_rol'] == 1) {
+                            echo "PRODUCTOS REGISTRADOS EN EL SISTEMA";
+                        } elseif ($_SESSION['usuario']['rol']['id_rol'] == 2) {
+                            echo "MIS PRODUCTOS";
+                        } else {
+                            // Puedes agregar un texto por defecto o dejarlo vacío si no coincide con los roles
+                            echo "NO POSEES PERMISOS PARA VER LOS PRODUCTOS";
+                        }
+                        ?>
+                    </h3>
+                    <?php if (isset($_SESSION['mensaje'])): ?>
+                        <div class="alert <?= $_SESSION['alerta'] ?? 'alert-info' ?> alert-dismissible fade in" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                            <strong><?= $_SESSION['mensaje'] ?></strong>
+                        </div>
+                    <?php
+                        unset($_SESSION['mensaje']);
+                        unset($_SESSION['alerta']);
+                    endif; ?>
 
                     <ol class="breadcrumb">
                         <li>

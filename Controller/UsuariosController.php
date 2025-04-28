@@ -14,6 +14,13 @@ if (!isset($_SESSION['usuario']['login'])) {
     exit();
 }
 
+if ($_SESSION['usuario']['rol']['id_rol']!==1)
+{
+    $_SESSION['mensaje'] = "Acceso no autorizado";
+    $_SESSION['alerta'] = "alert-danger";
+    header("Location: ../Views/LoginView.php");
+}
+
 $urlViews = URL_VIEWS;
 $alerta = $_SESSION['alerta'] ?? '';
 $mensaje = $_SESSION['mensaje'] ?? '';
@@ -40,23 +47,10 @@ try {
     $vendedores = $con->getUsersByRoleType('VENDEDOR');
     $clientes = $con->getUsersByRoleType('CLIENTE');
 
-    // Preparar datos para la vista
-    $viewData = [
-        'usuario' => $_SESSION['usuario'],
-        'nombres' => $_SESSION['usuario']['nombre'] ,
-        'foto' => $_SESSION['usuario']['foto_perfil'] ?? 'user.png',
-        'isSuperUser' => $isSuperUser,
-        'administradores' => $administradores,
-        'vendedores' => $vendedores,
-        'clientes' => $clientes,
-        'rolActual' => $rolUsuario['nombre_rol']
-    ];
+   
 
     // Cargar vista
     require("../Views/UsuarioViewFinal.php");
-    unset($_SESSION['error']);
-    unset($_SESSION['mensaje']);
-    unset($_SESSION['alerta']);
    
 } catch (Exception $e) {
     die("Error: " . $e->getMessage());
