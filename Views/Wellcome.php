@@ -114,48 +114,7 @@
             </div>
 
 
-            <div class="row">
-
-                <div class="col-lg-9 col-md-12">
-
-                    <div class="panel panel-default">
-
-                        <div class="panel-heading">
-                            <h2><i class="fa fa-flag-o red"></i><strong>Venta Total del Dia</strong></h2>
-
-                        </div>
-                        <div class="panel-body">
-                            <div class="dataTable_wrapper">
-                                <table class="table table-striped table-bordered table-hover" id="dataTables-example">
-                                    <thead>
-                                        <tr>
-
-                                            <th>PRODUCTO</th>
-                                            <th>CANTIDAD</th>
-                                            <th>PRECIO</th>
-                                            <th>TOTAL VENDIDO</th>
-                                            <th>FECHA</th>
-                                        </tr>
-                                    </thead>
-
-
-                                </table>
-
-
-                            </div>
-
-
-                        </div>
-
-
-                    </div>
-
-
-
-                </div>
-
-
-            </div>
+            
 
 
             <div class="col-md-3">

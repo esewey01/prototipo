@@ -7,13 +7,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['id_usuario'])) {
         $con = new Conexion();
         
         // Actualizar estado de verificación
-        $verificado = isset($_POST['verificado']) ? 1 : 0;
-        
-        $query = "UPDATE USUARIOS SET verificado = ? WHERE id_usuario = ?";
-        $params = [$verificado, $_POST['id_usuario']];
-        
-        $resultado = $con->executeQuery($query, $params);
-        
+        $resultado = isset($_POST['verificado'], $_POST['id_usuario']) ;
+
         if ($resultado) {
             $_SESSION['mensaje'] = "Usuario actualizado correctamente";
             $_SESSION['alerta'] = "alert-success";

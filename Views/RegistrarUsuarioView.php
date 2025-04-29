@@ -2,6 +2,7 @@
 <html lang="es">
 
 <?php include('../Model/Conexion.php'); ?>
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,54 +16,62 @@
 
 </head>
 
-<body class="contenedor_login">
-    <div class="container">
-        <form class="login-form" action="/Prototipo/Controller/RegistrarUsuarioController.php" method="POST" enctype="multipart/form-data" id="registroForm">
-            <div class="login-wrap">
-                <h2 class="text-center">Registro de Usuario</h2>
+<?php
+session_start();
+if (isset($_SESSION['registration_messages'])) {
+    echo '<div class="alert alert-'.$_SESSION['registration_messages']['type'].'">';
+    echo $_SESSION['registration_messages']['text'];
+    echo '</div>';
+    unset($_SESSION['registration_messages']);
+}
+?>
+<div class="container">
+    <form class="login-form" action="/Prototipo/Controller/RegistrarUsuarioController.php" method="POST" enctype="multipart/form-data" id="registroForm">
+        <div class="login-wrap">
+            <h2 class="text-center">Registro de Usuario</h2>
 
-                <div class="input-group">
-                    <span class="input-group-addon"><i class="icon_id_alt"></i></span>
-                    <input type="text" name="nombre" class="form-control" placeholder="Nombre completo" required value="<?= htmlspecialchars($valores['nombre'] ?? '') ?>">
-                </div>
-
-                <div class="input-group">
-                    <span class="input-group-addon"><i class="icon_id"></i></span>
-                    <input type="number" min="200000000" max="3000000000" step="1" name="login" class="form-control" placeholder="Boleta" required value="<?= htmlspecialchars($valores['login'] ?? '') ?>">
-                </div>
-
-                <div class="input-group">
-                    <span class="input-group-addon"><i class="icon_key_alt"></i></span>
-                    <input type="password" name="password" class="form-control" placeholder="Contraseña" required value="<?= htmlspecialchars($valores['password'] ?? '') ?>">
-                </div>
-                <div class="input-group">
-                    <span class="input-group-addon"><i class="icon_key_alt"></i></span>
-                    <input type="password" name="password2" class="form-control" placeholder="Confirmar Contraseña" required value="<?= htmlspecialchars($valores['password2'] ?? '') ?>">
-                </div>
-
-                <div id="telefono-status" class="hidden"></div>
-                <div class="input-group">
-                    <span class="input-group-addon"><i class="icon_phone"></i></span>
-                    <input type="tel" name="telefono" id="telefono" class="form-control" placeholder="Telefono" required value="<?= htmlspecialchars($valores['telefono'] ?? '') ?>">
-                    <span class="input-group-btn">
-                        <button type="button" id="btn-verificar-telefono" class="btn btn-primary">Verificar</button>
-                    </span>
-                </div>
-                
-
-                <div class="input-group">
-                    <span class="input-group-addon"><i class="icon_image"></i></span>
-                    <input type="file" id="foto" name="foto" accept=".jpg,.jpeg,.png" class="form-control" placeholder="Imagen" >
-                </div>
-                <small>(Máximo 2MB, formatos: JPG, PNG)</small>
-
-                <button class="btn btn-primary btn-lg btn-block" type="submit" id="btn-registrarse" disabled>Registrarse</button>
-                <button class="btn btn-primary btn-lg btn-block" type="button" onclick="location.href='LoginView.php'">Volver</button>
+            <div class="input-group">
+                <span class="input-group-addon"><i class="icon_id_alt"></i></span>
+                <input type="text" name="nombre" class="form-control" placeholder="Nombre completo" required value="<?= htmlspecialchars($valores['nombre'] ?? '') ?>">
             </div>
-        </form>
-    </div>
 
-    <script>
+            <div class="input-group">
+                <span class="input-group-addon"><i class="icon_id"></i></span>
+                <input type="number" min="200000000" max="3000000000" step="1" name="login" class="form-control" placeholder="Boleta" required value="<?= htmlspecialchars($valores['login'] ?? '') ?>">
+            </div>
+
+            <div class="input-group">
+                <span class="input-group-addon"><i class="icon_key_alt"></i></span>
+                <input type="password" name="password" class="form-control" placeholder="Contraseña" required value="<?= htmlspecialchars($valores['password'] ?? '') ?>">
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon"><i class="icon_key_alt"></i></span>
+                <input type="password" name="password2" class="form-control" placeholder="Confirmar Contraseña" required value="<?= htmlspecialchars($valores['password2'] ?? '') ?>">
+            </div>
+
+            <div id="telefono-status" class="hidden"></div>
+            <div class="input-group">
+                <span class="input-group-addon"><i class="icon_phone"></i></span>
+                <input type="tel" name="telefono" id="telefono" class="form-control" placeholder="Telefono" required value="<?= htmlspecialchars($valores['telefono'] ?? '') ?>">
+                <span class="input-group-btn">
+                    <button type="button" id="btn-verificar-telefono" class="btn btn-primary">Verificar</button>
+                </span>
+            </div>
+
+
+            <div class="input-group">
+                <span class="input-group-addon"><i class="icon_image"></i></span>
+                <input type="file" id="foto" name="foto" accept=".jpg,.jpeg,.png" class="form-control" placeholder="Imagen">
+            </div>
+            <small>(Máximo 2MB, formatos: JPG, PNG)</small>
+
+            <button class="btn btn-primary btn-lg btn-block" type="submit" id="btn-registrarse">Registrarse</button>
+            <button class="btn btn-primary btn-lg btn-block" type="button" onclick="location.href='LoginView.php'">Volver</button>
+        </div>
+    </form>
+</div>
+
+<script>
     const btnVerificar = document.getElementById('btn-verificar-telefono');
     const telefonoInput = document.getElementById('telefono');
     const statusElement = document.getElementById('telefono-status');
@@ -70,7 +79,7 @@
 
     let telefonoValido = false;
 
-    btnVerificar.addEventListener('click', function () {
+    btnVerificar.addEventListener('click', function() {
         const telefono = telefonoInput.value;
 
         btnRegistrarse.disabled = true; // Por seguridad, lo deshabilitamos cada vez
@@ -121,4 +130,5 @@
 </script>
 
 </body>
+
 </html>

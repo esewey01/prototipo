@@ -41,6 +41,7 @@
                                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                     <span aria-hidden="true">×</span>
                                 </button>
+                                <strong><?= $_SESSION['ultima_actualizacion_perfil'][$id_usuario]?></strong>
                                 <strong><?= $_SESSION['mensaje'] ?></strong>
                             </div>
                         <?php
@@ -76,7 +77,7 @@
                                     <li class="active"><a href="#info" data-toggle="tab">Información</a></li>
                                     <li><a href="#password" data-toggle="tab">Contraseña</a></li>
                                     <li><a href="#social" data-toggle="tab">Redes Sociales</a></li>
-                                    <?php if ($id_rol['id_rol'] == 3 or $id_rol['id_rol']==2): ?>
+                                    <?php if ($id_rol['id_rol'] == 3 or $id_rol['id_rol'] == 2): ?>
                                         <li><a href="#seller" data-toggle="tab">Ser Vendedor</a></li>
                                     <?php endif; ?>
                                 </ul>
@@ -89,8 +90,12 @@
 
                                             <div class="form-group text-center">
                                                 <div class="col-sm-12">
-                                                    <img src="<?= URL_VIEWS . $user_data['foto_perfil'] ?>" alt="Usuario"
-                                                        class="img-circle profile-pic" id="profileImage" style="width: 150px; height: 150px;">
+                                                    <img src="<?= URL_VIEWS . (isset($user_data['foto_perfil']) ? $user_data['foto_perfil'] : '') ?>"
+                                                        alt="Usuario"
+                                                        class="img-circle profile-pic"
+                                                        id="profileImage"
+                                                        style="width: 150px; height: 150px;"
+                                                        onerror="this.onerror=null; this.src='<?= URL_VIEWS . 'fotoproducto/user.png' ?>'">
                                                     <div class="mt-2">
                                                         <label class="btn btn-primary">
                                                             Cambiar foto <input type="file" name="foto" id="fotoInput" style="display: none;" onchange="previewImage(this)">
@@ -116,14 +121,14 @@
                                             <div class="form-group">
                                                 <label class="col-sm-2 control-label">Nombre</label>
                                                 <div class="col-sm-10">
-                                                    <input type="text" name="nombre" class="form-control" value="<?= htmlspecialchars($user_data['nombre']) ?>" required>
+                                                    <input type="text" name="nombre" class="form-control" value="<?= htmlspecialchars($user_data['nombre']) ?>">
                                                 </div>
                                             </div>
 
                                             <div class="form-group">
                                                 <label class="col-sm-2 control-label">Apellido</label>
                                                 <div class="col-sm-10">
-                                                    <input type="text" name="apellido" class="form-control" value="<?= htmlspecialchars($user_data['apellido']) ?>">
+                                                    <input type="text" name="apellido" class="form-control" value="<?= htmlspecialchars($user_data['apellido']) ?>"required>
                                                 </div>
                                             </div>
 
@@ -137,7 +142,7 @@
                                             <div class="form-group">
                                                 <label class="col-sm-2 control-label">Dirección</label>
                                                 <div class="col-sm-10">
-                                                    <textarea name="direccion" class="form-control"><?= htmlspecialchars($user_data['direccion']) ?></textarea>
+                                                    <textarea name="direccion" class="form-control"><?= htmlspecialchars($user_data['direccion']) ?></textarea >
                                                 </div>
                                             </div>
 

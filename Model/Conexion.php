@@ -179,6 +179,13 @@ class Conexion
         return $result[0] ?? null;
     }
 
+    //FUNCION PARA HABILITAR LA VERIFICACION DEL USUARIO
+    public function verificarUsuario($id_usuario,$verificado){
+        $sql = "UPDATE USUARIOS SET verificado = ? WHERE id_usuario = ?";
+        $respuesta= $this->executeNonQuery($sql, array($verificado,$id_usuario));
+        return $this->getResults($respuesta); 
+    }
+
 
     //FUNCIONES PARA OBTENER EL ROL JUNTO CON EL USUARIO *TOODS LOSD DATOS
     public function getUserWithRole($login)
@@ -292,7 +299,8 @@ class Conexion
 
 
     // En tu clase Conexion.php
-    public function updateUserProfile($id_usuario, $data)
+    public function updateUserProfile($id_usuario, $email, $nombre, $apellido, $telefono, 
+    $direccion, $fecha_nacimiento, $genero, $foto_perfil)
     {
         $sql = "UPDATE USUARIOS SET 
                     email = ?,
@@ -306,18 +314,13 @@ class Conexion
                 WHERE id_usuario = ?";
 
         $params = array(
-            $data['email'],
-            $data['nombre'],
-            $data['apellido'],
-            $data['telefono'],
-            $data['direccion'],
-            $data['fecha_nacimiento'],
-            $data['genero'],
-            $data['foto_perfil'],
+            $email, $nombre, $apellido, $telefono, 
+    $direccion, $fecha_nacimiento, $genero, $foto_perfil,
             $id_usuario
         );
 
-        return $this->executeNonQuery($sql, $params);
+        $result= $this->executeNonQuery($sql, $params);
+        return $this->getResults($result);
     }
 
     public function updatePassword($id_usuario, $new_password)

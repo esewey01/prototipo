@@ -24,21 +24,37 @@ $rol_usuario = $_SESSION['usuario']['rol']['nombre_rol'];
 
 // Procesar formularios POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    
+
+    $id_usuario = $_SESSION['usuario']['id_usuario'];
+
+    // Verificar si existe la última fecha de modificación en la sesión
+    if (isset($_SESSION['ultima_actualizacion_perfil'][$id_usuario])) {
+        $ultima_actualizacion = strtotime($_SESSION['ultima_actualizacion_perfil'][$id_usuario]);
+        $ahora = time();
+        $diferencia_segundos = $ahora - $ultima_actualizacion;
+        $una_hora_en_segundos = 3600;
+
+        if ($diferencia_segundos < $una_hora_en_segundos) {
+            $_SESSION['mensaje'] = "Debes esperar una hora antes de poder actualizar tu perfil nuevamente.";
+            $_SESSION['alerta'] = "alert-warning";
+            header("Location: PerfilController.php"); // Redirige al usuario
+            exit();
+        }
+    }
+
     if (isset($_POST['action'])) {
         try {
             switch ($_POST['action']) {
                 case 'update_profile':
                     $data = [
-
-                        'email' => trim($_POST['email']),
-                        'nombre' => trim($_POST['nombre']),
-                        'apellido' => trim($_POST['apellido']),
-                        'telefono' => trim($_POST['telefono']),
-                        'direccion' => trim($_POST['direccion']),
-                        'fecha_nacimiento' => !empty($_POST['fecha_nacimiento']) ? $_POST['fecha_nacimiento'] : null,
+                        'email' => trim($_POST['email'] ?? null),
+                        'nombre' => trim($_POST['nombre'] ?? null),
+                        'apellido' => trim($_POST['apellido'] ?? null),
+                        'telefono' => trim($_POST['telefono'] ?? null),
+                        'direccion' => trim($_POST['direccion'] ?? null),
+                        'fecha_nacimiento' => $_POST['fecha_nacimiento'] ?? null,
                         'genero' => $_POST['genero'] ?? null,
-                        'foto_perfil' => $_SESSION['usuario']['foto'] // Mantener por defecto
+                        'foto_perfil' => $_SESSION['usuario']['foto'] // Valor por defecto
                     ];
 
                     // Manejo de la imagen
@@ -49,11 +65,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         if (move_uploaded_file($_FILES['foto']['tmp_name'], $uploadFile)) {
                             $data['foto_perfil'] = $foto;
-                            $_SESSION['usuario']['foto'] = $foto;
                         }
                     }
 
-                    $con->updateUserProfile($id_usuario, $data);
+                    $result = $con->updateUserProfile(
+                        $id_usuario,
+                        $data['email'],
+                        $data['nombre'],
+                        $data['apellido'],
+                        $data['telefono'],
+                        $data['direccion'],
+                        $data['fecha_nacimiento'],
+                        $data['genero'],
+                        $data['foto_perfil']
+                    );
+
+
+                    if ($resutl === false) {
+                        throw new Exception("Error al actualizar el perfil");
+                    }
 
                     // Actualizar datos en sesión
                     $_SESSION['usuario']['email'] = $data['email'];
@@ -65,6 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['usuario']['genero'] = $data['genero'];
 
 
+                    $_SESSION['ultima_actualizacion_perfil'][$id_usuario] = date('Y-m-d H:i:s');
                     $_SESSION['mensaje'] = "Elementos actualizados correctamente";
                     $_SESSION['alerta'] = "alert-success";
                     header("Location: PerfilController.php");
@@ -89,14 +120,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
 
                     $con->updatePassword($id_usuario, $new_password);
+                    $_SESSION['ultima_actualizacion_perfil'][$id_usuario] = date('Y-m-d H:i:s');
                     $_SESSION['mensaje'] = "Contraseña actualizada";
                     $_SESSION['alerta'] = "alert-success";
                     header("Location: PerfilController.php");
                     exit();
                     break;
-                    
-                    
-                    
+
+
+
 
                 case 'update_social':
                     // Actualización de redes sociales común a todos los roles
@@ -142,12 +174,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         }
 
                         $con->createSellerRequest($id_usuario, $id_categoria, $descripcion);
+                        $_SESSION['ultima_actualizacion_perfil'][$id_usuario] = date('Y-m-d H:i:s');
                         $_SESSION['mensaje'] = "SOLICITUD CREADA CORRECTAMENTE";
                         $_SESSION['alerta'] = "alert-success";
                         header("Location: PerfilController.php");
                         exit();
                         break;
-                    
+
 
                         exit();
                     } else {
@@ -162,9 +195,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['mensaje'] = "Error: " . $e->getMessage();
             $_SESSION['alerta'] = "alert-danger";
         }
-        
     }
-    
 }
 
 
@@ -215,5 +246,3 @@ if (strtolower($rol_usuario) === 'cliente') {
 
 
 require('../Views/Perfil.php');
-
-

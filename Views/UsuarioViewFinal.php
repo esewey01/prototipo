@@ -50,7 +50,7 @@
                     <ol class="breadcrumb">
                     <li><i class="fa fa-home"></i><a href="PrincipalController.php">Inicio</a></li>
                     <li><i class="fa fa-users"></i><a href="UsuariosController.php">Administrar Usuarios</a></li>
-                    <li><i class="fa fa-edit"></i><a href="PrincipalController.php">Agregar Usuarios</a></li>
+                    <li><i class="fa fa-edit"></i><a href="#addUser" title="" data-toggle="modal">Agregar Usuarios</a></li>
                         <!--?php include("MenuOpcionesConfiguracion.php"); ?-->
                     </ol>
                 </div>

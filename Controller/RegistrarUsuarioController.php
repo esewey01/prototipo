@@ -134,6 +134,26 @@ class UserRegistrationController {
         if ($password !== $password2) {
             $this->errors[] = "Las contraseñas no coinciden";
         }
+        $minLength = 8;
+        if (strlen($password) < $minLength) {
+            $this->errors[] = "La contraseña debe tener al menos " . $minLength . " caracteres";
+        }
+
+        if (!preg_match('/[A-Z]/', $password)) {
+            $this->errors[] = "La contraseña debe contener al menos una letra mayúscula";
+        }
+
+        if (!preg_match('/[a-z]/', $password)) {
+            $this->errors[] = "La contraseña debe contener al menos una letra minúscula";
+        }
+
+        if (!preg_match('/[0-9]/', $password)) {
+            $this->errors[] = "La contraseña debe contener al menos un número";
+        }
+
+        if (!preg_match('/[^a-zA-Z0-9\s]/', $password)) {
+            $this->errors[] = "La contraseña debe contener al menos un carácter especial";
+        }
     }
     
     private function processPhotoUpload(&$userData) {
@@ -204,20 +224,23 @@ class UserRegistrationController {
     }
     
     private function showMessages($isSuccess) {
-        $messageText = implode('\n', $isSuccess ? $this->messages : $this->errors);
-        $redirectUrl = $isSuccess ? '../Views/LoginView.php' : '../Views/RegistrarUsuarioView.php';
+        $_SESSION['registration_messages'] = [
+            'text' => implode('<br>', $isSuccess ? $this->messages : $this->errors),
+            'type' => $isSuccess ? 'success' : 'danger'
+        ];
         
-        echo '<script>
-            alert("' . $messageText . '");
-            window.location.href = "' . $redirectUrl . '";
-        </script>';
+        $redirectUrl = $isSuccess ? '../Views/LoginView.php' : '../Views/RegistrarUsuarioView.php';
+        header("Location: $redirectUrl");
+        exit();
     }
     
     private function redirectWithError($message, $url) {
-        echo '<script>
-            alert("' . $message . '");
-            window.location.href = "' . $url . '";
-        </script>';
+        $_SESSION['registration_messages'] = [
+            'texto' => $message,
+            'tipo' => 'danger'
+        ];
+        header("Location: $url");
+        exit();
     }
 }
 

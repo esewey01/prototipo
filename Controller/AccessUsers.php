@@ -83,7 +83,7 @@ class AuthController {
             'telefono' => $usuario['telefono'],
             'direccion' => $usuario['direccion'],
             'genero' => $usuario['genero'],
-            'fecha_nacimiento' => $usuario['fecha_nacimiento']->format('Y-m-d'),
+           'fecha_nacimiento' => ($usuario['fecha_nacimiento'] instanceof DateTime) ? $usuario['fecha_nacimiento']->format('Y-m-d') : '',
             'foto' => $usuario['foto_perfil'],
             'fecha_registro' => $usuario['fecha_registro']->format('Y-m-d H:i:s'),
             'ultimo_registro' => $usuario['ultimo_registro'] ?? ' ',
