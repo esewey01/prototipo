@@ -261,17 +261,6 @@ INSERT INTO PRODUCTOS (
 ( 4,4,    'Coca Cola 500 gr', 'Coca Cola 500 gr', 0, 7.00, 6.00, 'fotoproducto/cocacola.jpg', '2020-06-12', 'ACTIVO'),
 ( 4,4,   'Pepsi de 500 ml', 'Pepsi de 500 ml', 0, 12.00, 11.00, 'fotoproducto/pepsi.jpg', '2020-07-06', 'ACTIVO');
 
-UPDATE PRODUCTO SET 
-            id_categoria = ?,
-            codigo = ?,
-            nombre_producto = ?,
-            descripcion = ?,
-            cantidad = ?,
-            precio_venta = ?,
-            precio_compra = ?,
-            fecha_registro = GETDATE()
-            where id_producto=
-
 
 --TABLA PARA REPORTES DE PRODUCTOS DEL USUARIO
 CREATE TABLE REPORTES (
@@ -291,88 +280,13 @@ CREATE TABLE REPORTES (
 );
 
 
-
---TABLA DE CARRITOS
--- TABLA PARA EL CARRITO DE COMPRAS
-CREATE TABLE CARRITO (
-    id_carrito INT IDENTITY(1,1) PRIMARY KEY,
-    id_usuario INT NOT NULL,
-    fecha_creacion DATETIME DEFAULT GETDATE(),
-    FOREIGN KEY (id_usuario) REFERENCES USUARIOS(id_usuario)
-);
-
--- TABLA PARA LOS ITEMS DEL CARRITO
-CREATE TABLE CARRITO_ITEMS (
-    id_item INT IDENTITY(1,1) PRIMARY KEY,
-    id_carrito INT NOT NULL,
-    id_producto INT NOT NULL,
-    cantidad INT NOT NULL DEFAULT 1,
-    precio_unitario DECIMAL(10,2) NOT NULL,
-    FOREIGN KEY (id_carrito) REFERENCES CARRITO(id_carrito) ON DELETE CASCADE,
-    FOREIGN KEY (id_producto) REFERENCES PRODUCTOS(id_producto)
-);
-
--- TABLA PARA ÓRDENES DE COMPRA
-CREATE TABLE ORDENES (
-    id_orden INT IDENTITY(1,1) PRIMARY KEY,
-    id_usuario INT NOT NULL,
-    id_vendedor INT NOT NULL,
-    fecha_orden DATETIME DEFAULT GETDATE(),
-    estado VARCHAR(20) DEFAULT 'PENDIENTE' CHECK (estado IN ('PENDIENTE', 'PROCESANDO', 'ENVIADO', 'ENTREGADO', 'CANCELADO')),
-    total DECIMAL(10,2) NOT NULL,
-    direccion_envio VARCHAR(255),
-    notas TEXT,
-    FOREIGN KEY (id_usuario) REFERENCES USUARIOS(id_usuario),
-    FOREIGN KEY (id_vendedor) REFERENCES USUARIOS(id_usuario)
-);
-
--- TABLA PARA DETALLES DE ÓRDENES
-CREATE TABLE ORDEN_DETALLES (
-    id_detalle INT IDENTITY(1,1) PRIMARY KEY,
-    id_orden INT NOT NULL,
-    id_producto INT NOT NULL,
-    cantidad INT NOT NULL,
-    precio_unitario DECIMAL(10,2) NOT NULL,
-    FOREIGN KEY (id_orden) REFERENCES ORDENES(id_orden) ON DELETE CASCADE,
-    FOREIGN KEY (id_producto) REFERENCES PRODUCTOS(id_producto)
-);
-
--- TABLA PARA MENSAJES
-CREATE TABLE MENSAJES (
-    id_mensaje INT IDENTITY(1,1) PRIMARY KEY,
-    id_remitente INT NOT NULL,
-    id_destinatario INT NOT NULL,
-    id_orden INT NULL,
-    asunto VARCHAR(100),
-    mensaje TEXT NOT NULL,
-    fecha_envio DATETIME DEFAULT GETDATE(),
-    leido BIT DEFAULT 0,
-    FOREIGN KEY (id_remitente) REFERENCES USUARIOS(id_usuario),
-    FOREIGN KEY (id_destinatario) REFERENCES USUARIOS(id_usuario),
-    FOREIGN KEY (id_orden) REFERENCES ORDENES(id_orden)
-);
-
--- TABLA PARA VALORACIONES
-CREATE TABLE VALORACIONES (
-    id_valoracion INT IDENTITY(1,1) PRIMARY KEY,
-    id_orden INT NOT NULL,
-    id_producto INT NOT NULL,
-    id_usuario INT NOT NULL,
-    id_vendedor INT NOT NULL,
-    calificacion INT CHECK (calificacion BETWEEN 1 AND 5),
-    comentario TEXT,
-    fecha_valoracion DATETIME DEFAULT GETDATE(),
-    respuesta_vendedor TEXT,
-    fecha_respuesta DATETIME,
-    FOREIGN KEY (id_orden) REFERENCES ORDENES(id_orden),
-    FOREIGN KEY (id_producto) REFERENCES PRODUCTOS(id_producto),
-    FOREIGN KEY (id_usuario) REFERENCES USUARIOS(id_usuario),
-    FOREIGN KEY (id_vendedor) REFERENCES USUARIOS(id_usuario)
-);
-
-
-
-
 delete SOLICITUDES_VENDEDOR
 USE UPIICSAFOOD
 SELECT*FROM USUARIOS
+
+
+SELECT p.*, u.nombre as nombre_vendedor, c.nombre_categoria
+            FROM PRODUCTOS p
+            JOIN USUARIOS u ON p.id_usuario = u.id_usuario
+            JOIN CATEGORIAS c ON p.id_categoria = c.id_categoria
+            WHERE p.id_producto = 1

@@ -150,7 +150,7 @@
 
                                 <div class="btn-group btn-group-justified mt-2">
                                     <a href="#" class="btn btn-sm btn-primary btn-ver-detalle"
-                                        data-id="<?= $producto['id_producto'] ?>">
+                                        data-id="<?= $producto['id_producto'] ?>" style="width:60px;">
                                         <i class="fa fa-eye"></i> Ver
                                     </a>
                                     <button class="btn btn-sm btn-success add-to-cart"
@@ -295,32 +295,41 @@
             }
         });
         // En tu ComprarView.php o donde listas los productos
-        $(document).on('click', '.btn-ver-detalle', function(e) {
+        $('.btn-ver-detalle').click(function(e) {
             e.preventDefault();
             const idProducto = $(this).data('id');
+            const modal = $('#productoDetalleModal');
 
-            // Mostrar spinner de carga
-            $('#productoDetalleModal .modal-body').html(`
-            <div class="text-center py-5">
-                <i class="fa fa-spinner fa-spin fa-3x"></i>
-                <p>Cargando detalles del producto...</p>
-            </div>
-        `);
+            modal.find('.modal-body').html(`
+        <div class="text-center py-5">
+            <i class="fa fa-spinner fa-spin fa-3x"></i>
+            <p>Cargando detalles del producto...</p>
+        </div>
+    `);
 
-            // Mostrar modal
-            $('#productoDetalleModal').modal('show');
+            modal.modal('show');
 
-            // Cargar contenido via AJAX
-            $.get('ComprarController.php?action=detalle&id=' + idProducto, function(data) {
-                $('#productoDetalleModal .modal-body').html(data);
-            }).fail(function() {
-                $('#productoDetalleModal .modal-body').html(`
+            $.ajax({
+                url: 'ComprarController.php?action=detalle&id=' + idProducto,
+                type: 'GET',
+                success: function(data) {
+                    modal.find('.modal-body').html(data);
+                },
+                error: function(xhr) {
+                    let errorMsg = 'Error al cargar los detalles';
+                    if (xhr.responseText) {
+                        errorMsg += ': ' + xhr.responseText.substring(0, 100);
+                    }
+                    modal.find('.modal-body').html(`
                 <div class="alert alert-danger">
-                    Error al cargar los detalles del producto.
+                    ${errorMsg}
+                    <button class="btn btn-sm btn-default" onclick="window.location.reload()">
+                        Recargar
+                    </button>
                 </div>
             `);
+                }
             });
-
         });
     </script>
 </body>

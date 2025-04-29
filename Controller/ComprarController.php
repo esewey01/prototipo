@@ -20,6 +20,29 @@ class ProductosController {
     
     public function detalle($id_producto) {
         $producto = $this->con->getProductoById($id_producto);
+        //funcion de prueba
+        if ($this->isAjaxRequest()) {
+            if (!$producto) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Producto no encontrado']);
+                exit;
+            }
+            $valoraciones = $this->con->getValoracionesProducto($id_producto);
+        
+            // Variables necesarias para la vista
+            //$URL_VIEWS = URL_VIEWS; // Asegúrate de definir esto en Constants.php
+            
+            // Capturar el output del include
+            ob_start();
+            include '../Views/ProductoDetalle.php';
+            $html = ob_get_clean();
+            
+            // Limpiar buffer y devolver HTML
+            ob_end_clean();
+            echo $html;
+            exit;
+        }
+    
         
         if ($producto) {
             // Si es una petición AJAX, devolver JSON
@@ -36,23 +59,7 @@ class ProductosController {
                 }
             }
             
-            $valoraciones = $this->con->getValoracionesProducto($id_producto);
-
-            if ($this->isAjaxRequest()) {
-                // Renderizar la vista de detalle y devolverla como HTML
-                ob_start();
-                include '../Views/ProductoDetalle.php';
-                $html = ob_get_clean();
-                echo $html;
-                exit;
-            } else {
-                include '../Views/ProductoDetalle.php';
-            }
-            echo json_encode([
-                'success' => true,
-                'producto' => $producto,
-                'valoraciones' => $valoraciones
-            ]);
+           
             exit;
         } else {
             // Petición normal (sin JS), cargar la vista completa
