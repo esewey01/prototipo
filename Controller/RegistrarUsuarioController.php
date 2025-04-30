@@ -133,7 +133,7 @@ class UserRegistrationController {
     private function validatePasswords($password, $password2) {
         if ($password !== $password2) {
             $this->errors[] = "Las contraseñas no coinciden";
-        }
+        }/*
         $minLength = 8;
         if (strlen($password) < $minLength) {
             $this->errors[] = "La contraseña debe tener al menos " . $minLength . " caracteres";
@@ -153,7 +153,7 @@ class UserRegistrationController {
 
         if (!preg_match('/[^a-zA-Z0-9\s]/', $password)) {
             $this->errors[] = "La contraseña debe contener al menos un carácter especial";
-        }
+        }*/
     }
     
     private function processPhotoUpload(&$userData) {
@@ -181,7 +181,7 @@ class UserRegistrationController {
         }
         
         $extension = pathinfo($foto['name'], PATHINFO_EXTENSION);
-        $userData['fotoPath'] = 'uploads/' . uniqid() . '.' . $extension;
+        $userData['fotoPath'] = '../Views/fotoproducto/' . uniqid() . '.' . $extension;
         
         if (!move_uploaded_file($foto['tmp_name'], $userData['fotoPath'])) {
             $this->errors[] = "Error al guardar la imagen";

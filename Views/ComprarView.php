@@ -71,7 +71,7 @@
         <section class="wrapper">
             <div class="row">
                 <div class="col-lg-12">
-                    <h3 class="page-header"><i class="fa fa-shopping-bag"></i> PRODUCTOS DISPONIBLES</h3>
+                    <h3 class="page-header"><i class="icon_tag_alt"></i> PRODUCTOS DISPONIBLES</h3>
 
                     <!--FUNCION DE ALERTA DE MENSAJES-->
                     <?php if (isset($_SESSION['mensaje'])): ?>
@@ -88,8 +88,9 @@
 
                     <ol class="breadcrumb">
                         <li><i class="fa fa-home"></i><a href="PrincipalController.php">Inicio</a></li>
-                        <li><i class="icon_tag_alt"></i><a href="ComprarController.php">Productos</a></li>
+                        <li><i class="icon_creditcard"></i><a href="ComprarController.php">Productos</a></li>
                         <li><i class="icon_cart_alt"></i><a href="CarritoController.php">Carrito</a></li>
+                        <li><i class="icon_wallet_alt"></i><a href="PagarController.php">Pagar</a></li>
                     </ol>
                 </div>
             </div>
@@ -154,9 +155,11 @@
                                         <i class="fa fa-eye"></i> Ver
                                     </a>
                                     <button class="btn btn-sm btn-success add-to-cart"
-                                        data-id="<?= $producto['id_producto'] ?>" style="width: 60px;">
-                                        <i class="fa fa-cart-plus"></i> Añadir
+                                        data-id="<?= $producto['id_producto'] ?>" style="width: 80px;">
+                                        <i class="fa fa-shopping-cart"></i>
+                                        <span class="cart-text">Añadir</span>
                                     </button>
+
                                 </div>
                             </div>
                         </div>
@@ -215,121 +218,105 @@
                     $(this).css('box-shadow', 'none');
                 }
             );
+            // Ver detalle del producto
+            $(document).on('click', '.btn-ver-detalle', function(e) {
+                e.preventDefault();
+                const idProducto = $(this).data('id');
+                const modal = $('#productoDetalleModal');
 
-            // Función para añadir al carrito
-            $('.add-to-cart').click(function() {
-                var id = $(this).data('id');
-                var button = $(this);
+                modal.find('.modal-body').html(`
+                    <div class="text-center py-5">
+                        <i class="fa fa-spinner fa-spin fa-3x"></i>
+                        <p>Cargando detalles del producto...</p>
+                    </div>
+                `);
 
-                button.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Procesando');
+                modal.modal('show');
 
                 $.ajax({
-                    url: 'CarritoController.php?action=agregar',
-                    method: 'POST',
-                    data: {
-                        id_producto: id,
-                        cantidad: 1
+                    url: 'ComprarController.php?action=detalle&id=' + idProducto,
+                    type: 'GET',
+                    success: function(data) {
+                        modal.find('.modal-body').html(data);
                     },
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.success) {
-                            // Mostrar notificación de éxito
-                            $.notify({
-                                icon: 'fa fa-check',
-                                message: response.message
-                            }, {
-                                type: 'success',
-                                delay: 3000,
-                                placement: {
-                                    from: "top",
-                                    align: "right"
-                                }
-                            });
-
-                            // Actualizar contador del carrito
-                            updateCartCount();
-                        } else {
-                            // Mostrar notificación de error
-                            $.notify({
-                                icon: 'fa fa-exclamation-triangle',
-                                message: response.message
-                            }, {
-                                type: 'danger',
-                                delay: 5000,
-                                placement: {
-                                    from: "top",
-                                    align: "right"
-                                }
-                            });
-
-                            // Redirigir a login si es necesario
-                            if (response.message.includes('sesión')) {
-                                setTimeout(function() {
-                                    window.location.href = 'login.php';
-                                }, 1500);
-                            }
+                    error: function(xhr) {
+                        let errorMsg = 'Error al cargar los detalles';
+                        if (xhr.responseText) {
+                            errorMsg += ': ' + xhr.responseText.substring(0, 100);
                         }
-                    },
-                    error: function() {
-                        $.notify({
-                            icon: 'fa fa-exclamation-circle',
-                            message: 'Error al procesar la solicitud'
-                        }, {
-                            type: 'danger',
-                            delay: 3000
-                        });
-                    },
-                    complete: function() {
-                        button.prop('disabled', false).html('<i class="fa fa-cart-plus"></i> Añadir');
+                        modal.find('.modal-body').html(`
+                        <div class="alert alert-danger">
+                            ${errorMsg}
+                            <button class="btn btn-sm btn-default" onclick="window.location.reload()">
+                                Recargar
+                            </button>
+                        </div>
+                        `);
                     }
                 });
             });
-
-            // Función para actualizar el contador del carrito
-            function updateCartCount() {
-                $.get('CarritoController.php?action=count', function(response) {
-                    $('#cart-count').text(response.count || 0);
-                }).fail(function() {
-                    console.error('Error al actualizar el contador del carrito');
-                });
-            }
         });
-        // En tu ComprarView.php o donde listas los productos
-        $('.btn-ver-detalle').click(function(e) {
-            e.preventDefault();
-            const idProducto = $(this).data('id');
-            const modal = $('#productoDetalleModal');
 
-            modal.find('.modal-body').html(`
-        <div class="text-center py-5">
-            <i class="fa fa-spinner fa-spin fa-3x"></i>
-            <p>Cargando detalles del producto...</p>
-        </div>
-    `);
-
-            modal.modal('show');
-
+        // Función para actualizar el contador del carrito
+        function actualizarContadorCarrito() {
             $.ajax({
-                url: 'ComprarController.php?action=detalle&id=' + idProducto,
+                url: 'CarritoController.php?action=contador',
                 type: 'GET',
-                success: function(data) {
-                    modal.find('.modal-body').html(data);
+                success: function(response) {
+                    $('#header-cart-count').text(response.total || 0);
                 },
-                error: function(xhr) {
-                    let errorMsg = 'Error al cargar los detalles';
-                    if (xhr.responseText) {
-                        errorMsg += ': ' + xhr.responseText.substring(0, 100);
-                    }
-                    modal.find('.modal-body').html(`
-                <div class="alert alert-danger">
-                    ${errorMsg}
-                    <button class="btn btn-sm btn-default" onclick="window.location.reload()">
-                        Recargar
-                    </button>
-                </div>
-            `);
+                error: function() {
+                    console.error('Error al obtener contador del carrito');
                 }
             });
+        }
+
+        // Añadir producto al carrito
+        $(document).on('click', '.add-to-cart', function(e) {
+            e.preventDefault();
+            const idProducto = $(this).data('id');
+            const boton = $(this);
+
+            // Guardar el estado original del botón
+            const originalText = boton.find('.cart-text').text();
+            const originalClass = boton.attr('class');
+
+            // Mostrar feedback visual
+            boton.prop('disabled', true);
+            boton.find('.cart-text').text('Añadiendo...');
+
+            $.ajax({
+                url: 'CarritoController.php?action=agregar',
+                type: 'POST',
+                dataType: 'json', // Asegurarnos de recibir JSON
+                data: {
+                    id_producto: idProducto
+                },
+                success: function(response) {
+                    if (response.success) {
+                        boton.find('.cart-text').text('Añadido');
+                        boton.removeClass('btn-success').addClass('btn-info');
+                        actualizarContadorCarrito();
+
+                        // Mostrar notificación
+                        toastr.success('Producto añadido al carrito');
+                    } else {
+                        toastr.error(response.message || 'Error al añadir al carrito');
+                        boton.find('.cart-text').text('Añadir');
+                        boton.prop('disabled', false);
+                    }
+                },
+                error: function(xhr) {
+                    toastr.error('Error en la conexión');
+                    boton.find('.cart-text').text('Añadir');
+                    boton.prop('disabled', false);
+                }
+            });
+        });
+
+        // Actualizar contador al cargar la página
+        $(document).ready(function() {
+            actualizarContadorCarrito();
         });
     </script>
 </body>

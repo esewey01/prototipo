@@ -61,14 +61,21 @@
 
                     <ol class="breadcrumb">
                         <li>
-                            <i class="fa fa-home"></i><a href="principal.php?usuario=<?php echo $usuario; ?>&password=<?php echo $password; ?>">Inicio</a>
+                            <i class="fa fa-home"></i><a href="PrincipalController.php?>">Inicio</a>
                         </li>
                         <li>
-                            <i class="fa fa-inbox"></i><a href="Producto.php?usuario=<?php echo $usuario; ?>&password=<?php echo $password; ?>">Producto</a>
+                            <i class="fa fa-inbox"></i><a href="ProductoController.php?>">Producto</a>
                         </li>
+                        <?php if ($id_rol == 2): ?>
                         <li>
-                            <i class="fa fa-plus"></i><a href="TipoProducto.php?usuario=<?php echo $usuario; ?>&password=<?php echo $password; ?>">Registrar Tipo Producto</a>
+                            <i class="fa fa-plus"></i><a href="#add>">Registrar Tipo Producto</a>
                         </li>
+                        <?php endif; ?>
+                        <?php if ($id_rol == 1): ?>
+                        <li>
+                            <i class="fa fa-plus"></i><a>Reportar Producto</a>
+                        </li>
+                        <?php endif; ?>
                     </ol>
                 </div>
             </div>

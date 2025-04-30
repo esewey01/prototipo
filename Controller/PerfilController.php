@@ -59,12 +59,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     // Manejo de la imagen
                     if (!empty($_FILES['foto']['name'])) {
-                        $uploadDir = '../fotoproducto/';
-                        $foto = 'user_' . $id_usuario . '_' . time() . '_' . basename($_FILES['foto']['name']);
+                        $uploadDir = '../Views/fotoproducto/';
+                        $foto = 'user_' . $id_usuario . '_' . time() 
+                        . '_' . basename($_FILES['foto']['name']);
                         $uploadFile = $uploadDir . $foto;
 
                         if (move_uploaded_file($_FILES['foto']['tmp_name'], $uploadFile)) {
-                            $data['foto_perfil'] = $foto;
+                            $data['foto_perfil'] = "fotoproducto/".$foto;
                         }
                     }
 

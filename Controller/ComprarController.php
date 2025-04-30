@@ -27,7 +27,7 @@ class ProductosController {
                 echo json_encode(['success' => false, 'message' => 'Producto no encontrado']);
                 exit;
             }
-            $valoraciones = $this->con->getValoracionesProducto($id_producto);
+            //$valoraciones = $this->con->getValoracionesProducto($id_producto);
         
             // Variables necesarias para la vista
             //$URL_VIEWS = URL_VIEWS; // Asegúrate de definir esto en Constants.php
@@ -68,18 +68,18 @@ class ProductosController {
                 exit;
             }
             
-            $valoraciones = $this->con->getValoracionesProducto($id_producto);
+            //$valoraciones = $this->con->getValoracionesProducto($id_producto);
             include '../Views/ProductoDetalle.php';
         }
     }
     
     public function getValoraciones($id_producto) {
         header('Content-Type: application/json');
-        $valoraciones = $this->con->getValoracionesProducto($id_producto);
+        /*$valoraciones = $this->con->getValoracionesProducto($id_producto);
         echo json_encode([
             'success' => true,
             'data' => $valoraciones
-        ]);
+        ]);*/
         exit;
     }
 

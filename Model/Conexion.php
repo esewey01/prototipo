@@ -180,10 +180,11 @@ class Conexion
     }
 
     //FUNCION PARA HABILITAR LA VERIFICACION DEL USUARIO
-    public function verificarUsuario($id_usuario,$verificado){
+    public function verificarUsuario($id_usuario, $verificado)
+    {
         $sql = "UPDATE USUARIOS SET verificado = ? WHERE id_usuario = ?";
-        $respuesta= $this->executeNonQuery($sql, array($verificado,$id_usuario));
-        return $this->getResults($respuesta); 
+        $respuesta = $this->executeNonQuery($sql, array($verificado, $id_usuario));
+        return $this->getResults($respuesta);
     }
 
 
@@ -298,10 +299,18 @@ class Conexion
 
 
 
-    // En tu clase Conexion.php
-    public function updateUserProfile($id_usuario, $email, $nombre, $apellido, $telefono, 
-    $direccion, $fecha_nacimiento, $genero, $foto_perfil)
-    {
+    // ACTUALIZAR PERFIL
+    public function updateUserProfile(
+        $id_usuario,
+        $email,
+        $nombre,
+        $apellido,
+        $telefono,
+        $direccion,
+        $fecha_nacimiento,
+        $genero,
+        $foto_perfil
+    ) {
         $sql = "UPDATE USUARIOS SET 
                     email = ?,
                     nombre = ?,
@@ -314,13 +323,19 @@ class Conexion
                 WHERE id_usuario = ?";
 
         $params = array(
-            $email, $nombre, $apellido, $telefono, 
-    $direccion, $fecha_nacimiento, $genero, $foto_perfil,
+            $email,
+            $nombre,
+            $apellido,
+            $telefono,
+            $direccion,
+            $fecha_nacimiento,
+            $genero,
+            $foto_perfil,
             $id_usuario
         );
 
-        $result= $this->executeNonQuery($sql, $params);
-        return $this->getResults($result);
+        $result = $this->executeNonQuery($sql, $params);
+        return $result;
     }
 
     public function updatePassword($id_usuario, $new_password)
@@ -689,188 +704,189 @@ class Conexion
         return $this->getResults($stmt)[0] ?? null;
     }
 
-    /*FUNCIONES DE CARRITOS*/ 
-    // PRODUCTOS
-public function getProductosByCategoria($id_categoria = null) {
-    $sql = "SELECT p.*, u.nombre as nombre_vendedor, c.nombre_categoria
+    
+    //FUNCUINES PARA LOSS PRODUCTOS
+    public function getProductosByCategoria($id_categoria = null)
+    {
+        $sql = "SELECT p.*, u.nombre as nombre_vendedor, c.nombre_categoria
             FROM PRODUCTOS p
             JOIN USUARIOS u ON p.id_usuario = u.id_usuario
             JOIN CATEGORIAS c ON p.id_categoria = c.id_categoria
             WHERE p.estado = 'ACTIVO' AND (? IS NULL OR p.id_categoria = ?)";
-    
-    $params = $id_categoria ? [$id_categoria, $id_categoria] : [null, null];
-    $stmt = $this->executeQuery($sql, $params);
-    return $this->getResults($stmt);
-}
 
-public function getProductoById($id_producto) {
-    $sql = "SELECT p.*, u.nombre as nombre_vendedor, c.nombre_categoria
+        $params = $id_categoria ? [$id_categoria, $id_categoria] : [null, null];
+        $stmt = $this->executeQuery($sql, $params);
+        return $this->getResults($stmt);
+    }
+
+    public function getProductoById($id_producto)
+    {
+        $sql = "SELECT p.*, u.nombre as nombre_vendedor, c.nombre_categoria
             FROM PRODUCTOS p
             JOIN USUARIOS u ON p.id_usuario = u.id_usuario
             JOIN CATEGORIAS c ON p.id_categoria = c.id_categoria
             WHERE p.id_producto = ?";
-    
-    $stmt = $this->executeQuery($sql, [$id_producto]);
-    return $this->getResults($stmt)[0] ?? null;
-}
 
-// CARRITO
-public function getOrCreateCarrito($id_usuario) {
-    // Buscar carrito activo
-    $sql = "SELECT * FROM CARRITO WHERE id_usuario = ?";
-    $carrito = $this->getRow($sql, [$id_usuario]);
-    
-    if (!$carrito) {
-        // Crear nuevo carrito
-        $sql = "INSERT INTO CARRITO (id_usuario) OUTPUT INSERTED.id_carrito VALUES (?)";
+        $stmt = $this->executeQuery($sql, [$id_producto]);
+        return $this->getResults($stmt)[0] ?? null;
+    }
+
+    /*FUNCIONES DE CARRITOS*/
+    public function obtenerCarritoActivo($id_usuario)
+    {
+        $sql = "SELECT id_carrito FROM CARRITO 
+            WHERE id_usuario = ? AND estado = 'ACTIVO'";
         $stmt = $this->executeQuery($sql, [$id_usuario]);
         $result = $this->getResults($stmt);
-        return $result[0]['id_carrito'];
-    }
-    
-    return $carrito['id_carrito'];
-}
 
-public function addToCarrito($id_carrito, $id_producto, $cantidad) {
-    $producto = $this->getProductoById($id_producto);
-    if (!$producto) return false;
-    
-    // Verificar si ya existe en el carrito
-    $sql = "SELECT * FROM CARRITO_ITEMS 
+        if (!empty($result)) {
+            return $result[0]['id_carrito'];
+        } else {
+            // Crear nuevo carrito si no existe
+            $sql = "INSERT INTO CARRITO (id_usuario) OUTPUT INSERTED.id_carrito VALUES (?)";
+            $stmt = $this->executeQuery($sql, [$id_usuario]);
+            $result = $this->getResults($stmt);
+            return $result[0]['id_carrito'];
+        }
+    }
+
+    public function agregarProductoCarrito($id_usuario, $id_producto, $cantidad = 1)
+    {
+        // Obtener precio actual del producto
+        $producto = $this->getProductoById($id_producto);
+        if (!$producto) {
+            throw new Exception("Producto no encontrado");
+        }
+
+        $id_carrito = $this->obtenerCarritoActivo($id_usuario);
+
+        // Verificar si el producto ya está en el carrito
+        $sql = "SELECT id_detalle, cantidad FROM DETALLE_CARRITO 
             WHERE id_carrito = ? AND id_producto = ?";
-    $existente = $this->getRow($sql, [$id_carrito, $id_producto]);
-    
-    if ($existente) {
-        // Actualizar cantidad
-        $sql = "UPDATE CARRITO_ITEMS SET cantidad = cantidad + ? 
-                WHERE id_item = ?";
-        return $this->executeNonQuery($sql, [$cantidad, $existente['id_item']]);
-    } else {
-        // Agregar nuevo item
-        $sql = "INSERT INTO CARRITO_ITEMS 
-                (id_carrito, id_producto, cantidad, precio_unitario)
+        $stmt = $this->executeQuery($sql, [$id_carrito, $id_producto]);
+        $existe = $this->getResults($stmt);
+
+        if (!empty($existe)) {
+            // Actualizar cantidad si ya existe
+            $nueva_cantidad = $existe[0]['cantidad'] + $cantidad;
+            $sql = "UPDATE DETALLE_CARRITO SET cantidad = ? 
+                WHERE id_detalle = ?";
+            return $this->executeNonQuery($sql, [$nueva_cantidad, $existe[0]['id_detalle']]);
+        } else {
+            // Agregar nuevo producto al carrito
+            $sql = "INSERT INTO DETALLE_CARRITO 
+                (id_carrito, id_producto, cantidad, precio_unitario) 
                 VALUES (?, ?, ?, ?)";
-        return $this->executeNonQuery($sql, [
-            $id_carrito, 
-            $id_producto, 
-            $cantidad, 
-            $producto['precio_venta']
-        ]);
-    }
-}
-
-public function getCarritoItems($id_carrito) {
-    $sql = "SELECT ci.*, p.nombre_producto, p.imagen, u.nombre as nombre_vendedor
-            FROM CARRITO_ITEMS ci
-            JOIN PRODUCTOS p ON ci.id_producto = p.id_producto
-            JOIN USUARIOS u ON p.id_usuario = u.id_usuario
-            WHERE ci.id_carrito = ?";
-    
-    $stmt = $this->executeQuery($sql, [$id_carrito]);
-    return $this->getResults($stmt);
-}
-
-// ÓRDENES
-public function createOrden($id_usuario, $id_vendedor, $items, $direccion_envio, $notas) {
-    // Calcular total
-    $total = 0;
-    foreach ($items as $item) {
-        $total += $item['precio_unitario'] * $item['cantidad'];
-    }
-    
-    // Iniciar transacción
-    sqlsrv_begin_transaction($this->connection);
-    
-    try {
-        // Crear orden
-        $sql = "INSERT INTO ORDENES 
-                (id_usuario, id_vendedor, total, direccion_envio, notas)
-                OUTPUT INSERTED.id_orden
-                VALUES (?, ?, ?, ?, ?)";
-        $stmt = $this->executeQuery($sql, [
-            $id_usuario, $id_vendedor, $total, $direccion_envio, $notas
-        ]);
-        $orden = $this->getResults($stmt);
-        $id_orden = $orden[0]['id_orden'];
-        
-        // Agregar items
-        foreach ($items as $item) {
-            $sql = "INSERT INTO ORDEN_DETALLES
-                    (id_orden, id_producto, cantidad, precio_unitario)
-                    VALUES (?, ?, ?, ?)";
-            $this->executeNonQuery($sql, [
-                $id_orden, 
-                $item['id_producto'], 
-                $item['cantidad'], 
-                $item['precio_unitario']
-            ]);
-            
-            // Reducir stock
-            $sql = "UPDATE PRODUCTOS SET cantidad = cantidad - ? 
-                    WHERE id_producto = ?";
-            $this->executeNonQuery($sql, [
-                $item['cantidad'], 
-                $item['id_producto']
+            return $this->executeNonQuery($sql, [
+                $id_carrito,
+                $id_producto,
+                $cantidad,
+                $producto['precio_venta']
             ]);
         }
-        
-        // Vaciar carrito
-        $sql = "DELETE FROM CARRITO_ITEMS WHERE id_carrito IN 
-                (SELECT id_carrito FROM CARRITO WHERE id_usuario = ?)";
-        $this->executeNonQuery($sql, [$id_usuario]);
-        
-        // Confirmar transacción
-        sqlsrv_commit($this->connection);
-        return $id_orden;
-    } catch (Exception $e) {
-        sqlsrv_rollback($this->connection);
-        throw $e;
     }
-}
 
-// MENSAJES
-public function sendMessage($id_remitente, $id_destinatario, $id_orden, $asunto, $mensaje) {
-    $sql = "INSERT INTO MENSAJES 
-            (id_remitente, id_destinatario, id_orden, asunto, mensaje)
-            VALUES (?, ?, ?, ?, ?)";
-    return $this->executeNonQuery($sql, [
-        $id_remitente, $id_destinatario, $id_orden, $asunto, $mensaje
-    ]);
-}
+    public function obtenerProductosCarrito($id_usuario)
+    {
+        $id_carrito = $this->obtenerCarritoActivo($id_usuario);
 
-public function getMessages($id_usuario, $tipo = 'recibidos') {
-    $sql = $tipo == 'recibidos' 
-        ? "SELECT m.*, u.nombre as remitente_nombre 
-           FROM MENSAJES m
-           JOIN USUARIOS u ON m.id_remitente = u.id_usuario
-           WHERE m.id_destinatario = ? ORDER BY m.fecha_envio DESC"
-        : "SELECT m.*, u.nombre as destinatario_nombre 
-           FROM MENSAJES m
-           JOIN USUARIOS u ON m.id_destinatario = u.id_usuario
-           WHERE m.id_remitente = ? ORDER BY m.fecha_envio DESC";
-    
-    $stmt = $this->executeQuery($sql, [$id_usuario]);
-    return $this->getResults($stmt);
-}
+        $sql = "SELECT dc.*, p.nombre_producto, p.descripcion, p.imagen, 
+                   (dc.cantidad * dc.precio_unitario) as subtotal
+            FROM DETALLE_CARRITO dc
+            JOIN PRODUCTOS p ON dc.id_producto = p.id_producto
+            WHERE dc.id_carrito = ?";
+        $stmt = $this->executeQuery($sql, [$id_carrito]);
+        return $this->getResults($stmt);
+    }
 
-// VALORACIONES
-public function addValoracion($id_orden, $id_producto, $id_usuario, $id_vendedor, $calificacion, $comentario) {
-    $sql = "INSERT INTO VALORACIONES 
-            (id_orden, id_producto, id_usuario, id_vendedor, calificacion, comentario)
-            VALUES (?, ?, ?, ?, ?, ?)";
-    return $this->executeNonQuery($sql, [
-        $id_orden, $id_producto, $id_usuario, $id_vendedor, $calificacion, $comentario
-    ]);
-}
+    public function actualizarCantidadCarrito($id_detalle, $cantidad)
+    {
+        $sql = "UPDATE DETALLE_CARRITO SET cantidad = ? 
+            WHERE id_detalle = ? AND cantidad > 0";
+        return $this->executeNonQuery($sql, [$cantidad, $id_detalle]);
+    }
 
-public function getValoracionesProducto($id_producto) {
-    $sql = "SELECT v.*, u.nombre as usuario_nombre
+    public function eliminarProductoCarrito($id_detalle)
+    {
+        $sql = "DELETE FROM DETALLE_CARRITO WHERE id_detalle = ?";
+        return $this->executeNonQuery($sql, [$id_detalle]);
+    }
+
+    public function vaciarCarrito($id_usuario)
+    {
+        $id_carrito = $this->obtenerCarritoActivo($id_usuario);
+        $sql = "DELETE FROM DETALLE_CARRITO WHERE id_carrito = ?";
+        return $this->executeNonQuery($sql, [$id_carrito]);
+    }
+
+    public function obtenerTotalCarrito($id_usuario)
+    {
+        $id_carrito = $this->obtenerCarritoActivo($id_usuario);
+
+        $sql = "SELECT SUM(cantidad * precio_unitario) as total
+            FROM DETALLE_CARRITO
+            WHERE id_carrito = ?";
+        $stmt = $this->executeQuery($sql, [$id_carrito]);
+        $result = $this->getResults($stmt);
+        return $result[0]['total'] ?? 0;
+    }
+
+    public function obtenerCantidadTotalCarrito($id_usuario)
+    {
+        $id_carrito = $this->obtenerCarritoActivo($id_usuario);
+
+        $sql = "SELECT SUM(cantidad) as total_items
+            FROM DETALLE_CARRITO
+            WHERE id_carrito = ?";
+        $stmt = $this->executeQuery($sql, [$id_carrito]);
+        $result = $this->getResults($stmt);
+        return $result[0]['total_items'] ?? 0;
+    }
+
+    // Funciones para valoraciones
+    public function agregarValoracion($id_usuario, $id_producto, $calificacion, $comentario = null)
+    {
+        $sql = "INSERT INTO VALORACIONES 
+            (id_usuario, id_producto, calificacion, comentario)
+            VALUES (?, ?, ?, ?)";
+        return $this->executeNonQuery($sql, [
+            $id_usuario,
+            $id_producto,
+            $calificacion,
+            $comentario
+        ]);
+    }
+
+    public function obtenerValoracionesProducto($id_producto)
+    {
+        $sql = "SELECT v.*, u.nombre, u.foto_perfil
             FROM VALORACIONES v
             JOIN USUARIOS u ON v.id_usuario = u.id_usuario
-            WHERE v.id_producto = ?
+            WHERE v.id_producto = ? AND v.estado = 'ACTIVO'
             ORDER BY v.fecha_valoracion DESC";
-    
-    $stmt = $this->executeQuery($sql, [$id_producto]);
-    return $this->getResults($stmt);
-}
+        $stmt = $this->executeQuery($sql, [$id_producto]);
+        return $this->getResults($stmt);
+    }
+
+    public function obtenerPromedioValoraciones($id_producto)
+    {
+        $sql = "SELECT AVG(calificacion) as promedio, COUNT(*) as total
+            FROM VALORACIONES
+            WHERE id_producto = ? AND estado = 'ACTIVO'";
+        $stmt = $this->executeQuery($sql, [$id_producto]);
+        $result = $this->getResults($stmt);
+        return [
+            'promedio' => round($result[0]['promedio'] ?? 0, 1),
+            'total' => $result[0]['total'] ?? 0
+        ];
+    }
+
+    public function usuarioYaValoroProducto($id_usuario, $id_producto)
+    {
+        $sql = "SELECT id_valoracion FROM VALORACIONES 
+            WHERE id_usuario = ? AND id_producto = ?";
+        $stmt = $this->executeQuery($sql, [$id_usuario, $id_producto]);
+        $result = $this->getResults($stmt);
+        return !empty($result);
+    }
 }

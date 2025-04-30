@@ -22,7 +22,7 @@ INSERT INTO ROLES (nombre_rol, descripcion ) VALUES
 CREATE TABLE USUARIOS (
   id_usuario INT IDENTITY(1,1) PRIMARY KEY,
   login VARCHAR(50) UNIQUE NOT NULL,
-  email VARCHAR(100) ,
+  email VARCHAR(100),
   password VARCHAR(255) NOT NULL,
   nombre VARCHAR(100) NOT NULL,
   apellido VARCHAR(100),
@@ -40,8 +40,6 @@ CREATE TABLE USUARIOS (
   token_verificacion VARCHAR(100),
   fecha_expiracion_token DATETIME
 );
-
-
 
 INSERT INTO USUARIOS (login, email, password, nombre, apellido, telefono, direccion, 
 fecha_nacimiento, genero, foto_perfil, activo, verificado) VALUES
@@ -143,21 +141,22 @@ INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden
 ('Perfil', 'Activo', 'icon_profile', 'PerfilController.php', '#ffffff', 'A',  NULL,1),
 ('Comprar', 'Activo', 'icon_creditcard', 'ComprarController.php', '#ffffff', 'A',NULL, 2),
 ('Carrito', 'Activo', 'icon_cart', 'CarritoController.php', '#ffffff', 'A', NULL,3),
-('Historial', 'Activo', 'icon_document', 'HistorialController.php', '#ffffff', 'A',NULL, 4);
+('Pagar', 'Activo', 'icon_wallet_alt', 'PagarController.php', '#ffffff', 'A', NULL,4),
+('Historial', 'Activo', 'icon_document', 'HistorialController.php', '#ffffff', 'A',NULL, 5);
 
 -- Opciones solo para administradores (id_rol = 1)
 INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden) VALUES
 ('Usuarios', 'Activo', 'icon_organigrama', 'UsuariosController.php', '#ffffff', 'A', 1, 5),
-('Solicitudes', 'Activo', 'icon_documents', 'SolicitudesController.php', '#ffffff', 'A', 1, 6),
-('Productos', 'Activo', 'icon_datareport_alt', 'ProductoController.php', '#ffffff', 'A', 1, 7),--TAMBIEN PARA ADMIN
-('Reportes', 'Activo', 'icon_clipboard', 'ReportesController.php', '#ffffff', 'A', 1, 8),
-('Configuración', 'Activo', 'icon_tools', 'ConfiguracionController.php', '#ffffff', 'A' ,1, 9);
+('Solicitudes', 'Activo', 'icon_documents', 'SolicitudesController.php', '#ffffff', 'A', 1, 7),
+('Productos', 'Activo', 'icon_datareport_alt', 'ProductoController.php', '#ffffff', 'A', 1, 8),--TAMBIEN PARA ADMIN
+('Reportes', 'Activo', 'icon_clipboard', 'ReportesController.php', '#ffffff', 'A', 1, 9),
+('Configuración', 'Activo', 'icon_tools', 'ConfiguracionController.php', '#ffffff', 'A' ,1, 10);
 
 -- Opciones para vendedores (id_rol = 2)
 INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden) VALUES
-('Productos', 'Activo', 'icon_datareport_alt', 'ProductoController.php', '#ffffff', 'A', 2, 5),--TAMBIEN PARA ADMIN
-('Ventas', 'Activo', 'icon_cart', 'VentasController.php', '#ffffff', 'A', 2, 6),
-('Clientes', 'Activo', 'icon_organigrama', 'ClientesController.php', '#ffffff', 'A', 2, 7);
+('Productos', 'Activo', 'icon_datareport_alt', 'ProductoController.php', '#ffffff', 'A', 2, 6),--TAMBIEN PARA ADMIN
+('Ventas', 'Activo', 'icon_cart', 'VentasController.php', '#ffffff', 'A', 2, 7),
+('Clientes', 'Activo', 'icon_organigrama', 'ClientesController.php', '#ffffff', 'A', 2, 8);
 
 
 
@@ -261,6 +260,17 @@ INSERT INTO PRODUCTOS (
 ( 4,4,    'Coca Cola 500 gr', 'Coca Cola 500 gr', 0, 7.00, 6.00, 'fotoproducto/cocacola.jpg', '2020-06-12', 'ACTIVO'),
 ( 4,4,   'Pepsi de 500 ml', 'Pepsi de 500 ml', 0, 12.00, 11.00, 'fotoproducto/pepsi.jpg', '2020-07-06', 'ACTIVO');
 
+UPDATE PRODUCTO SET 
+            id_categoria = ?,
+            codigo = ?,
+            nombre_producto = ?,
+            descripcion = ?,
+            cantidad = ?,
+            precio_venta = ?,
+            precio_compra = ?,
+            fecha_registro = GETDATE()
+            where id_producto=
+
 
 --TABLA PARA REPORTES DE PRODUCTOS DEL USUARIO
 CREATE TABLE REPORTES (
@@ -280,13 +290,38 @@ CREATE TABLE REPORTES (
 );
 
 
-delete SOLICITUDES_VENDEDOR
-USE UPIICSAFOOD
-SELECT*FROM USUARIOS
+CREATE TABLE CARRITO (
+  id_carrito INT IDENTITY(1,1) PRIMARY KEY,
+  id_usuario INT NOT NULL,
+  fecha_creacion DATETIME DEFAULT GETDATE(),
+  estado VARCHAR(20) DEFAULT 'ACTIVO' CHECK (estado IN ('ACTIVO', 'COMPLETADO', 'ABANDONADO')),
+  FOREIGN KEY (id_usuario) REFERENCES USUARIOS(id_usuario) ON DELETE CASCADE
+);
 
+SELECT* FROM CARRITO
+SELECT* FROM DETALLE_CARRITO
 
-SELECT p.*, u.nombre as nombre_vendedor, c.nombre_categoria
-            FROM PRODUCTOS p
-            JOIN USUARIOS u ON p.id_usuario = u.id_usuario
-            JOIN CATEGORIAS c ON p.id_categoria = c.id_categoria
-            WHERE p.id_producto = 1
+CREATE TABLE DETALLE_CARRITO (
+  id_detalle INT IDENTITY(1,1) PRIMARY KEY,
+  id_carrito INT NOT NULL,
+  id_producto INT NOT NULL,
+  cantidad INT NOT NULL DEFAULT 1 CHECK (cantidad > 0),
+  precio_unitario DECIMAL(10,2) NOT NULL,
+  fecha_agregado DATETIME DEFAULT GETDATE(),
+  FOREIGN KEY (id_carrito) REFERENCES CARRITO(id_carrito) ON DELETE CASCADE,
+  FOREIGN KEY (id_producto) REFERENCES PRODUCTOS(id_producto) ON DELETE CASCADE,
+  UNIQUE (id_carrito, id_producto) -- Evita duplicados en el carrito
+);
+
+CREATE TABLE VALORACIONES (
+  id_valoracion INT IDENTITY(1,1) PRIMARY KEY,
+  id_usuario INT NOT NULL,
+  id_producto INT NOT NULL,
+  calificacion TINYINT NOT NULL CHECK (calificacion BETWEEN 1 AND 5),
+  comentario TEXT,
+  fecha_valoracion DATETIME DEFAULT GETDATE(),
+  estado VARCHAR(20) DEFAULT 'ACTIVO' CHECK (estado IN ('ACTIVO', 'OCULTO')),
+  FOREIGN KEY (id_usuario) REFERENCES USUARIOS(id_usuario) ON DELETE CASCADE,
+  FOREIGN KEY (id_producto) REFERENCES PRODUCTOS(id_producto) ON DELETE CASCADE,
+  UNIQUE (id_usuario, id_producto) -- Cada usuario solo puede valorar un producto una vez
+);

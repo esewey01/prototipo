@@ -5,43 +5,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrito de Compras</title>
-    
+    <title>Document</title>
 </head>
 
 <body>
+
+    <!--Menu desplegable-->
     <section id="container" class="">
-        <!-- Header -->
+
         <header class="header dark-bg">
             <div class="toggle-nav">
-                <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom">
-                    <i class="icon_menu"></i>
-                </div>
+                <div class="icon-reorder tooltips" data-original-title="Menú Principal" data-placement="bottom"><i
+                        class="icon_menu"></i></div>
             </div>
-            <?php include("Logo.php") ?>
+            <?PHP include("Logo.php") ?>
+
             <div class="nav search-row" id="top_menu">
+                <!--  search form start -->
                 <ul class="nav top-menu">
                     <li>
                         <form class="navbar-form">
-                            <input class="form-control" placeholder="Buscar productos..." type="text">
+                            <input class="form-control" placeholder="Search" type="text">
                         </form>
                     </li>
                 </ul>
+                <!--  search form end -->
             </div>
-            <?php include("DropDown.php"); ?>
+            <?PHP include("DropDown.php"); ?> <!--MENU DE USUARIO-->
         </header>
 
-        <!-- Menú Principal -->
-        <?php include("Menu.php") ?>
+        <?PHP include("Menu.php") ?>
+
     </section>
 
     <section id="main-content">
         <section class="wrapper">
+
             <div class="row">
                 <div class="col-lg-12">
-                    <h3 class="page-header"><i class="icon_cart_alt"></i> MI CARRITO</h3>
-                    
-                    <!-- Mensajes de alerta -->
+                    <h3 class="page-header"><i class="fa fa-laptop"></i> PRINCIPAL</h3>
+                    <!--FUNCION DE ALERTA DE MENSAJES-->
                     <?php if (isset($_SESSION['mensaje'])): ?>
                         <div class="alert <?= $_SESSION['alerta'] ?? 'alert-info' ?> alert-dismissible fade in" role="alert">
                             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -49,323 +52,197 @@
                             </button>
                             <strong><?= $_SESSION['mensaje'] ?></strong>
                         </div>
-                        <?php
+                    <?php
                         unset($_SESSION['mensaje']);
                         unset($_SESSION['alerta']);
-                        endif; ?>
-                    
+                    endif; ?>
                     <ol class="breadcrumb">
                         <li><i class="fa fa-home"></i><a href="PrincipalController.php">Inicio</a></li>
-                        <li><i class="icon_cart_alt"></i> Carrito</li>
-                        <li><i class="icon_document"></i><a href="HistorialController.php">Historial</a></li>
+                        <li><i class="fa fa-laptop"></i> Principal</li>
                     </ol>
                 </div>
             </div>
 
             <div class="row">
-                <div class="col-lg-12">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="icon_cart"></i> PRODUCTOS EN TU CARRITO
-                        </div>
-                        <div class="panel-body">
-                            <?php if (empty($items)): ?>
-                                <div class="alert text-center">
-                                    <i class="fa fa-shopping-cart fa-3x mb-3"></i>
-                                    <h4>Tu carrito está vacío</h4>
-                                    <p>Explora nuestros productos y encuentra lo que necesitas</p>
+                    <div class="col-md-8">
+                        <?php if (empty($productos)): ?>
+                            <div class="panel panel-default empty-cart">
+                                <div class="panel-body">
+                                    <i class="fa fa-shopping-cart fa-4x text-muted"></i>
+                                    <h3>Tu carrito está vacío</h3>
+                                    <p>No hay productos en tu carrito de compras.</p>
                                     <a href="ComprarController.php" class="btn btn-primary">
-                                        <i class="fa fa-arrow-right"></i> Ir a productos
+                                        <i class="fa fa-arrow-left"></i> Continuar comprando
                                     </a>
                                 </div>
-                            <?php else: ?>
-                                <div class="table-responsive">
-                                    <table class="table table-cart">
-                                        <thead>
-                                            <tr>
-                                                <th style="width: 40%">Producto</th>
-                                                <th class="text-center">Precio Unitario</th>
-                                                <th class="text-center">Cantidad</th>
-                                                <th class="text-center">Subtotal</th>
-                                                <th class="text-center">Acciones</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php
-                                            $total = 0;
-                                            foreach ($items as $item):
-                                                $subtotal = $item['precio_unitario'] * $item['cantidad'];
-                                                $total += $subtotal;
-                                            ?>
-                                                <tr id="item-<?= $item['id_item'] ?>">
-                                                    <td>
-                                                        <div class="media">
-                                                            <img src="<?= URL_VIEWS . htmlspecialchars($item['imagen']) ?>"
-                                                                class="cart-item-img mr-3"
-                                                                alt="<?= htmlspecialchars($item['nombre_producto']) ?>"
-                                                                onerror="this.src='<?= URL_VIEWS ?>fotoproducto/default.png'">
-                                                            <div class="media-body">
-                                                                <h5 class="mt-0"><?= htmlspecialchars($item['nombre_producto']) ?></h5>
-                                                                <small class="text-muted">Vendedor: <?= htmlspecialchars($item['nombre_vendedor']) ?></small>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td class="text-center align-middle">
-                                                        $<?= number_format($item['precio_unitario'], 2) ?>
-                                                    </td>
-                                                    <td class="text-center align-middle">
-                                                        <div class="input-group quantity-control mx-auto">
-                                                            <button class="btn btn-outline-secondary update-qty"
-                                                                data-id="<?= $item['id_item'] ?>"
-                                                                data-action="minus">
-                                                                <i class="fa fa-minus"></i>
-                                                            </button>
-                                                            <input type="number" class="form-control text-center"
-                                                                value="<?= $item['cantidad'] ?>" min="1"
-                                                                id="qty-<?= $item['id_item'] ?>">
-                                                            <button class="btn btn-outline-secondary update-qty"
-                                                                data-id="<?= $item['id_item'] ?>"
-                                                                data-action="plus">
-                                                                <i class="fa fa-plus"></i>
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                    <td class="text-center align-middle">
-                                                        <strong>$<?= number_format($subtotal, 2) ?></strong>
-                                                    </td>
-                                                    <td class="text-center align-middle">
-                                                        <button class="btn btn-danger btn-sm remove-item"
-                                                            data-id="<?= $item['id_item'] ?>"
-                                                            title="Eliminar producto">
-                                                            <i class="fa fa-trash"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
+                            </div>
+                        <?php else: ?>
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <i class="fa fa-list"></i> Productos en tu carrito
                                 </div>
-
-                                <div class="row mt-4">
-                                    <div class="col-md-6">
-                                        <div class="card cart-totals">
-                                            <div class="card-body">
-                                                <h5 class="card-title">Resumen del Pedido</h5>
-                                                <table class="table table-sm">
-                                                    <tr>
-                                                        <td>Subtotal:</td>
-                                                        <td class="text-right">$<?= number_format($total, 2) ?></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Envío:</td>
-                                                        <td class="text-right">$0.00</td>
-                                                    </tr>
-                                                    <tr class="font-weight-bold">
-                                                        <td>Total:</td>
-                                                        <td class="text-right">$<?= number_format($total, 2) ?></td>
-                                                    </tr>
-                                                </table>
+                                <div class="panel-body">
+                                    <?php foreach ($productos as $producto): ?>
+                                        <div class="row producto-carrito">
+                                            <div class="col-xs-3">
+                                                <img src="<?= URL_VIEWS . htmlspecialchars($producto['imagen']) ?>" 
+                                                     class="img-thumbnail producto-imagen"
+                                                     onerror="this.src='<?= URL_VIEWS ?>fotoproducto/default.png'">
+                                            </div>
+                                            <div class="col-xs-5">
+                                                <h5><?= htmlspecialchars($producto['nombre_producto']) ?></h5>
+                                                <p class="text-muted small"><?= htmlspecialchars($producto['descripcion']) ?></p>
+                                                <p class="text-success">
+                                                    <strong>$<?= number_format($producto['precio_unitario'], 2) ?></strong> c/u
+                                                </p>
+                                            </div>
+                                            <div class="col-xs-2 text-center">
+                                                <input type="number" min="1" value="<?= $producto['cantidad'] ?>" 
+                                                       class="form-control input-sm cantidad-producto" 
+                                                       data-id="<?= $producto['id_detalle'] ?>">
+                                            </div>
+                                            <div class="col-xs-2 text-right">
+                                                <h5>$<?= number_format($producto['subtotal'], 2) ?></h5>
+                                                <button class="btn btn-danger btn-xs btn-eliminar" 
+                                                        data-id="<?= $producto['id_detalle'] ?>">
+                                                    <i class="fa fa-trash"></i> Eliminar
+                                                </button>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="col-md-6 cart-actions">
-                                        <div class="d-flex justify-content-between">
-                                            <a href="productos.php" class="btn btn-outline-secondary">
-                                                <i class="fa fa-arrow-left"></i> Seguir comprando
-                                            </a>
-                                            <a href="checkout.php" class="btn btn-primary">
-                                                Proceder al pago <i class="fa fa-arrow-right"></i>
-                                            </a>
-                                        </div>
-                                        <div class="mt-3">
-                                            <small class="text-muted">
-                                                <i class="fa fa-lock"></i> Tus datos de pago están protegidos
-                                            </small>
-                                        </div>
-                                    </div>
+                                    <?php endforeach; ?>
                                 </div>
-                            <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="panel panel-default resumen-compra">
+                            <div class="panel-heading">
+                                <i class="fa fa-credit-card"></i> Resumen de compra
+                            </div>
+                            <div class="panel-body">
+                                <table class="table">
+                                    <tr>
+                                        <td>Subtotal:</td>
+                                        <td class="text-right">$<?= number_format($total, 2) ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Envío:</td>
+                                        <td class="text-right">$0.00</td>
+                                    </tr>
+                                    <tr class="active">
+                                        <th>Total:</th>
+                                        <th class="text-right">$<?= number_format($total, 2) ?></th>
+                                    </tr>
+                                </table>
+                                
+                                <?php if (!empty($productos)): ?>
+                                    <a href="CheckoutController.php" class="btn btn-success btn-block">
+                                        <i class="fa fa-check"></i> Proceder al pago
+                                    </a>
+                                    <button class="btn btn-default btn-block btn-vaciar-carrito">
+                                        <i class="fa fa-trash"></i> Vaciar carrito
+                                    </button>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
         </section>
-    </section>
 
-    <?php include('LibraryJS.php'); ?>
+    <?php include("LibraryJs.php"); ?>
 
-    <script>
-        $(document).ready(function() {
+    $(document).ready(function() {
             // Actualizar cantidad
-            $('.update-qty').click(function() {
-                var id = $(this).data('id');
-                var action = $(this).data('action');
-                var input = $('#qty-' + id);
-                var currentVal = parseInt(input.val());
-                var newVal = action == 'plus' ? currentVal + 1 : Math.max(1, currentVal - 1);
-
-                input.val(newVal);
-                updateCartItem(id, newVal);
-            });
-
-            // Eliminar item
-            $('.remove-item').click(function() {
-                var id = $(this).data('id');
-                var itemRow = $('#item-' + id);
+            $(document).on('change', '.cantidad-producto', function() {
+                const id = $(this).data('id');
+                const cantidad = $(this).val();
                 
-                bootbox.confirm({
-                    title: "Confirmar eliminación",
-                    message: "¿Estás seguro de eliminar este producto de tu carrito?",
-                    buttons: {
-                        cancel: {
-                            label: '<i class="fa fa-times"></i> Cancelar'
-                        },
-                        confirm: {
-                            label: '<i class="fa fa-check"></i> Eliminar',
-                            className: 'btn-danger'
-                        }
-                    },
-                    callback: function(result) {
-                        if (result) {
-                            removeCartItem(id, itemRow);
-                        }
-                    }
-                });
-            });
-
-            // Función para actualizar cantidad en el carrito
-            function updateCartItem(id, quantity) {
+                if (cantidad < 1) {
+                    $(this).val(1);
+                    return;
+                }
+                
+                // Mostrar carga
+                const input = $(this);
+                input.prop('disabled', true);
+                
                 $.ajax({
                     url: 'CarritoController.php?action=actualizar',
-                    method: 'POST',
-                    data: {
-                        id_item: id,
-                        cantidad: quantity
-                    },
+                    type: 'POST',
+                    data: { id_detalle: id, cantidad: cantidad },
                     dataType: 'json',
-                    beforeSend: function() {
-                        $('#qty-' + id).prop('disabled', true);
-                    },
                     success: function(response) {
                         if (response.success) {
-                            // Mostrar notificación de éxito
-                            $.notify({
-                                icon: 'fa fa-check',
-                                message: 'Cantidad actualizada correctamente'
-                            }, {
-                                type: 'success',
-                                delay: 2000,
-                                placement: {
-                                    from: "top",
-                                    align: "right"
-                                }
-                            });
-                            
-                            // Actualizar la página si hay cambios importantes
-                            if (response.reload) {
-                                setTimeout(function() {
-                                    location.reload();
-                                }, 500);
-                            }
-                        } else {
-                            // Mostrar error
-                            $.notify({
-                                icon: 'fa fa-exclamation-triangle',
-                                message: response.message || 'Error al actualizar la cantidad'
-                            }, {
-                                type: 'danger',
-                                delay: 3000
-                            });
-                            
-                            // Revertir el valor si hay error
                             location.reload();
+                        } else {
+                            toastr.error(response.message || 'Error al actualizar cantidad');
+                            input.prop('disabled', false);
                         }
                     },
-                    error: function() {
-                        $.notify({
-                            icon: 'fa fa-exclamation-circle',
-                            message: 'Error de conexión'
-                        }, {
-                            type: 'danger',
-                            delay: 3000
-                        });
-                    },
-                    complete: function() {
-                        $('#qty-' + id).prop('disabled', false);
+                    error: function(xhr) {
+                        toastr.error('Error en la conexión');
+                        input.prop('disabled', false);
                     }
                 });
-            }
-
-            // Función para eliminar item del carrito
-            function removeCartItem(id, itemRow) {
+            });
+            
+            // Eliminar producto
+            $(document).on('click', '.btn-eliminar', function() {
+                if (!confirm('¿Eliminar este producto del carrito?')) return;
+                
+                const id = $(this).data('id');
+                const button = $(this);
+                button.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
+                
                 $.ajax({
                     url: 'CarritoController.php?action=eliminar',
-                    method: 'POST',
-                    data: {
-                        id_item: id
-                    },
+                    type: 'POST',
+                    data: { id_detalle: id },
                     dataType: 'json',
-                    beforeSend: function() {
-                        itemRow.css('opacity', '0.5');
-                    },
                     success: function(response) {
                         if (response.success) {
-                            // Animación para eliminar la fila
-                            itemRow.fadeOut(300, function() {
-                                $(this).remove();
-                                
-                                // Mostrar notificación
-                                $.notify({
-                                    icon: 'fa fa-check',
-                                    message: 'Producto eliminado del carrito'
-                                }, {
-                                    type: 'success',
-                                    delay: 2000
-                                });
-                                
-                                // Actualizar contador del carrito
-                                updateCartCount();
-                                
-                                // Si no quedan items, recargar la página
-                                if ($('.table-cart tbody tr').length === 0) {
-                                    setTimeout(function() {
-                                        location.reload();
-                                    }, 500);
-                                }
-                            });
+                            location.reload();
                         } else {
-                            itemRow.css('opacity', '1');
-                            $.notify({
-                                icon: 'fa fa-exclamation-triangle',
-                                message: response.message || 'Error al eliminar el producto'
-                            }, {
-                                type: 'danger',
-                                delay: 3000
-                            });
+                            toastr.error(response.message || 'Error al eliminar producto');
+                            button.prop('disabled', false).html('<i class="fa fa-trash"></i> Eliminar');
                         }
                     },
-                    error: function() {
-                        itemRow.css('opacity', '1');
-                        $.notify({
-                            icon: 'fa fa-exclamation-circle',
-                            message: 'Error de conexión'
-                        }, {
-                            type: 'danger',
-                            delay: 3000
-                        });
+                    error: function(xhr) {
+                        toastr.error('Error en la conexión');
+                        button.prop('disabled', false).html('<i class="fa fa-trash"></i> Eliminar');
                     }
                 });
-            }
-
-            // Función para actualizar contador del carrito
-            function updateCartCount() {
-                $.get('CarritoController.php?action=count', function(response) {
-                    $('#cart-count').text(response.count || 0);
-                }).fail(function() {
-                    console.error('Error al actualizar contador del carrito');
+            });
+            
+            // Vaciar carrito
+            $('.btn-vaciar-carrito').click(function() {
+                if (!confirm('¿Vaciar todo el carrito de compras?')) return;
+                
+                const button = $(this);
+                button.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
+                
+                $.ajax({
+                    url: 'CarritoController.php?action=vaciar',
+                    type: 'POST',
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            location.reload();
+                        } else {
+                            toastr.error(response.message || 'Error al vaciar carrito');
+                            button.prop('disabled', false).html('<i class="fa fa-trash"></i> Vaciar carrito');
+                        }
+                    },
+                    error: function(xhr) {
+                        toastr.error('Error en la conexión');
+                        button.prop('disabled', false).html('<i class="fa fa-trash"></i> Vaciar carrito');
+                    }
                 });
-            }
+            });
         });
-    </script>
+        </script>
 </body>
+
 </html>
