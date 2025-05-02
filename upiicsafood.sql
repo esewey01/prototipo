@@ -17,6 +17,8 @@ INSERT INTO ROLES (nombre_rol, descripcion ) VALUES
 ('Cliente', 'Puede realizar compras');
 
 
+SELECT*FROM usuarios
+
 
 --TABLA DE USUARIOS 
 CREATE TABLE USUARIOS (
@@ -40,12 +42,17 @@ CREATE TABLE USUARIOS (
   token_verificacion VARCHAR(100),
   fecha_expiracion_token DATETIME
 );
-
+SELECT*FROM USUARIOS
+SELECT*FROM ROLES_USUARIO
 INSERT INTO USUARIOS (login, email, password, nombre, apellido, telefono, direccion, 
 fecha_nacimiento, genero, foto_perfil, activo, verificado) VALUES
 
+INSERT INTO USUARIOS (login, email, password)
+VALUES ('ADMIN2','ADMIN@EMAIL.COM','ADMIN');
+
 --SUPER USUARIO
 ('admin', 'david.ugarte@empresa.com', 'admin', 'David', 'Ugarte', '55-6158-4615', 'Av. Principal 123, Ciudad', '1985-05-15', 'M', 'fotoproducto/user.png', 1, 1);
+
 -- Administradores
 ('2020601052', 'david.ugarte@empresa.com', 'david', 'David', 'Ugarte', '55-6158-4615', 'Av. Principal 123, Ciudad', '1985-05-15', 'M', 'fotoproducto/user.png', 1, 1),
 ('henry', 'henry@empresa.com', 'henry', 'Henrych',NULL, '55-1234-5678', 'Calle Secundaria 456, Ciudad', '1990-08-20', 'M', 'fotoproducto/user02.jpg', 1, 1),
@@ -141,7 +148,7 @@ INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden
 ('Perfil', 'Activo', 'icon_profile', 'PerfilController.php', '#ffffff', 'A',  NULL,1),
 ('Comprar', 'Activo', 'icon_creditcard', 'ComprarController.php', '#ffffff', 'A',NULL, 2),
 ('Carrito', 'Activo', 'icon_cart', 'CarritoController.php', '#ffffff', 'A', NULL,3),
-('Pagar', 'Activo', 'icon_wallet_alt', 'PagarController.php', '#ffffff', 'A', NULL,4),
+('Pagar', 'Activo', 'icon_wallet_alt', 'CheckoutController.php', '#ffffff', 'A', NULL,4),
 ('Historial', 'Activo', 'icon_document', 'HistorialController.php', '#ffffff', 'A',NULL, 5);
 
 -- Opciones solo para administradores (id_rol = 1)
@@ -260,16 +267,7 @@ INSERT INTO PRODUCTOS (
 ( 4,4,    'Coca Cola 500 gr', 'Coca Cola 500 gr', 0, 7.00, 6.00, 'fotoproducto/cocacola.jpg', '2020-06-12', 'ACTIVO'),
 ( 4,4,   'Pepsi de 500 ml', 'Pepsi de 500 ml', 0, 12.00, 11.00, 'fotoproducto/pepsi.jpg', '2020-07-06', 'ACTIVO');
 
-UPDATE PRODUCTO SET 
-            id_categoria = ?,
-            codigo = ?,
-            nombre_producto = ?,
-            descripcion = ?,
-            cantidad = ?,
-            precio_venta = ?,
-            precio_compra = ?,
-            fecha_registro = GETDATE()
-            where id_producto=
+
 
 
 --TABLA PARA REPORTES DE PRODUCTOS DEL USUARIO
@@ -325,3 +323,61 @@ CREATE TABLE VALORACIONES (
   FOREIGN KEY (id_producto) REFERENCES PRODUCTOS(id_producto) ON DELETE CASCADE,
   UNIQUE (id_usuario, id_producto) -- Cada usuario solo puede valorar un producto una vez
 );
+
+
+CREATE TABLE ORDENES (
+    id_orden INT IDENTITY(1,1) PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    id_vendedor INT NOT NULL,
+    id_carrito INT NOT NULL,
+    fecha_orden DATETIME DEFAULT GETDATE(),
+    estado VARCHAR(20) DEFAULT 'PENDIENTE' CHECK (estado IN ('PENDIENTE', 'PAGADO', 'CANCELADO', 'ENTREGADO')),
+    total DECIMAL(10,2) NOT NULL,
+    metodo_pago VARCHAR(20) DEFAULT 'EFECTIVO',
+    direccion_entrega VARCHAR(255),
+    comentarios VARCHAR(MAX),
+    fecha_actualizacion DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (id_usuario) REFERENCES USUARIOS(id_usuario),
+    FOREIGN KEY (id_vendedor) REFERENCES USUARIOS(id_usuario),
+    FOREIGN KEY (id_carrito) REFERENCES CARRITO(id_carrito)
+);
+
+CREATE TABLE DETALLE_ORDEN (
+    id_detalle INT IDENTITY(1,1) PRIMARY KEY,
+    id_orden INT NOT NULL,
+    id_producto INT NOT NULL,
+    cantidad INT NOT NULL,
+    precio_unitario DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (id_orden) REFERENCES ORDENES(id_orden),
+    FOREIGN KEY (id_producto) REFERENCES PRODUCTOS(id_producto)
+);
+
+ALTER TABLE ORDENES ADD fecha_actualizacion DATETIME DEFAULT GETDATE();
+
+select *from usuarios
+SELECT p.*, u.nombre as nombre_vendedor, u.apellido as apellido_vendedor
+,u.login as login_vendedor , c.nombre_categoria
+            FROM PRODUCTOS p
+            JOIN USUARIOS u ON p.id_usuario = u.id_usuario
+            JOIN CATEGORIAS c ON p.id_categoria = c.id_categoria
+            WHERE p.id_producto =1
+
+SELECT*FROM ORDENES
+SELECT*FROM USUARIOS
+            SELECT 
+                    o.*,
+                    c.nombre as cliente_nombre,
+                    c.login as cliente_login,
+                    (SELECT COUNT(*) FROM DETALLE_ORDEN do WHERE do.id_orden = o.id_orden) as total_productos
+                FROM ORDENES o
+                JOIN USUARIOS c ON o.id_usuario = c.id_usuario
+                WHERE o.id_usuario = 3
+                AND ('PENDIENTE' IS NULL OR o.estado = 'PENDIENTE')
+                ORDER BY o.fecha_orden DESC
+
+
+                --BUSCAR VENDEDOR CON ID_PRODUCTO
+              SELECT id_usuario FROM PRODUCTOS WHERE id_producto = 1
+
+
+            UPDATE ORDENES SET id_vendedor = 3 WHERE id_orden >1

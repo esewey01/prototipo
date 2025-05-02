@@ -132,7 +132,9 @@
                                         onerror="this.src='<?= URL_VIEWS ?>fotoproducto/default.png'">
                                 </div>
 
-                                <h4 class="text mt-2"><?= htmlspecialchars($producto['nombre_producto']) ?></h4>
+                                <h4 class="text mt-2" style="max-width: 10ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                
+                                <?= htmlspecialchars($producto['nombre_producto']) ?></h4>
 
                                 <div class="mb-2">
                                     <span class="label label-info">

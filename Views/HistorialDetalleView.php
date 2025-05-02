@@ -13,21 +13,20 @@ if (!isset($_SESSION['usuario'])) {
 }
 
 $usuario = $_SESSION['usuario'];
-
+$esCliente = ($_SESSION['usuario']['rol']['id_rol'] == 3); // Asumiendo que 3 es Cliente
 
 try {
     switch ($action) {
         case 'ver':
             $id_orden = $_GET['id'] ?? 0;
             $orden = $db->getOrdenById($id_orden);
-
-            $detalles = $db->getDetallesOrdenCompleto($id_orden);
             
-            // Asegurar que los valores numéricos sean float
-            $orden['total'] = (float)$orden['total'];
-            foreach ($detalles as &$detalle) {
-                $detalle['precio_unitario'] = (float)$detalle['precio_unitario'];
+            // Verificar que el cliente solo vea sus propias órdenes
+            if ($esCliente && $orden['id_usuario'] != $usuario['id_usuario']) {
+                throw new Exception("No tienes permiso para ver esta orden");
             }
+            
+            $detalles = $db->getDetallesOrdenCompleto($id_orden);
             
             // Devolver JSON para el modal
             header('Content-Type: application/json');
@@ -39,7 +38,9 @@ try {
             exit;
             
         case 'eliminar':
-           
+            if (!$esCliente) {
+                throw new Exception("Acción no permitida");
+            }
             
             $id_orden = $_POST['id_orden'] ?? 0;
             $orden = $db->getOrdenById($id_orden);
@@ -66,7 +67,7 @@ try {
             break;
     }
 } catch (Exception $e) {
-    if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) ){
+    if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) {
         header('Content-Type: application/json');
         echo json_encode(['error' => $e->getMessage()]);
     } else {

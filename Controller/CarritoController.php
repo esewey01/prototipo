@@ -14,17 +14,22 @@ try {
                 echo json_encode(['success' => false, 'message' => 'Debes iniciar sesión']);
                 exit;
             }
-
+            
             $id_producto = $_POST['id_producto'] ?? 0;
+            $cantidad = $_POST['cantidad'] ?? 1; // Aquí recibimos la cantidad
+            
             if ($id_producto <= 0) {
                 echo json_encode(['success' => false, 'message' => 'Producto inválido']);
                 exit;
             }
-
+            
             $id_usuario = $_SESSION['usuario']['id_usuario'];
-            $success = $db->agregarProductoCarrito($id_usuario, $id_producto);
-
-            echo json_encode(['success' => $success, 'message' => $success ? 'Producto añadido' : 'Error al añadir']);
+            $success = $db->agregarProductoCarrito($id_usuario, $id_producto, $cantidad);
+            
+            echo json_encode([
+                'success' => $success,
+                'message' => $success ? 'Producto añadido al carrito' : 'Error al agregar producto'
+            ]);
             break;
 
         case 'contador':

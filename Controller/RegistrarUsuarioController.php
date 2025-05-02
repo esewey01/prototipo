@@ -202,8 +202,8 @@ class UserRegistrationController {
                 $userData['nombre'],
                 $userData['login'],
                 $userData['password'],
-                $userData['fotoPath'],
                 $userData['telefono'],
+                $userData['fotoPath'],
                 $id_rol
             );
             
