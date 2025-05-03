@@ -1,8 +1,14 @@
 ---------BASE DE DATOS UPIICSA FOOD
 --UGARTE VELASQUEZ DAVID
---UPIICSAFOOD
+--UPIICSAFOOD o PROTOTIPO
+--CREACION DE BASE DE DATOS UPIICSAFOOD
 
+USE PROTOTIPO
 --CREATE DATABASE UPIICSAFOOD
+
+
+
+
 --TABLA DE ROLES PARA LOS USUARIOS
 CREATE TABLE ROLES (
   id_rol INT IDENTITY(0,1) PRIMARY KEY,
@@ -17,7 +23,14 @@ INSERT INTO ROLES (nombre_rol, descripcion ) VALUES
 ('Cliente', 'Puede realizar compras');
 
 
-SELECT*FROM usuarios
+
+SELECT*FROM ROLES
+
+
+
+
+
+
 
 
 --TABLA DE USUARIOS 
@@ -42,16 +55,12 @@ CREATE TABLE USUARIOS (
   token_verificacion VARCHAR(100),
   fecha_expiracion_token DATETIME
 );
-SELECT*FROM USUARIOS
-SELECT*FROM ROLES_USUARIO
+
 INSERT INTO USUARIOS (login, email, password, nombre, apellido, telefono, direccion, 
 fecha_nacimiento, genero, foto_perfil, activo, verificado) VALUES
 
-INSERT INTO USUARIOS (login, email, password)
-VALUES ('ADMIN2','ADMIN@EMAIL.COM','ADMIN');
-
 --SUPER USUARIO
-('admin', 'david.ugarte@empresa.com', 'admin', 'David', 'Ugarte', '55-6158-4615', 'Av. Principal 123, Ciudad', '1985-05-15', 'M', 'fotoproducto/user.png', 1, 1);
+('admin', 'david.ugarte@empresa.com', 'admin', 'Administrador', ' ', '55-6158-4615', 'Av. Principal 123, Ciudad', '1985-05-15', 'M', 'fotoproducto/user.png', 1, 1),
 
 -- Administradores
 ('2020601052', 'david.ugarte@empresa.com', 'david', 'David', 'Ugarte', '55-6158-4615', 'Av. Principal 123, Ciudad', '1985-05-15', 'M', 'fotoproducto/user.png', 1, 1),
@@ -68,6 +77,11 @@ VALUES ('ADMIN2','ADMIN@EMAIL.COM','ADMIN');
 ('2020605213', 'lety.calani@cliente.com', '2020605213', 'Lety', 'Calani', '33-5678-9012', 'Residencial Las Flores 258, Ciudad', '1995-02-14', 'F', 'fotoproducto/user.png', 1, 1),
 ('2017656456', 'test.user@cliente.com', '123', 'Test', 'User', '81-7654-3210', 'Privada Jardines 369, Ciudad', NULL, NULL, 'fotoproducto/userM3.jpg', 1, 0);
 
+
+SELECT*from usuarios
+
+
+
 --TABLA DE ROLES DE USUARIO
 CREATE TABLE ROLES_USUARIO (
   id_usuario_rol INT IDENTITY(1,1) PRIMARY KEY,
@@ -78,32 +92,25 @@ CREATE TABLE ROLES_USUARIO (
   FOREIGN KEY (id_rol) REFERENCES roles(id_rol) ON DELETE CASCADE,
 );
 
-SELECT*FROM USUARIOS
-SELECT*FROM ROLES
-
-UPDATE ROLES SET nombre_rol='SuperUser' where id_rol=0
-SELECT*FROM ROLES_USUARIO
 INSERT INTO ROLES_USUARIO(id_usuario, id_rol) VALUES
-(49,0);
--- Administradores (rol 1)
-(1, 1), -- David Ugarte
-(2, 1), -- Henrych
+(1,0), -- Super User (rol 0)
 
--- Vendedores (rol 2)
-(3, 2), -- David Ugarte (vendedor)
-(4, 2), -- Sussy
+(2, 1), -- Administrador (rol 1)
+
+(3, 3), -- Cliente (rol 3)
+
+(4, 2), -- Vendedor (rol 2)
+
+(5, 3), -- Cliente (rol 3)
+(6, 3), -- Cliente (rol 3)
+(7, 3), -- Cliente (rol 3)
+(8, 3), -- Cliente (rol 3)
+(9, 3); -- Cliente (rol 3)
 
 
--- Clientes (rol 3)
-(5, 3), -- Juan Perez
-(6, 3), -- Carolina Valdivia
-(7, 3), -- Thais Calani
-(8, 3), -- LetyCalani
-(9, 3); -- Test123334
 
-/*ACTUALIZAR A LOS VENDEDORES*/
 
-UPDATE ROLES_USUARIO SET id_rol = 3 WHERE id_usuario > 4; -- Cambiar rol de David Ugarte a cliente
+
 
 --TABLA DE REDES SOCIALES
 
@@ -125,7 +132,8 @@ INSERT INTO REDES_SOCIALES (id_usuario, tipo_red, url_perfil, nombre_usuario ) V
 (7, 'Facebook', 'https://facebook.com/thais.calani', 'thais.calani'),
 (8, 'Instagram', 'https://instagram.com/lety_calani', 'lety_calani');
 
-use upiicsafood
+
+
 DROP TABLE MENU
 --TABLA MENU 
 CREATE TABLE MENU (
@@ -167,6 +175,10 @@ INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden
 
 
 
+
+
+
+
 --TABLA PARA CATEGORIZAR PRODUCTOS 
 
 CREATE TABLE CATEGORIAS (
@@ -183,6 +195,8 @@ INSERT INTO CATEGORIAS (nombre_categoria, descripcion) VALUES
 ('Dulces', 'Golosinas de tamaños pequeños'),
 ('Otros', 'Otros productos diversos');
 
+
+
 --------------------------SOLICITUDESVENDEDOR
 CREATE TABLE SOLICITUDES_VENDEDOR (
   id_solicitud INT IDENTITY(1,1) PRIMARY KEY,
@@ -198,16 +212,16 @@ CREATE TABLE SOLICITUDES_VENDEDOR (
 );
 
 -- Solicitud pendiente
-INSERT INTO SOLICITUDES_VENDEDOR (id_usuario, descripcion, estado) 
+INSERT INTO SOLICITUDES_VENDEDOR (id_usuario, descripcion, estado ) 
 VALUES (5, 'Quiero vender mis productos de repostería', 'PENDIENTE');
 
 -- Vendedor aprobado
 INSERT INTO SOLICITUDES_VENDEDOR (id_usuario, descripcion, estado, fecha_revision, id_revisor, comentarios) 
-VALUES (6, 'Venta de artículos electrónicos', 'APROBADA', GETDATE(), 1, 'Documentación completa');
+VALUES (6, 'Venta de artículos electrónicos', 'APROBADA', GETDATE(), 2, 'Documentación completa');
 
 -- Solicitud rechazada
 INSERT INTO SOLICITUDES_VENDEDOR (id_usuario, descripcion, estado, fecha_revision, id_revisor, comentarios) 
-VALUES (7, 'Venta de ropa usada', 'RECHAZADA', GETDATE(), 1, 'No cumple políticas de calidad');
+VALUES (7, 'Venta de ropa usada', 'RECHAZADA', GETDATE(), 2, 'No cumple políticas de calidad');
 
 
 ---TABLA DE PRODUCTOS
@@ -229,10 +243,6 @@ CREATE TABLE PRODUCTOS (
 );
 
 
-SELECT*FROM PRODUCTOS
-UPDATE PRODUCTOS 
-SET id_usuario=4
-WHERE id_producto>10
 
 
 
@@ -241,8 +251,8 @@ INSERT INTO PRODUCTOS (
   id_usuario, id_categoria, nombre_producto, descripcion, cantidad, precio_venta, precio_compra, imagen, fecha_registro, estado
 ) VALUES
 -- Productos de Pollo (Proveedor: POLLOS IMBA SRL)
-( 3, 1,  'Un Cuarto', 'Un Cuarto', 100, 23.00, 6.00, 'fotoproducto/imagen_1349563845.jpg', '2020-06-12', 'ACTIVO'),
-( 3, 1,  'DUOPOLLO', 'DUOPOLLO', 15, 16.00, 6.00, 'fotoproducto/imagen_1349563882.jpg', '2018-04-28', 'ACTIVO'),
+( 3, 1,  'Comida', 'Comida Completa', 100, 23.00, 6.00, 'fotoproducto/imagen_1349563845.jpg', '2020-06-12', 'ACTIVO'),
+( 3, 1,  'POLLO LOCO', 'POLLITO', 15, 16.00, 6.00, 'fotoproducto/imagen_1349563882.jpg', '2018-04-28', 'ACTIVO'),
 ( 3, 1,  'LIMITO', 'LIMITO', 12, 13.00, 6.00, 'fotoproducto/imagen_1349563944.jpg', '2018-04-28', 'ACTIVO'),
 ( 3, 1,  'ECONOMICO', 'ECONOMICO', 8, 8.00, 0.00, 'fotoproducto/imagen_1349563944.jpg', '2018-05-06', 'ACTIVO'),
 ( 3, 1,  'SUPER COMBO', 'SUPER COMBO', 100, 10.00, 6.00, 'fotoproducto/imagen_1349564147.jpg', '2018-05-06', 'ACTIVO'),
@@ -296,8 +306,7 @@ CREATE TABLE CARRITO (
   FOREIGN KEY (id_usuario) REFERENCES USUARIOS(id_usuario) ON DELETE CASCADE
 );
 
-SELECT* FROM CARRITO
-SELECT* FROM DETALLE_CARRITO
+
 
 CREATE TABLE DETALLE_CARRITO (
   id_detalle INT IDENTITY(1,1) PRIMARY KEY,
@@ -352,32 +361,6 @@ CREATE TABLE DETALLE_ORDEN (
     FOREIGN KEY (id_producto) REFERENCES PRODUCTOS(id_producto)
 );
 
-ALTER TABLE ORDENES ADD fecha_actualizacion DATETIME DEFAULT GETDATE();
 
-select *from usuarios
-SELECT p.*, u.nombre as nombre_vendedor, u.apellido as apellido_vendedor
-,u.login as login_vendedor , c.nombre_categoria
-            FROM PRODUCTOS p
-            JOIN USUARIOS u ON p.id_usuario = u.id_usuario
-            JOIN CATEGORIAS c ON p.id_categoria = c.id_categoria
-            WHERE p.id_producto =1
-
-SELECT*FROM ORDENES
+SELECT*FROM ROLES_USUARIO
 SELECT*FROM USUARIOS
-            SELECT 
-                    o.*,
-                    c.nombre as cliente_nombre,
-                    c.login as cliente_login,
-                    (SELECT COUNT(*) FROM DETALLE_ORDEN do WHERE do.id_orden = o.id_orden) as total_productos
-                FROM ORDENES o
-                JOIN USUARIOS c ON o.id_usuario = c.id_usuario
-                WHERE o.id_usuario = 3
-                AND ('PENDIENTE' IS NULL OR o.estado = 'PENDIENTE')
-                ORDER BY o.fecha_orden DESC
-
-
-                --BUSCAR VENDEDOR CON ID_PRODUCTO
-              SELECT id_usuario FROM PRODUCTOS WHERE id_producto = 1
-
-
-            UPDATE ORDENES SET id_vendedor = 3 WHERE id_orden >1

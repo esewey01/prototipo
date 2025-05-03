@@ -9,10 +9,10 @@ class Conexion
     public function __construct()
     {
         // Configuración del servidor
-        $this->server = "localhost";
-        $this->database = "UPIICSAFOOD";
-        $this->user = "david";  //USUARIO DE SQL SERVER
-        $this->password = "6441";
+        $this->server = "prototipo.database.windows.net";
+        $this->database = "Prototipo";
+        $this->user = "adminsql";  //USUARIO DE SQL SERVER
+        $this->password = "CoC0Play$.";
         // Configuración de la conexión
         $connectionInfo = array(
             "Database" => $this->database,
@@ -250,14 +250,13 @@ class Conexion
 
 
     public function getMenuByRol($id_rol)
-    {
-        $sql = "SELECT * FROM MENU 
-            WHERE id_rol = ? OR id_rol IS NULL
+{
+    $sql = "SELECT * FROM MENU
+            WHERE (? = 0 OR id_rol = ? OR id_rol IS NULL)
             ORDER BY orden";
-        $stmt = $this->executeQuery($sql, array($id_rol));
-        return $this->getResults($stmt);
-    }
-
+    $stmt = $this->executeQuery($sql, array($id_rol, $id_rol));
+    return $this->getResults($stmt);
+}
 
     //CCREAR NUEVO USUARIO
     public function createUserWithRole($nombre, $login, $password, $foto_perfil, $email, $id_rol)
