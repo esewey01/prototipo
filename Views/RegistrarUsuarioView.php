@@ -7,12 +7,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro - UPIICSA FOOD</title>
-    <link href="Views/css/bootstrap.min.css" rel="stylesheet">
-    <link href="Views/css/bootstrap-theme.css" rel="stylesheet">
-    <link href="Views/css/elegant-icons-style.css" rel="stylesheet" />
-    <link href="Views/css/font-awesome.css" rel="stylesheet" />
-    <link href="Views/css/style.css" rel="stylesheet">
-    <link href="Views/css/style-responsive.css" rel="stylesheet" />
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-theme.css" rel="stylesheet">
+    <link href="css/elegant-icons-style.css" rel="stylesheet" />
+    <link href="css/font-awesome.css" rel="stylesheet" />
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/style-responsive.css" rel="stylesheet" />
 
 </head>
 
