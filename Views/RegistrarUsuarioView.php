@@ -7,12 +7,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro - UPIICSA FOOD</title>
-    <link href="/Prototipo/Views/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/Prototipo/Views/css/bootstrap-theme.css" rel="stylesheet">
-    <link href="/Prototipo/Views/css/elegant-icons-style.css" rel="stylesheet" />
-    <link href="/Prototipo/Views/css/font-awesome.css" rel="stylesheet" />
-    <link href="/Prototipo/Views/css/style.css" rel="stylesheet">
-    <link href="/Prototipo/Views/css/style-responsive.css" rel="stylesheet" />
+    <link href="Views/css/bootstrap.min.css" rel="stylesheet">
+    <link href="Views/css/bootstrap-theme.css" rel="stylesheet">
+    <link href="Views/css/elegant-icons-style.css" rel="stylesheet" />
+    <link href="Views/css/font-awesome.css" rel="stylesheet" />
+    <link href="Views/css/style.css" rel="stylesheet">
+    <link href="Views/css/style-responsive.css" rel="stylesheet" />
 
 </head>
 
@@ -26,7 +26,7 @@ if (isset($_SESSION['registration_messages'])) {
 }
 ?>
 <div class="container">
-    <form class="login-form" action="/Prototipo/Controller/RegistrarUsuarioController.php" method="POST" enctype="multipart/form-data" id="registroForm">
+    <form class="login-form" action="Controller/RegistrarUsuarioController.php" method="POST" enctype="multipart/form-data" id="registroForm">
         <div class="login-wrap">
             <h2 class="text-center">Registro de Usuario</h2>
 
@@ -96,7 +96,7 @@ if (isset($_SESSION['registration_messages'])) {
         statusElement.className = 'text-info';
         statusElement.classList.remove('hidden');
 
-        fetch('/Prototipo/Controller/VerificarTelefonoController.php?telefono=' + telefono)
+        fetch('Controller/VerificarTelefonoController.php?telefono=' + telefono)
             .then(response => response.json())
             .then(data => {
                 if (data.valid) {
