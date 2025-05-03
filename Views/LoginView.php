@@ -16,12 +16,12 @@ session_start();
 
     <title>UPIICSA FOOD - Sistema de Compra y Venta</title>
 
-    <link href="/Views/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/Views/css/bootstrap-theme.css" rel="stylesheet">
-    <link href="/Views/css/elegant-icons-style.css" rel="stylesheet" />
-    <link href="/Views/css/font-awesome.css" rel="stylesheet" />
-    <link href="/Views/css/style.css" rel="stylesheet">
-    <link href="/Views/css/style-responsive.css" rel="stylesheet" />
+    <link href="Views/css/bootstrap.min.css" rel="stylesheet">
+    <link href="Views/css/bootstrap-theme.css" rel="stylesheet">
+    <link href="Views/css/elegant-icons-style.css" rel="stylesheet" />
+    <link href="Views/css/font-awesome.css" rel="stylesheet" />
+    <link href="Views/css/style.css" rel="stylesheet">
+    <link href="Views/css/style-responsive.css" rel="stylesheet" />
 
 </head>
 
@@ -45,7 +45,7 @@ session_start();
 
     <div class="container">
 
-        <form class="login-form" action="/Prototipo/Controller/AccessUsers.php" method="POST">
+        <form class="login-form" action="Controller/AccessUsers.php" method="POST">
             <div class="login-wrap">
 
                 <p class="login-img"><i class="icon_like"></i></p>
@@ -63,7 +63,7 @@ session_start();
                 </label>
                 <button class="btn btn-primary btn-lg btn-block" type="submit">Iniciar Sesión</button>
                 <button class="btn btn-primary btn-lg btn-block" type="button"
-                    onclick="location.href='/Prototipo/Views/RegistrarUsuarioView.php'">
+                    onclick="location.href='Views/RegistrarUsuarioView.php'">
                     Registrarse
                 </button>
             </div>
