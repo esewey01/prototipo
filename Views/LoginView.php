@@ -16,12 +16,12 @@ session_start();
 
     <title>UPIICSA FOOD - Sistema de Compra y Venta</title>
 
-    <link href="/Prototipo/Views/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/Prototipo/Views/css/bootstrap-theme.css" rel="stylesheet">
-    <link href="/Prototipo/Views/css/elegant-icons-style.css" rel="stylesheet" />
-    <link href="/Prototipo/Views/css/font-awesome.css" rel="stylesheet" />
-    <link href="/Prototipo/Views/css/style.css" rel="stylesheet">
-    <link href="/Prototipo/Views/css/style-responsive.css" rel="stylesheet" />
+    <link href="/Views/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/Views/css/bootstrap-theme.css" rel="stylesheet">
+    <link href="/Views/css/elegant-icons-style.css" rel="stylesheet" />
+    <link href="/Views/css/font-awesome.css" rel="stylesheet" />
+    <link href="/Views/css/style.css" rel="stylesheet">
+    <link href="/Views/css/style-responsive.css" rel="stylesheet" />
 
 </head>
 
