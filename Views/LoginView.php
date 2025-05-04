@@ -23,12 +23,12 @@ if (isset($_SESSION['registration_messages'])) {
     <title>UPIICSA FOOD - Sistema de Compra y Venta</title>
 
     
-    <link href="views/css/bootstrap.min.css" rel="stylesheet">
-    <link href="views/css/bootstrap-theme.css" rel="stylesheet">
-    <link href="views/css/elegant-icons-style.css" rel="stylesheet" />
-    <link href="views/css/font-awesome.css" rel="stylesheet" />
-    <link href="views/css/style.css" rel="stylesheet">
-    <link href="views/css/style-responsive.css" rel="stylesheet" />
+    <link href="public/css/bootstrap.min.css" rel="stylesheet">
+    <link href="public/css/bootstrap-theme.css" rel="stylesheet">
+    <link href="public/css/elegant-icons-style.css" rel="stylesheet" />
+    <link href="public/css/font-awesome.css" rel="stylesheet" />
+    <link href="public/css/style.css" rel="stylesheet">
+    <link href="public/css/style-responsive.css" rel="stylesheet" />
 
 </head>
 

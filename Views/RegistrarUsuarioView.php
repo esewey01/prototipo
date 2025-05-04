@@ -16,12 +16,12 @@ if (isset($_SESSION['registration_messages'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro - UPIICSA FOOD</title>
     
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/bootstrap-theme.css" rel="stylesheet">
-    <link href="css/elegant-icons-style.css" rel="stylesheet" />
-    <link href="css/font-awesome.css" rel="stylesheet" />
-    <link href="css/style.css" rel="stylesheet">
-    <link href="css/style-responsive.css" rel="stylesheet" />
+    <link href="../public/../public/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../public/css/bootstrap-theme.css" rel="stylesheet">
+    <link href="../public/css/elegant-icons-style.css" rel="stylesheet" />
+    <link href="../public/css/font-awesome.css" rel="stylesheet" />
+    <link href="../public/css/style.css" rel="stylesheet">
+    <link href="../public/css/style-responsive.css" rel="stylesheet" />
 </head>
 
 
