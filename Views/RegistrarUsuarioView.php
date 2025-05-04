@@ -15,10 +15,6 @@ if (isset($_SESSION['registration_messages'])) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro - UPIICSA FOOD</title>
-
-    
-<?php include('../Model/Conexion.php'); ?>
-<?php include('../Controller/Constants.php'); ?>
     
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/bootstrap-theme.css" rel="stylesheet">
