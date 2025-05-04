@@ -1,32 +1,36 @@
+<?php
+session_start();
+if (isset($_SESSION['registration_messages'])) {
+    echo '<div class="alert alert-' . $_SESSION['registration_messages']['type'] . '">';
+    echo $_SESSION['registration_messages']['text'];
+    echo '</div>';
+    unset($_SESSION['registration_messages']);
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 
-<?php include('../Model/Conexion.php'); ?>
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro - UPIICSA FOOD</title>
+
+    
+<?php include('../Model/Conexion.php'); ?>
+<?php include('../Controller/Constants.php'); ?>
+    
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/bootstrap-theme.css" rel="stylesheet">
     <link href="css/elegant-icons-style.css" rel="stylesheet" />
     <link href="css/font-awesome.css" rel="stylesheet" />
     <link href="css/style.css" rel="stylesheet">
     <link href="css/style-responsive.css" rel="stylesheet" />
-
 </head>
 
-<?php
-session_start();
-if (isset($_SESSION['registration_messages'])) {
-    echo '<div class="alert alert-'.$_SESSION['registration_messages']['type'].'">';
-    echo $_SESSION['registration_messages']['text'];
-    echo '</div>';
-    unset($_SESSION['registration_messages']);
-}
-?>
+
 <div class="container">
-    <form class="login-form" action="Controller/RegistrarUsuarioController.php" method="POST" enctype="multipart/form-data" id="registroForm">
+    <form class="login-form" action="../Controller/RegistrarUsuarioController.php" method="POST" enctype="multipart/form-data" id="registroForm">
         <div class="login-wrap">
             <h2 class="text-center">Registro de Usuario</h2>
 
@@ -66,7 +70,7 @@ if (isset($_SESSION['registration_messages'])) {
             <small>(Máximo 2MB, formatos: JPG, PNG)</small>
 
             <button class="btn btn-primary btn-lg btn-block" type="submit" id="btn-registrarse">Registrarse</button>
-            <button class="btn btn-primary btn-lg btn-block" type="button" onclick="location.href='LoginView.php'">Volver</button>
+            <button class="btn btn-primary btn-lg btn-block" type="button" onclick="location.href='../index.php'">Volver</button>
         </div>
     </form>
 </div>
@@ -96,7 +100,7 @@ if (isset($_SESSION['registration_messages'])) {
         statusElement.className = 'text-info';
         statusElement.classList.remove('hidden');
 
-        fetch('Controller/VerificarTelefonoController.php?telefono=' + telefono)
+        fetch('../Controller/VerificarTelefonoController.php?telefono=' + telefono)
             .then(response => response.json())
             .then(data => {
                 if (data.valid) {

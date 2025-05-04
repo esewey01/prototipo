@@ -1,5 +1,11 @@
 <?php
 session_start();
+if (isset($_SESSION['registration_messages'])) {
+    echo '<div class="alert alert-' . $_SESSION['registration_messages']['type'] . '">';
+    echo $_SESSION['registration_messages']['text'];
+    echo '</div>';
+    unset($_SESSION['registration_messages']);
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -16,32 +22,19 @@ session_start();
 
     <title>UPIICSA FOOD - Sistema de Compra y Venta</title>
 
-    <link href="Views/css/bootstrap.min.css" rel="stylesheet">
-    <link href="Views/css/bootstrap-theme.css" rel="stylesheet">
-    <link href="Views/css/elegant-icons-style.css" rel="stylesheet" />
-    <link href="Views/css/font-awesome.css" rel="stylesheet" />
-    <link href="Views/css/style.css" rel="stylesheet">
-    <link href="Views/css/style-responsive.css" rel="stylesheet" />
+    
+    <link href="Views/views/css/bootstrap.min.css" rel="stylesheet">
+    <link href="views/css/bootstrap-theme.css" rel="stylesheet">
+    <link href="views/css/elegant-icons-style.css" rel="stylesheet" />
+    <link href="views/css/font-awesome.css" rel="stylesheet" />
+    <link href="views/css/style.css" rel="stylesheet">
+    <link href="views/css/style-responsive.css" rel="stylesheet" />
 
 </head>
 
 
 
 <body class="contenedor_login">
-
-
-
-    <?php if (isset($_SESSION['mensaje'])): ?>
-        <div class="alert <?= $_SESSION['alerta'] ?? 'alert-info' ?> alert-dismissible fade in" role="alert">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">×</span>
-            </button>
-            <strong><?= $_SESSION['mensaje'] ?></strong>
-        </div>
-    <?php
-        unset($_SESSION['mensaje']);
-        unset($_SESSION['alerta']);
-    endif; ?>
 
     <div class="container">
 
