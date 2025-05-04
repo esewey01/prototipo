@@ -1,21 +1,12 @@
 <?php
-// Determinar si estamos en localhost o producción
-$isLocal = ($_SERVER['HTTP_HOST'] == 'localhost' || $_SERVER['HTTP_HOST'] == '127.0.0.1');
-
-// Definir URL base dinámica
-$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https://" : "http://";
-$baseUrl = $protocol . $_SERVER['HTTP_HOST'] . str_replace($_SERVER['DOCUMENT_ROOT'], '', dirname(__DIR__));
-
-// Definir constantes
 if (!defined('URL_VIEWS')) {
-    define('URL_VIEWS', rtrim($baseUrl, '/') . '/Views/');
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https" : "http";
+    $host = $_SERVER['HTTP_HOST'];
+    $path = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\') . '/Views/';
+    define('URL_VIEWS', "{$protocol}://{$host}{$path}");
 }
 
 if (!defined('ADDRESS')) {
-    // Ruta física del servidor (independiente del ambiente)
-    define('ADDRESS', dirname(__DIR__) . '/Views/fotoproducto/');
+    define('ADDRESS', $_SERVER['DOCUMENT_ROOT'] . '/Prototipo/Views/fotoproducto/');
 }
 
-if (!defined('BASE_URL')) {
-    define('BASE_URL', $baseUrl);
-}
