@@ -150,7 +150,7 @@ class UserRegistrationController
     {
         if ($password !== $password2) {
             $this->errors[] = "Las contraseñas no coinciden";
-        }/*
+        }
         $minLength = 8;
         if (strlen($password) < $minLength) {
             $this->errors[] = "La contraseña debe tener al menos " . $minLength . " caracteres";
@@ -170,7 +170,7 @@ class UserRegistrationController
 
         if (!preg_match('/[^a-zA-Z0-9\s]/', $password)) {
             $this->errors[] = "La contraseña debe contener al menos un carácter especial";
-        }*/
+        }
     }
 
     private function processPhotoUpload(&$userData)

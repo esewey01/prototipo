@@ -128,7 +128,7 @@ class AuthController {
     
     private function redirectToLogin() {
        
-        header('Location: ../Views/LoginView.php');
+        header('Location: ../index.php');
         exit();
     }
 }
