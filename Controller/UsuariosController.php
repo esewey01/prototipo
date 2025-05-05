@@ -14,7 +14,7 @@ if (!isset($_SESSION['usuario']['login'])) {
     exit();
 }
 
-if ($_SESSION['usuario']['rol']['id_rol']!==1)
+if ($_SESSION['usuario']['rol']['id_rol']>= 2)
 {
     $_SESSION['mensaje'] = "Acceso no autorizado";
     $_SESSION['alerta'] = "alert-danger";
