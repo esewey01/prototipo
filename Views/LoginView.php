@@ -27,6 +27,7 @@ endif; ?>
     <meta name="description" content="PROYECTO DE INGENIERÍA DE PRUEBAS">
 
     <title>UPIICSA FOOD - Sistema de Compra y Venta</title>
+    
 
 
     <link href="public/css/bootstrap.min.css" rel="stylesheet">
