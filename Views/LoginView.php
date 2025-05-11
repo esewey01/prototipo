@@ -1,11 +1,17 @@
 <?php
 session_start();
-if (isset($_SESSION['registration_messages'])) {
-    echo '<div class="alert alert-' . $_SESSION['registration_messages']['type'] . '">';
-    echo $_SESSION['registration_messages']['text'];
-    echo '</div>';
-    unset($_SESSION['registration_messages']);
-}
+//FUNCION DE ALERTA DE MENSAJES-
+if (isset($_SESSION['mensaje'])): ?>
+    <div class="alert <?= $_SESSION['alerta'] ?? 'alert-info' ?> alert-dismissible fade in" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">×</span>
+        </button>
+        <strong><?= $_SESSION['mensaje'] . ': ' . $_SESSION['usuario']['rol']['nombre_rol'] ?></strong>
+    </div>
+<?php
+    unset($_SESSION['mensaje']);
+    unset($_SESSION['alerta']);
+endif; ?>
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -22,7 +28,7 @@ if (isset($_SESSION['registration_messages'])) {
 
     <title>UPIICSA FOOD - Sistema de Compra y Venta</title>
 
-    
+
     <link href="public/css/bootstrap.min.css" rel="stylesheet">
     <link href="public/css/bootstrap-theme.css" rel="stylesheet">
     <link href="public/css/elegant-icons-style.css" rel="stylesheet" />

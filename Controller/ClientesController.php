@@ -6,8 +6,8 @@ if (!isset($_SESSION)) {
     session_start();
 }
 
-$usuario = $_GET['usuario'];
-$password = $_GET['password'];
+$usuario = $_SESSION['usuario']['login'];
+$password = $_SESSION['usuario']['password'];
 
 $con = new Conexion();
 
