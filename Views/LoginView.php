@@ -12,7 +12,7 @@ if (isset($_SESSION['mensaje'])): ?>
     unset($_SESSION['mensaje']);
     unset($_SESSION['alerta']);
 endif; ?>
-?>
+
 <!DOCTYPE html>
 <html lang="es">
 

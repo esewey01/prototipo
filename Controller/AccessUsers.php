@@ -3,33 +3,35 @@ session_start();
 require('../Model/Conexion.php');
 require('Constants.php');
 
-class AuthController {
+class AuthController
+{
     private $conexion;
-    
+
     private $alerta;
     private $mensaje;
-    
-    public function __construct(Conexion $conexion) {
+
+    public function __construct(Conexion $conexion)
+    {
         $this->conexion = $conexion;
         $this->alerta = $_SESSION['alerta'] ?? '';
         $this->mensaje = $_SESSION['mensaje'] ?? '';
-       
     }
-    
-    public function handleRequest() {
+
+    public function handleRequest()
+    {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->setErrorSession("Acceso no autorizado");
             $this->redirectToLogin();
             return;
         }
-        
+
         $login = trim($_POST['login']);
         $password = trim($_POST['password']);
-        
+
         if (!$this->validateInputs($login, $password)) {
             return;
         }
-        
+
         try {
             $this->authenticateUser($login, $password);
         } catch (Exception $e) {
@@ -37,8 +39,9 @@ class AuthController {
             $this->redirectToLogin();
         }
     }
-    
-    private function validateInputs($login, $password) {
+
+    private function validateInputs($login, $password)
+    {
         if (empty($login) || empty($password)) {
             $this->setErrorSession("Ningún campo debe estar vacío");
             $this->redirectToLogin();
@@ -46,33 +49,63 @@ class AuthController {
         }
         return true;
     }
-    
-    private function authenticateUser($login, $password) {
+
+    private function authenticateUser($login, $password)
+    {
         $usuario = $this->conexion->getUserWithRole($login);
-        
+
         if (!$usuario) {
+            //NO REVELAR SI EL USUARIO NO EXISTE
             throw new Exception("Usuario o contraseña incorrectos");
         }
-        
-        $this->validatePassword($usuario, $password);
+
+        //VERIFICAR SI LA CUENTA ESTA BLOQUEDA TEMPORALMENTE
+
+        if ($usuario['fecha_bloqueo'] && $usuario['fecha_bloqueo']->getTimestamp() > time()) {
+            throw new Exception("Cuenta bloqueada temporalmente. Intenta más tarde.");
+        }
+
+       
+        $hashedInput = hash('sha256', utf8_encode($password));
+
+        // Comparar con el hash almacenado en la base de datos
+        if (strcasecmp($hashedInput, $usuario['password']) !== 0) {
+            // Incrementar intentos fallidos
+            $this->conexion->incrementFailedAttempts($usuario['id_usuario']);
+
+            // Bloquear después de 5 intentos por 30 minutos
+            if ($usuario['intentos_fallidos'] + 1 >= 5) {
+                $this->conexion->blockAccount($usuario['id_usuario'], 1800); // 30 minutos
+                throw new Exception("Demasiados intentos fallidos. Cuenta bloqueada temporalmente.");
+            }
+
+            throw new Exception("Usuario o Password incorrectos, por favor intenta de nuevo1");
+        }
+
+        // Resetear intentos fallidos al loguearse correctamente
+        $this->conexion->resetFailedAttempts($usuario['id_usuario']);
+
+
+
         $this->checkAccountStatus($usuario);
         $this->setupUserSession($usuario);
         $this->redirectBasedOnRole($usuario);
     }
-    
-    private function validatePassword($usuario, $password) {
-        if ($usuario['password'] !== $password) {
-            throw new Exception("Usuario o Password incorrectos, por favor intenta de nuevo");
-        }
-    }
-    
-    private function checkAccountStatus($usuario) {
+
+
+
+    private function checkAccountStatus($usuario)
+    {
         if (!$usuario['activo']) {
             throw new Exception("Tu cuenta está desactivada. Contacta al administrador");
         }
     }
-    
-    private function setupUserSession($usuario) {
+
+    private function setupUserSession($usuario)
+    {
+        session_regenerate_id(true); // Cambia el ID de sesión para prevenir ataques de fijación de sesión
+        $_SESSION['LAST_ACTIVITY'] = time(); // Actualiza el tiempo de la última actividad
+
         $_SESSION['usuario'] = [
             'id_usuario' => $usuario['id_usuario'],
             'login' => $usuario['login'],
@@ -83,7 +116,7 @@ class AuthController {
             'telefono' => $usuario['telefono'],
             'direccion' => $usuario['direccion'],
             'genero' => $usuario['genero'],
-           'fecha_nacimiento' => ($usuario['fecha_nacimiento'] instanceof DateTime) ? $usuario['fecha_nacimiento']->format('Y-m-d') : '',
+            'fecha_nacimiento' => ($usuario['fecha_nacimiento'] instanceof DateTime) ? $usuario['fecha_nacimiento']->format('Y-m-d') : '',
             'foto' => $usuario['foto_perfil'],
             'fecha_registro' => $usuario['fecha_registro']->format('Y-m-d H:i:s'),
             'ultimo_registro' => $usuario['ultimo_registro'] ?? ' ',
@@ -94,40 +127,41 @@ class AuthController {
             'menu' => $this->conexion->getMenuByRol($usuario['id_rol'])
         ];
     }
-    
-    private function redirectBasedOnRole($usuario) {
+
+    private function redirectBasedOnRole($usuario)
+    {
         $roleName = strtolower($usuario['nombre_rol']);
         $this->mensaje = strtoupper($roleName) . ": " . $usuario['nombre'];
         $_SESSION['mensaje'] = "Conexion exitosa, bienvenido a la plataforma";
         $_SESSION['alerta'] = "alert-success";
-        
+
         $viewMap = [
             'superuser' => '../Views/Wellcome.php',
             'administrador' => '../Views/Wellcome.php',
             'vendedor' => '../Views/Wellcome.php',
             'cliente' => '../Views/Wellcome.php'
         ];
-        
+
         if (!isset($viewMap[$roleName])) {
             throw new Exception("Rol no reconocido");
         }
-        
+
         require($viewMap[$roleName]);
         unset($_SESSION['mensaje']);
         unset($_SESSION['alerta']);
-    
-        exit();
-        
 
+        exit();
     }
-    
-    private function setErrorSession($message) {
+
+    private function setErrorSession($message)
+    {
         $_SESSION['mensaje'] = $message;
         $_SESSION['alerta'] = "alert-danger";
     }
-    
-    private function redirectToLogin() {
-       
+
+    private function redirectToLogin()
+    {
+
         header('Location: ../index.php');
         exit();
     }

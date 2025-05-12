@@ -121,7 +121,7 @@ class Conexion
         return $result ?? null;
     }
 
-    // FUNCIONES PARA LOS UUSARIOS 
+    // FUNCIONES PARA LOS USUARIOS 
     public function searchUser($login)
     {
         $sql = "SELECT id_usuario FROM USUARIOS WHERE login = ?";
@@ -129,11 +129,62 @@ class Conexion
         $result = $this->getResults($stmt);
         return !empty($result);
     }
+
+    /**
+     * Incrementa el contador de intentos fallidos de un usuario
+     */
+    public function incrementFailedAttempts($id_usuario)
+    {
+        $sql = "UPDATE USUARIOS SET 
+            intentos_fallidos = intentos_fallidos + 1,
+            ultimo_acceso = GETDATE()
+            WHERE id_usuario = ?";
+        return $this->executeNonQuery($sql, [$id_usuario]);
+    }
+
+    /**
+     * Bloquea una cuenta por un tiempo determinado (en segundos)
+     */
+    public function blockAccount($id_usuario, $seconds)
+    {
+        $sql = "UPDATE USUARIOS SET 
+            fecha_bloqueo = DATEADD(SECOND, ?, GETDATE()),
+            intentos_fallidos = 0
+            WHERE id_usuario = ?";
+        return $this->executeNonQuery($sql, [$seconds, $id_usuario]);
+    }
+
+    /**
+     * Resetea los intentos fallidos al hacer login correctamente
+     */
+    public function resetFailedAttempts($id_usuario)
+    {
+        $sql = "UPDATE USUARIOS SET 
+            intentos_fallidos = 0,
+            fecha_bloqueo = NULL,
+            ultimo_acceso = GETDATE()
+            WHERE id_usuario = ?";
+        return $this->executeNonQuery($sql, [$id_usuario]);
+    }
+
+    /**
+     * Obtiene información sobre el bloqueo de un usuario
+     */
+    public function getLoginAttemptsInfo($id_usuario)
+    {
+        $sql = "SELECT intentos_fallidos, fecha_bloqueo 
+            FROM USUARIOS 
+            WHERE id_usuario = ?";
+        $stmt = $this->executeQuery($sql, [$id_usuario]);
+        return $this->getResults($stmt)[0] ?? null;
+    }
     //REGISTRAR NUEVO USUARIO
     public function registerUserWithRole($nombre, $login, $password, $foto_perfil, $telefono, $id_rol)
     {
         // Iniciar transacción para asegurar integridad
         sqlsrv_begin_transaction($this->connection);
+        //HASHEAR LA CONTRASEÑA ANTES DE ALMACENARLA
+        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
         try {
             // 1. Insertar el usuario y obtener el ID insertado directamente
@@ -141,7 +192,7 @@ class Conexion
                     (nombre, login, password, foto_perfil, telefono, fecha_registro) 
                     OUTPUT INSERTED.id_usuario
                     VALUES (?, ?, ?, ?, ?, GETDATE())";
-            $result = $this->executeQuery($sql_user, array($nombre, $login, $password, $foto_perfil, $telefono));
+            $result = $this->executeQuery($sql_user, array($nombre, $login, $hashedPassword, $foto_perfil, $telefono));
 
             // Obtener el ID del nuevo usuario desde el resultado
             $row = $this->getResults($result);
@@ -250,19 +301,21 @@ class Conexion
 
 
     public function getMenuByRol($id_rol)
-{
-    $sql = "SELECT * FROM MENU
+    {
+        $sql = "SELECT * FROM MENU
             WHERE (? = 0 OR id_rol = ? OR id_rol IS NULL)
             ORDER BY orden";
-    $stmt = $this->executeQuery($sql, array($id_rol, $id_rol));
-    return $this->getResults($stmt);
-}
+        $stmt = $this->executeQuery($sql, array($id_rol, $id_rol));
+        return $this->getResults($stmt);
+    }
 
     //CCREAR NUEVO USUARIO
     public function createUserWithRole($nombre, $login, $password, $foto_perfil, $email, $id_rol)
     {
         // Iniciar transacción para asegurar integridad
         sqlsrv_begin_transaction($this->connection);
+        //hashear la contraseña antes de almacenarla
+        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
         try {
             // 1. Insertar el usuario y obtener el ID insertado directamente
@@ -270,7 +323,7 @@ class Conexion
                     (nombre, login, password, foto_perfil, email, fecha_registro) 
                     OUTPUT INSERTED.id_usuario
                     VALUES (?, ?, ?, ?, ?, GETDATE())";
-            $result = $this->executeQuery($sql_user, array($nombre, $login, $password, $foto_perfil, $email));
+            $result = $this->executeQuery($sql_user, array($nombre, $login, $hashedPassword, $foto_perfil, $email));
 
             // Obtener el ID del nuevo usuario desde el resultado
             $row = $this->getResults($result);
