@@ -13,7 +13,7 @@ class Conexion
         $this->database = "Prototipo";
         $this->user = "adminsql";  //USUARIO DE SQL SERVER
         $this->password = "CoC0Play$.";
-        // Configuración de la conexión
+        //Configuración de la conexión
         $connectionInfo = array(
             "Database" => $this->database,
             "UID" => $this->user,
@@ -32,16 +32,37 @@ class Conexion
         $this->connection = sqlsrv_connect($this->server, $connectionInfo);
 
         if (!$this->connection) {
-            die("Error de conexión: " . print_r(sqlsrv_errors(), true));
-        } else {
-            //ECHO 'Conexión exitosa a la base de datos: ';
-            // echo '
-            // <script language = javascript>
-            //      alert(`Conexión exitosa a la base de datos:' . $this->database .'`);
-            // </script>
-            // ';
+            $errors = sqlsrv_errors();
+            error_log("Error de conexión a SQL Server: " . print_r($errors, true));
+            throw new DatabaseConnectionException("No se puede conectar al servidor de base de datos. Por favor, intente más tarde.");
         }
-    }
+  
+
+    }/*
+    public function connect()
+    {
+        if ($this->connection) {
+            return $this->connection;
+        }
+
+        $connectionInfo = array(
+            "Database" => $this->database,
+            "UID" => $this->user,
+            "PWD" => $this->password,
+            "CharacterSet" => "UTF-8",
+            "LoginTimeout" => 5 // 5 segundos de timeout
+        );
+
+        $this->connection = @sqlsrv_connect($this->server, $connectionInfo);
+
+        if (!$this->connection) {
+            $errors = sqlsrv_errors();
+            error_log("Error de conexión a SQL Server: " . print_r($errors, true));
+            throw new DatabaseConnectionException("No se puede conectar al servidor de base de datos. Por favor, intente más tarde.");
+        }
+
+        return $this->connection;*/
+   // }
 
 
 
@@ -1209,3 +1230,7 @@ class Conexion
         return $this->getResults($stmt);
     }
 }
+
+
+class DatabaseConnectionException extends Exception {}
+?>

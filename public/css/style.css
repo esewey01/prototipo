@@ -23,6 +23,37 @@ Website: http://geekslabs.com/
 }
 
 
+.product-card {
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            height: 100%;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-img {
+            height: 180px;
+            object-fit: cover;
+            width: 100%;
+        }
+
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            height: calc(100% - 180px);
+        }
+
+        .card-text {
+            flex-grow: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
 
 body {
     color: #797979;

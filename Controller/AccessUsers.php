@@ -6,7 +6,6 @@ require('Constants.php');
 class AuthController
 {
     private $conexion;
-
     private $alerta;
     private $mensaje;
 
@@ -130,7 +129,7 @@ class AuthController
         session_destroy();
         
 
-        // Configura parámetros seguros de sesión
+        //Parámetros seguros de sesión
         ini_set('session.cookie_httponly', 1);
         ini_set('session.cookie_secure', 1); // Solo si usas HTTPS
         ini_set('session.use_strict_mode', 1);
@@ -169,10 +168,10 @@ class AuthController
         $_SESSION['alerta'] = "alert-success";
 
         $viewMap = [
-            'superuser' => '../Views/Wellcome.php',
-            'administrador' => '../Views/Wellcome.php',
-            'vendedor' => '../Views/Wellcome.php',
-            'cliente' => '../Views/Wellcome.php'
+            'superuser' => 'PrincipalController.php',
+            'administrador' => 'PrincipalController.php',
+            'vendedor' => 'PrincipalController.php',
+            'cliente' => 'PrincipalController.php'
         ];
 
         if (!isset($viewMap[$roleName])) {
@@ -200,18 +199,23 @@ class AuthController
     }
 }
 
-// Al final del archivo, modifica la creación del controlador
+
 try {
     $con = new Conexion();
     $authController = new AuthController($con);
     $authController->handleRequest();
-} catch (Exception $e) {
+} catch (Throwable $e) { // Captura tanto Exception como Error
     // Registrar el error en logs
-    error_log("Error de conexión: " . $e->getMessage());
+    error_log("Error crítico en AuthController: " . $e->getMessage() . " en " . $e->getFile() . ":" . $e->getLine());
 
-    // Mostrar mensaje amigable al usuario
-    $_SESSION['mensaje'] = "Error de conexión. Por favor intente más tarde.";
+    // Iniciar sesión si no está iniciada
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
+    }
+
+    $_SESSION['mensaje'] = "Error en el sistema. Por favor intente más tarde.";
     $_SESSION['alerta'] = "alert-danger";
+    
     header('Location: ../index.php');
     exit();
 }

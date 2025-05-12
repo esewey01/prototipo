@@ -107,11 +107,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Cambio de contraseña común a todos los roles
                     $current_password = $_POST['current_password'];
                     $new_password = $_POST['new_password'];
+                    //CONTRASEÑA HASHEADA
+                    $hashedInput = hash('sha256', utf8_encode($new_password));
                     $confirm_password = $_POST['confirm_password'];
 
                     // Verificar usuario actual
                     $user = $con->getUser($_SESSION['usuario']['login']);
-                    if ($user[0]['password'] !== trim($current_password)) {
+
+                    if (strcasecmp($hashedInput, $user[0]['password']) !== 0) {
+                    //if ($user[0]['password'] !== trim($current_password)) {
 
                         throw new Exception("La contraseña no conicide con la ingresada");
                     }
