@@ -47,12 +47,34 @@ class AuthController
             $this->redirectToLogin();
             return false;
         }
+
+
+
+        // Validación adicional contra inyección SQL
+    if (preg_match('/[\'"\\;]/', $login)) {
+        error_log("Intento de inyección SQL detectado: " . $login);
+        $this->setErrorSession("Caracteres no permitidos");
+        $this->redirectToLogin();
+        return false;
+    }
+     // Longitud máxima razonable
+     if (strlen($login) > 50 || strlen($password) > 100) {
+        $this->setErrorSession("Datos de entrada demasiado largos");
+        $this->redirectToLogin();
+        return false;
+    }
         return true;
     }
 
     private function authenticateUser($login, $password)
     {
         $usuario = $this->conexion->getUserWithRole($login);
+
+        if ($usuario === null) {
+            // Esto podría indicar un error en la consulta, no solo "usuario no existe"
+            error_log("Error al obtener usuario: posible problema de conexión");
+            throw new Exception("Error en el sistema. Por favor intente más tarde.");
+        }
 
         if (!$usuario) {
             //NO REVELAR SI EL USUARIO NO EXISTE
@@ -65,7 +87,7 @@ class AuthController
             throw new Exception("Cuenta bloqueada temporalmente. Intenta más tarde.");
         }
 
-       
+
         $hashedInput = hash('sha256', utf8_encode($password));
 
         // Comparar con el hash almacenado en la base de datos
@@ -103,6 +125,17 @@ class AuthController
 
     private function setupUserSession($usuario)
     {
+        // Destruye la sesión anterior completamente
+        session_unset();
+        session_destroy();
+        
+
+        // Configura parámetros seguros de sesión
+        ini_set('session.cookie_httponly', 1);
+        ini_set('session.cookie_secure', 1); // Solo si usas HTTPS
+        ini_set('session.use_strict_mode', 1);
+
+        session_start();
         session_regenerate_id(true); // Cambia el ID de sesión para prevenir ataques de fijación de sesión
         $_SESSION['LAST_ACTIVITY'] = time(); // Actualiza el tiempo de la última actividad
 
@@ -167,7 +200,18 @@ class AuthController
     }
 }
 
-// Uso del controlador
-$con = new Conexion();
-$authController = new AuthController($con);
-$authController->handleRequest();
+// Al final del archivo, modifica la creación del controlador
+try {
+    $con = new Conexion();
+    $authController = new AuthController($con);
+    $authController->handleRequest();
+} catch (Exception $e) {
+    // Registrar el error en logs
+    error_log("Error de conexión: " . $e->getMessage());
+
+    // Mostrar mensaje amigable al usuario
+    $_SESSION['mensaje'] = "Error de conexión. Por favor intente más tarde.";
+    $_SESSION['alerta'] = "alert-danger";
+    header('Location: ../index.php');
+    exit();
+}

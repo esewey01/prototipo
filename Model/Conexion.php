@@ -19,7 +19,9 @@ class Conexion
             "UID" => $this->user,
             "PWD" => $this->password,
             "CharacterSet" => "UTF-8",
-            "TrustServerCertificate" => true
+            "TrustServerCertificate" => true,
+            "LoginTimeout" => 5, // 5 segundos de timeout
+            "ConnectionPooling" => false
         );
 
 
@@ -184,7 +186,7 @@ class Conexion
         // Iniciar transacción para asegurar integridad
         sqlsrv_begin_transaction($this->connection);
         //HASHEAR LA CONTRASEÑA ANTES DE ALMACENARLA
-        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+        $hashedPassword = strtolower(hash('sha256', $password));
 
         try {
             // 1. Insertar el usuario y obtener el ID insertado directamente
@@ -239,7 +241,8 @@ class Conexion
     }
 
 
-    //FUNCIONES PARA OBTENER EL ROL JUNTO CON EL USUARIO *TOODS LOSD DATOS
+    //FUNCION PARA OBTENER AL USUARIO JUNTO SU ROL
+    //TODOS LOS DATOS DEL USUARIO
     public function getUserWithRole($login)
     {
         $sql = "SELECT u.*, r.nombre_rol, r.id_rol 
@@ -299,6 +302,7 @@ class Conexion
     }
 
 
+    //FUNCION PARA OBTENER EL MENU DL USUARIO
 
     public function getMenuByRol($id_rol)
     {
@@ -315,7 +319,7 @@ class Conexion
         // Iniciar transacción para asegurar integridad
         sqlsrv_begin_transaction($this->connection);
         //hashear la contraseña antes de almacenarla
-        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+        $hashedPassword = strtolower(hash('sha256', $password));
 
         try {
             // 1. Insertar el usuario y obtener el ID insertado directamente
@@ -392,8 +396,10 @@ class Conexion
 
     public function updatePassword($id_usuario, $new_password)
     {
+        //FUNCION HASH PARA LA NUEVA CONTRASEÑA
+        $hashedPassword = strtolower(hash('sha256', $new_password));
         $sql = "UPDATE USUARIOS SET password = ? WHERE id_usuario = ?";
-        return $this->executeNonQuery($sql, array($id_usuario, $new_password));
+        return $this->executeNonQuery($sql, array($id_usuario, $hashedPassword));
     }
 
     public function updateSocialNetworks($id_usuario, $facebook, $instagram, $linkedin, $twitter)

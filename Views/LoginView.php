@@ -6,7 +6,7 @@ if (isset($_SESSION['mensaje'])): ?>
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">×</span>
         </button>
-        <strong><?= $_SESSION['mensaje'] . ': ' . $_SESSION['usuario']['rol']['nombre_rol'] ?></strong>
+        <strong><?= $_SESSION['mensaje']?></strong>
     </div>
 <?php
     unset($_SESSION['mensaje']);
