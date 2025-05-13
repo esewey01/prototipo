@@ -16,6 +16,10 @@ API NEWS
 SELECT*FROM USUARIOS
 
 
+
+SELECT*FROM REDES_SOCIALES
+
+
 --TABLA DE ROLES PARA LOS USUARIOS
 CREATE TABLE ROLES (
   id_rol INT IDENTITY(0,1) PRIMARY KEY,
@@ -117,27 +121,28 @@ INSERT INTO ROLES_USUARIO(id_usuario, id_rol) VALUES
 
 
 
-
+SELECT*from REDES_SOCIALES
 
 --TABLA DE REDES SOCIALES
+DROP TABLE REDES_SOCIALES
 
 CREATE TABLE REDES_SOCIALES(
   id_red_social INT IDENTITY(1,1) PRIMARY KEY,
   id_usuario INT NOT NULL ,
   tipo_red VARCHAR(50) ,
   url_perfil VARCHAR(255) ,
-  nombre_usuario VARCHAR(100),
   fecha_vinculacion DATETIME DEFAULT GETDATE(),
   FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE
 );
+
 -- Redes sociales para algunos usuarios
-INSERT INTO REDES_SOCIALES (id_usuario, tipo_red, url_perfil, nombre_usuario ) VALUES
-(1, 'Facebook', 'https://facebook.com/david.ugarte', 'david.ugarte'),
-(1, 'LinkedIn', 'https://linkedin.com/in/david-ugarte', 'david-ugarte'),
-(2, 'Twitter', 'https://twitter.com/henrych_admin', 'henrych_admin'),
-(4, 'Instagram', 'https://instagram.com/sussy_vendedora', 'sussy_vendedora'),
-(7, 'Facebook', 'https://facebook.com/thais.calani', 'thais.calani'),
-(8, 'Instagram', 'https://instagram.com/lety_calani', 'lety_calani');
+INSERT INTO REDES_SOCIALES (id_usuario, tipo_red, url_perfil ) VALUES
+(2, 'Facebook', 'https://facebook.com/david.ugarte'),
+(2, 'LinkedIn', 'https://linkedin.com/in/david-ugarte'),
+(2, 'Twitter', 'https://twitter.com/henrych_admin'),
+(4, 'Instagram', 'https://instagram.com/sussy_vendedora'),
+(7, 'Facebook', 'https://facebook.com/thais.calani'),
+(8, 'Instagram', 'https://instagram.com/lety_calani');
 
 
 

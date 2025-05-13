@@ -30,6 +30,8 @@ if (!$orden) {
 ?>
 <!DOCTYPE html>
 <html>
+    
+
 <head>
     <title>Confirmación de Pago</title>
    
@@ -50,13 +52,14 @@ if (!$orden) {
     </style>
 </head>
 <body>
+
     
 
     
     <div class="container mt-4 mb-5">
         <div class="receipt">
             <div class="receipt-header">
-                <h2 class="text-success"><i class="fa fa-check-circle"></i> ¡Pago realizado con éxito!</h2>
+                <h2 class="text-success"><i class="fa fa-check-circle"></i> Pedido realizado con exito!</h2>
                 <h4>UPIICSA FOOD</h4>
                 <p class="text-muted">Orden #<?= htmlspecialchars($orden['id_orden']) ?></p>
             </div>

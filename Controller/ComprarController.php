@@ -1,102 +1,160 @@
 <?php
-require_once ('../Model/Conexion.php');
+require_once('../Model/Conexion.php');
 require('Constants.php');
 
 class ProductosController {
-    private $con;
+    private $conexion;
+    private $requestMethod;
+    private $isAjax;
     
     public function __construct() {
-        $this->con = new Conexion();
+        $this->conexion = new Conexion();
+        $this->requestMethod = $_SERVER['REQUEST_METHOD'];
+        $this->isAjax = $this->isAjaxRequest();
         session_start();
     }
     
-    public function index() {
-        $categorias = $this->con->getAllCategorias();
+    public function handleRequest() {
+        $action = $_GET['action'] ?? 'index';
+        
+        switch ($action) {
+            case 'detalle':
+                $this->handleProductDetail();
+                break;
+            case 'getValoraciones':
+                $this->handleGetRatings();
+                break;
+            default:
+                $this->showProductList();
+        }
+    }
+    
+    private function showProductList() {
+    try {
+        $categorias = $this->conexion->getAllCategorias();
         $id_categoria = $_GET['categoria'] ?? null;
-        $productos = $this->con->getProductosByCategoria($id_categoria);
+        $productos = $this->conexion->getProductosByCategoria($id_categoria);
         
-        include '../views/ComprarView.php';
+        $this->renderView('ComprarView.php', [
+            'categorias' => $categorias,
+            'productos' => $productos,
+            'error' => empty($productos) ? 'No se encontraron productos' : null
+        ]);
+    } catch (Exception $e) {
+        error_log("Error en showProductList: " . $e->getMessage());
+        $this->renderView('ComprarView.php', [
+            'categorias' => [],
+            'productos' => [],
+            'error' => 'Error al cargar los productos'
+        ]);
     }
+}
     
-    public function detalle($id_producto) {
-        $producto = $this->con->getProductoById($id_producto);
-        //funcion de prueba
-        if ($this->isAjaxRequest()) {
-            if (!$producto) {
-                header('Content-Type: application/json');
-                echo json_encode(['success' => false, 'message' => 'Producto no encontrado']);
-                exit;
-            }
-            //$valoraciones = $this->con->getValoracionesProducto($id_producto);
-        
-            // Variables necesarias para la vista
-            //$URL_VIEWS = URL_VIEWS; // Asegúrate de definir esto en Constants.php
-            
-            // Capturar el output del include
-            ob_start();
-            include '../Views/ProductoDetalle.php';
-            $html = ob_get_clean();
-            
-            // Limpiar buffer y devolver HTML
-            ob_end_clean();
-            echo $html;
-            exit;
+    private function handleProductDetail() {
+        if (!isset($_GET['id'])) {
+            $this->sendErrorResponse('ID de producto no proporcionado');
+            return;
         }
-    
         
-        if ($producto) {
-            // Si es una petición AJAX, devolver JSON
-            header('Content-Type: application/json');
-            if (!$producto) {
-                if ($this->isAjaxRequest()) {
-                    header('Content-Type: application/json');
-                    echo json_encode(['success' => false, 'message' => 'Producto no encontrado']);
-                    exit;
-                } else {
-                    $_SESSION['mensaje'] = 'Producto no encontrado';
-                    header('Location: ComprarController.php');
-                    exit;
-                }
-            }
-            
-           
-            exit;
+        $id_producto = $_GET['id'];
+        $producto = $this->conexion->getProductoById($id_producto);
+        
+        if (!$producto) {
+            $this->handleProductNotFound();
+            return;
+        }
+        
+        if ($this->isAjax) {
+            $this->renderPartialView('ProductoDetalle.php', [
+                'producto' => $producto,
+                'URL_VIEWS' => URL_VIEWS
+            ]);
         } else {
-            // Petición normal (sin JS), cargar la vista completa
-            if (!$producto) {
-                header('Location: ../Views/ComprarView.php');
-                exit;
-            }
-            
-            //$valoraciones = $this->con->getValoracionesProducto($id_producto);
-            include '../Views/ProductoDetalle.php';
+            $this->renderView('ProductoDetalle.php', [
+                'producto' => $producto
+            ]);
         }
     }
     
-    public function getValoraciones($id_producto) {
-        header('Content-Type: application/json');
-        /*$valoraciones = $this->con->getValoracionesProducto($id_producto);
-        echo json_encode([
+    private function handleGetRatings() {
+        if (!isset($_GET['id'])) {
+            $this->sendErrorResponse('ID de producto no proporcionado');
+            return;
+        }
+        
+        $id_producto = $_GET['id'];
+        //$valoraciones = $this->conexion->getValoracionesProducto($id_producto);
+        
+        $this->sendJsonResponse([
             'success' => true,
-            'data' => $valoraciones
-        ]);*/
+            'data' => [] //$valoraciones
+        ]);
+    }
+    
+    private function handleProductNotFound() {
+        if ($this->isAjax) {
+            $this->sendJsonResponse([
+                'success' => false,
+                'message' => 'Producto no encontrado'
+            ], 404);
+        } else {
+            $_SESSION['mensaje'] = 'Producto no encontrado';
+            header('Location: ComprarController.php');
+            exit;
+        }
+    }
+    
+    private function renderView($viewPath, $data = []) {
+        extract($data);
+        include "../Views/{$viewPath}";
         exit;
     }
-
+    
+    private function renderPartialView($viewPath, $data = []) {
+        ob_start();
+        $this->renderView($viewPath, $data);
+        $html = ob_get_clean();
+        echo $html;
+        exit;
+    }
+    
+    private function sendJsonResponse($data, $statusCode = 200) {
+        header('Content-Type: application/json');
+        http_response_code($statusCode);
+        echo json_encode($data);
+        exit;
+    }
+    
+    private function sendErrorResponse($message, $statusCode = 400) {
+        $this->sendJsonResponse([
+            'success' => false,
+            'message' => $message
+        ], $statusCode);
+    }
+    
     private function isAjaxRequest() {
         return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
                strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
     }
 }
 
+try{
+// Punto de entrada de la aplicación
 $controller = new ProductosController();
-$action = $_GET['action'] ?? 'index';
-
-if ($action == 'detalle' && isset($_GET['id'])) {
-    $controller->detalle($_GET['id']);
-} elseif ($action == 'getValoraciones' && isset($_GET['id'])) {
-    $controller->getValoraciones($_GET['id']);
-} else {
-    $controller->index();
+$controller->handleRequest();
 }
+catch (Throwable $e) { // Captura tanto Exception como Error
+    // Registrar el error en logs
+    error_log("Error crítico: " . $e->getMessage() . " en " . $e->getFile() . ":" . $e->getLine());
 
+    // Iniciar sesión si no está iniciada
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
+    }
+
+    $_SESSION['mensaje'] = "Error en el sistema. Por favor intente más tarde.";
+    $_SESSION['alerta'] = "alert-danger";
+    header("Location: ComprarController.php");
+    exit();
+
+}

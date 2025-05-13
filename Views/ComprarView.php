@@ -101,14 +101,14 @@
                                 </div>
 
                                 <h4 class="text mt-2" style="max-width: 10ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                
-                                <?= htmlspecialchars($producto['nombre_producto']) ?></h4>
+
+                                    <?= htmlspecialchars($producto['nombre_producto']) ?></h4>
 
                                 <div class="mb-2">
                                     <span class="label label-info">
                                         <?= htmlspecialchars($producto['nombre_categoria']) ?>
                                     </span>
-                                    <span class="label label-danger pull-right">
+                                    <span class="label label-danger pull-right" style="cursor: pointer;" data-usuario-id="<?= $producto['id_usuario'] ?>">
                                         <?= htmlspecialchars($producto['nombre_vendedor']) ?>
                                     </span>
                                 </div>
@@ -174,11 +174,75 @@
     </section>
 
     <?php include('../Views/ProductoDetalleModal.php'); ?>
-
+    <?php include('../Views/UsuarioDetalleModal.php'); ?>
     <?php include("LibraryJs.php"); ?>
 
     <script>
         $(document).ready(function() {
+            $(document).on('click', '.label-danger', function(e) {
+                e.preventDefault();
+                const idUsuario = $(this).data('usuario-id');
+                const modal = $('#usuarioDetalleModal');
+
+                // Mostrar loading
+                modal.find('#loadingUsuario').show();
+                modal.find('#usuarioContent').hide();
+                modal.modal('show');
+
+                // Obtener datos del usuario via AJAX
+                $.ajax({
+                    url: '../Controller/UsuarioController.php?action=detalle&id=' + idUsuario,
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.success) {
+                            const usuario = response.data.usuario;
+                            const redes = response.data.redes;
+
+                            // Actualizar información básica
+                            $('#usuarioFoto').attr('src', URL_VIEWS + (usuario.foto_perfil || 'fotoproducto/user.png'));
+                            $('#usuarioNombre').text(usuario.nombre + (usuario.apellido ? ' ' + usuario.apellido : ''));
+                            $('#usuarioLogin').text('@' + usuario.login);
+                            $('#usuarioEmail').text(usuario.email || 'No proporcionado');
+                            $('#usuarioTelefono').text(usuario.telefono || 'No proporcionado');
+                            $('#usuarioDireccion').text(usuario.direccion || 'No proporcionada');
+
+                            // Actualizar redes sociales
+                            let redesHtml = '';
+                            if (redes && redes.length > 0) {
+                                redes.forEach(red => {
+                                    if (red.url_perfil) {
+                                        redesHtml += `
+                                    <a href="${red.url_perfil}" target="_blank" class="btn btn-sm btn-default">
+                                        <i class="fa fa-${red.tipo_red.toLowerCase()}"></i> ${red.tipo_red}
+                                    </a> `;
+                                    }
+                                });
+                            } else {
+                                redesHtml = '<p class="text-muted">El usuario no ha agregado redes sociales</p>';
+                            }
+                            $('#usuarioRedes').html(redesHtml);
+
+                            // Mostrar contenido
+                            $('#loadingUsuario').hide();
+                            $('#usuarioContent').show();
+                        } else {
+                            modal.find('.modal-body').html(`
+                        <div class="alert alert-danger">
+                            ${response.message || 'Error al cargar la información del usuario'}
+                        </div>
+                    `);
+                        }
+                    },
+                    error: function(xhr) {
+                        modal.find('.modal-body').html(`
+                    <div class="alert alert-danger">
+                        Error en la conexión: ${xhr.statusText}
+                    </div>
+                `);
+                    }
+                });
+            });
+
             // Efecto hover para las tarjetas
             $('.product-card').hover(
                 function() {

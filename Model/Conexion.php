@@ -36,35 +36,7 @@ class Conexion
             error_log("Error de conexión a SQL Server: " . print_r($errors, true));
             throw new DatabaseConnectionException("No se puede conectar al servidor de base de datos. Por favor, intente más tarde.");
         }
-  
-
-    }/*
-    public function connect()
-    {
-        if ($this->connection) {
-            return $this->connection;
-        }
-
-        $connectionInfo = array(
-            "Database" => $this->database,
-            "UID" => $this->user,
-            "PWD" => $this->password,
-            "CharacterSet" => "UTF-8",
-            "LoginTimeout" => 5 // 5 segundos de timeout
-        );
-
-        $this->connection = @sqlsrv_connect($this->server, $connectionInfo);
-
-        if (!$this->connection) {
-            $errors = sqlsrv_errors();
-            error_log("Error de conexión a SQL Server: " . print_r($errors, true));
-            throw new DatabaseConnectionException("No se puede conectar al servidor de base de datos. Por favor, intente más tarde.");
-        }
-
-        return $this->connection;*/
-   // }
-
-
+    }
 
     //EJECUTAR SELECT 
     private function executeQuery($sql, $params = array())
@@ -142,6 +114,13 @@ class Conexion
         $stmt = $this->executeQuery($sql, array($login));
         $result = $this->getResults($stmt);
         return $result ?? null;
+    }
+    public function getUserById($id_usuario)
+    {
+        $sql = "SELECT * FROM USUARIOS WHERE id_usuario = ?";
+        $stmt = $this->executeQuery($sql, [$id_usuario]);
+        $result = $this->getResults($stmt);
+        return $result[0] ?? null;
     }
 
     // FUNCIONES PARA LOS USUARIOS 
@@ -420,7 +399,7 @@ class Conexion
         //FUNCION HASH PARA LA NUEVA CONTRASEÑA
         $hashedPassword = strtolower(hash('sha256', $new_password));
         $sql = "UPDATE USUARIOS SET password = ? WHERE id_usuario = ?";
-        return $this->executeNonQuery($sql, array($id_usuario, $hashedPassword));
+        return $this->executeNonQuery($sql, array($hashedPassword, $id_usuario));
     }
 
     public function updateSocialNetworks($id_usuario, $facebook, $instagram, $linkedin, $twitter)
@@ -429,19 +408,36 @@ class Conexion
         $check = "SELECT * FROM REDES_SOCIALES WHERE id_usuario = ?";
         $exists = $this->getResults($this->executeQuery($check, array($id_usuario)));
 
-        if ($exists) {
-            $sql = "UPDATE REDES_SOCIALES SET url_perfil = ? WHERE id_usuario = ? AND tipo_red = ?";
-            $this->executeNonQuery($sql, array($facebook, $id_usuario, 'facebook'));
-            $this->executeNonQuery($sql, array($instagram, $id_usuario, 'instagram'));
-            $this->executeNonQuery($sql, array($linkedin, $id_usuario, 'linkedin'));
-            $this->executeNonQuery($sql, array($twitter, $id_usuario, 'twitter'));
-        } else {
-            $sql = "INSERT INTO REDES_SOCIALES (id_usuario, tipo_red, url_perfil) VALUES (?, ?, ?)";
-            $this->executeNonQuery($sql, array($id_usuario, 'facebook', $facebook));
-            $this->executeNonQuery($sql, array($id_usuario, 'instagram', $instagram));
-            $this->executeNonQuery($sql, array($id_usuario, 'linkedin', $linkedin));
-            $this->executeNonQuery($sql, array($id_usuario, 'twitter', $twitter));
+        $success = true;
+
+        $redes = [
+            'facebook' => $facebook,
+            'instagram' => $instagram,
+            'linkedin' => $linkedin,
+            'twitter' => $twitter
+        ];
+
+        foreach ($redes as $tipo => $url) {
+            // Verificar si existe este tipo de red para el usuario
+            $checkRed = "SELECT * FROM REDES_SOCIALES WHERE id_usuario = ? AND tipo_red = ?";
+            $existeRed = $this->getResults($this->executeQuery($checkRed, array($id_usuario, $tipo)));
+
+            if ($existeRed) {
+                // Actualizar solo si la URL no está vacía
+                if (!empty($url)) {
+                    $sql = "UPDATE REDES_SOCIALES SET url_perfil = ? WHERE id_usuario = ? AND tipo_red = ?";
+                    $success = $success && $this->executeNonQuery($sql, array($url, $id_usuario, $tipo));
+                }
+            } else {
+                // Insertar solo si la URL no está vacía
+                if (!empty($url)) {
+                    $sql = "INSERT INTO REDES_SOCIALES (id_usuario, tipo_red, url_perfil) VALUES (?, ?, ?)";
+                    $success = $success && $this->executeNonQuery($sql, array($id_usuario, $tipo, $url));
+                }
+            }
         }
+
+        return $success;
     }
 
     public function createSellerRequest($id_usuario, $id_categoria, $descripcion)
@@ -863,7 +859,8 @@ class Conexion
             FROM PRODUCTOS p
             JOIN USUARIOS u ON p.id_usuario = u.id_usuario
             JOIN CATEGORIAS c ON p.id_categoria = c.id_categoria
-            WHERE p.estado = 'ACTIVO' AND (? IS NULL OR p.id_categoria = ?)";
+            WHERE p.estado = 'ACTIVO' AND (? IS NULL OR p.id_categoria = ?)
+            ORDER BY NEWID()";
 
         $params = $id_categoria ? [$id_categoria, $id_categoria] : [null, null];
         $stmt = $this->executeQuery($sql, $params);
@@ -1233,4 +1230,3 @@ class Conexion
 
 
 class DatabaseConnectionException extends Exception {}
-?>
