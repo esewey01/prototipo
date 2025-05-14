@@ -94,7 +94,7 @@
                         <div class="panel panel-default product-card">
                             <div class="panel-body">
                                 <div class="text-center">
-                                    <img src="<?= URL_VIEWS . htmlspecialchars($producto['imagen']) ?>"
+                                    <img src="<?= URL_VIEWS . htmlspecialchars($producto['imagen']) ?? ''?>"
                                         class="product-img img-thumbnail"
                                         alt="<?= htmlspecialchars($producto['nombre_producto']) ?>"
                                         onerror="this.src='<?= URL_VIEWS ?>fotoproducto/default.png'">
@@ -179,6 +179,7 @@
 
     <script>
         $(document).ready(function() {
+            var URL_VIEWS = '<?= URL_VIEWS ?>';
             $(document).on('click', '.label-danger', function(e) {
                 e.preventDefault();
                 const idUsuario = $(this).data('usuario-id');
@@ -191,7 +192,8 @@
 
                 // Obtener datos del usuario via AJAX
                 $.ajax({
-                    url: '../Controller/UsuarioController.php?action=detalle&id=' + idUsuario,
+                    url: 'UsuarioController.php?action=detalle&id=' + idUsuario,
+                    
                     type: 'GET',
                     success: function(response) {
                         if (response.success) {

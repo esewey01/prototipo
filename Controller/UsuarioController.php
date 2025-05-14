@@ -4,9 +4,11 @@ require('Constants.php');
 
 class UsuarioController {
     private $conexion;
+    private $urlViews;
     
     public function __construct() {
         $this->conexion = new Conexion();
+        $this->urlViews=URL_VIEWS;
     }
     
     public function handleRequest() {

@@ -6,9 +6,11 @@ class ProductosController {
     private $conexion;
     private $requestMethod;
     private $isAjax;
+    private $urlViews;
     
     public function __construct() {
         $this->conexion = new Conexion();
+        $this->urlViews=URL_VIEWS;
         $this->requestMethod = $_SERVER['REQUEST_METHOD'];
         $this->isAjax = $this->isAjaxRequest();
         session_start();
