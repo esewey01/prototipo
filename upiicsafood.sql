@@ -120,10 +120,7 @@ INSERT INTO ROLES_USUARIO(id_usuario, id_rol) VALUES
 
 
 INSERT INTO REDES_SOCIALES (id_usuario, tipo_red, url_perfil ) VALUES
-(3, 'Facebook', 'https://facebook.com/henry'),
-(3, 'LinkedIn', 'https://linkedin.com/in/henry'),
-(3, 'Twitter', 'https://twitter.com/henry'),
-(3, 'Instagram', 'https://instagram.com/henry');
+
 
 
 SELECT*FROM USUARIOS
@@ -146,6 +143,10 @@ INSERT INTO REDES_SOCIALES (id_usuario, tipo_red, url_perfil ) VALUES
 (2, 'Facebook', 'https://facebook.com/david.ugarte'),
 (2, 'LinkedIn', 'https://linkedin.com/in/david-ugarte'),
 (2, 'Twitter', 'https://twitter.com/henrych_admin'),
+(3, 'Facebook', 'https://facebook.com/henry'),
+(3, 'LinkedIn', 'https://linkedin.com/in/henry'),
+(3, 'Twitter', 'https://twitter.com/henry'),
+(3, 'Instagram', 'https://instagram.com/henry'),
 (4, 'Instagram', 'https://instagram.com/sussy_vendedora'),
 (7, 'Facebook', 'https://facebook.com/thais.calani'),
 (8, 'Instagram', 'https://instagram.com/lety_calani');

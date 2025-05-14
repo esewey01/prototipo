@@ -140,7 +140,7 @@ class ProductoController {
         }
     }
 }
-
+try{
 // Uso del controlador
 $action = $_GET['action'] ?? 'index';
 $controller = new ProductoController();
@@ -153,4 +153,22 @@ switch ($action) {
     default:
         $controller->index();
         break;
+}
+
+
+}
+catch (Throwable $e) { // Captura tanto Exception como Error
+    // Registrar el error en logs
+    error_log("Error crítico en AuthController: " . $e->getMessage() . " en " . $e->getFile() . ":" . $e->getLine());
+
+    // Iniciar sesión si no está iniciada
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
+    }
+
+    $_SESSION['mensaje'] = "Error en el sistema. Por favor intente más tarde.";
+    $_SESSION['alerta'] = "alert-danger";
+    
+    header('Location: ProductoController.php');
+    exit();
 }

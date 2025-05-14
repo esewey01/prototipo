@@ -28,7 +28,7 @@
                                     <i class="fa fa-info-circle"></i> Información de contacto
                                 </div>
                                 <div class="panel-body">
-                                    <p><strong><i class="icon_clipboard"></i> Nombre: </strong> <span id="usuarioNombre"></span></p>
+                                    <p><strong><i class="icon_paperclip"></i> Nombre: </strong> <span id="usuarioNombre"></span></p>
                                     <p><strong><i class="icon_paperclip"></i> Nacimiento: </strong> <span id="usuarioFechaNacimiento"></span></p>
                                     <p><strong><i class="icon_paperclip"></i> Genero: </strong> <span id="usuarioGenero"></span></p>
                                     <p><strong><i class="fa fa-envelope"></i> Email:</strong> <span id="usuarioEmail"></span></p>
