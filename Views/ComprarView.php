@@ -207,8 +207,7 @@
                             $('#usuarioFoto').attr('src', URL_VIEWS + (usuario.foto_perfil || 'fotoproducto/user.png'));
                             $('#usuarioNombre').text(usuario.nombre + (usuario.apellido ? ' ' + usuario.apellido : ''));
                             $('#usuarioLogin').text('@' + usuario.login);
-                            const fechaObj = usuario.fecha_nacimiento;
-$('#usuarioFechaNacimiento').text(fechaObj ? fechaObj.toLocaleDateString() : 'No proporcionada');
+                            $('#usuarioFechaNacimiento').text(usuario.fecha_nacimiento);
                             const genero = usuario.genero;
                             const mapeoGenero = {
                                 'M': 'Masculino',
