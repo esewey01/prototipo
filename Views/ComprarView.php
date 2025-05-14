@@ -94,7 +94,7 @@
                         <div class="panel panel-default product-card">
                             <div class="panel-body">
                                 <div class="text-center">
-                                    <img src="<?= URL_VIEWS . htmlspecialchars($producto['imagen']) ?? ''?>"
+                                    <img src="<?= URL_VIEWS . htmlspecialchars($producto['imagen']) ?? '' ?>"
                                         class="product-img img-thumbnail"
                                         alt="<?= htmlspecialchars($producto['nombre_producto']) ?>"
                                         onerror="this.src='<?= URL_VIEWS ?>fotoproducto/default.png'">
@@ -183,6 +183,7 @@
             $(document).on('click', '.label-danger', function(e) {
                 e.preventDefault();
                 const idUsuario = $(this).data('usuario-id');
+                console.log('ID Usuario:', idUsuario); // <--- AGREGAR ESTA LÍNEA
                 const modal = $('#usuarioDetalleModal');
 
                 // Mostrar loading
@@ -193,9 +194,11 @@
                 // Obtener datos del usuario via AJAX
                 $.ajax({
                     url: 'UsuarioController.php?action=detalle&id=' + idUsuario,
-                    
+
                     type: 'GET',
                     success: function(response) {
+                        console.log('Respuesta Success:', response); // <-- AGREGAR ESTA LÍNEA
+
                         if (response.success) {
                             const usuario = response.data.usuario;
                             const redes = response.data.redes;
@@ -204,21 +207,64 @@
                             $('#usuarioFoto').attr('src', URL_VIEWS + (usuario.foto_perfil || 'fotoproducto/user.png'));
                             $('#usuarioNombre').text(usuario.nombre + (usuario.apellido ? ' ' + usuario.apellido : ''));
                             $('#usuarioLogin').text('@' + usuario.login);
+                            const fechaObj = usuario.fecha_nacimiento;
+$('#usuarioFechaNacimiento').text(fechaObj ? fechaObj.toLocaleDateString() : 'No proporcionada');
+                            const genero = usuario.genero;
+                            const mapeoGenero = {
+                                'M': 'Masculino',
+                                'F': 'Femenino'
+                            };
+
+                            $('#usuarioGenero').text(mapeoGenero[genero] || 'No definido');
                             $('#usuarioEmail').text(usuario.email || 'No proporcionado');
                             $('#usuarioTelefono').text(usuario.telefono || 'No proporcionado');
                             $('#usuarioDireccion').text(usuario.direccion || 'No proporcionada');
 
+                            //FUNCION PARA WHASTAPP
+                            const telefono = usuario.telefono;
+                            const telefonoLimpio = telefono ? telefono.replace(/\D/g, '') : null; // Elimina caracteres no numéricos
+                            const enlaceWhatsApp = telefonoLimpio ? `https://wa.me/${telefonoLimpio}` : null;
+
+                            const telefonoElemento = $('#usuarioTelefono');
+
+                            if (enlaceWhatsApp) {
+                                telefonoElemento.html(`<a href="${enlaceWhatsApp}" target="_blank">${telefono} <i class="icon_link_alt"></i></a>`);
+                            } else {
+                                telefonoElemento.text(telefono || 'No proporcionado');
+                            }
                             // Actualizar redes sociales
                             let redesHtml = '';
-                            if (redes && redes.length > 0) {
-                                redes.forEach(red => {
-                                    if (red.url_perfil) {
-                                        redesHtml += `
-                                    <a href="${red.url_perfil}" target="_blank" class="btn btn-sm btn-default">
-                                        <i class="fa fa-${red.tipo_red.toLowerCase()}"></i> ${red.tipo_red}
-                                    </a> `;
-                                    }
-                                });
+                            if (response.data.redes && response.data.redes.length > 0) {
+                                const redesObjeto = response.data.redes[0]; // Accedemos al primer (y único) objeto dentro del array
+
+                                if (redesObjeto.facebook) {
+                                    redesHtml += `
+                                <a href="${redesObjeto.facebook}" target="_blank" class="btn btn-sm btn-default">
+                                    <i class="fa fa-facebook"></i> Facebook
+                                </a> `;
+                                }
+                                if (redesObjeto.instagram) {
+                                    redesHtml += `
+                                <a href="${redesObjeto.instagram}" target="_blank" class="btn btn-sm btn-default">
+                                    <i class="fa fa-instagram"></i> Instagram
+                                </a> `;
+                                }
+                                if (redesObjeto.linkedin) {
+                                    redesHtml += `
+                                <a href="${redesObjeto.linkedin}" target="_blank" class="btn btn-sm btn-default">
+                                    <i class="fa fa-linkedin"></i> LinkedIn
+                                </a> `;
+                                }
+                                if (redesObjeto.twitter) {
+                                    redesHtml += `
+                                <a href="${redesObjeto.twitter}" target="_blank" class="btn btn-sm btn-default">
+                                    <i class="fa fa-twitter"></i> Twitter
+                                </a> `;
+                                }
+
+                                if (redesHtml === '') {
+                                    redesHtml = '<p class="text-muted">El usuario no ha agregado redes sociales</p>';
+                                }
                             } else {
                                 redesHtml = '<p class="text-muted">El usuario no ha agregado redes sociales</p>';
                             }
@@ -236,6 +282,7 @@
                         }
                     },
                     error: function(xhr) {
+                        console.log('Error AJAX:', xhr); // <-- AGREGAR ESTA LÍNEA
                         modal.find('.modal-body').html(`
                     <div class="alert alert-danger">
                         Error en la conexión: ${xhr.statusText}

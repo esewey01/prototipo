@@ -19,7 +19,7 @@
                     <div class="row">
                         <div class="col-md-4 text-center">
                             <img id="usuarioFoto" src="" class="img-thumbnail" style="width: 150px; height: 150px;">
-                            <h4 id="usuarioNombre" class="mt-2"></h4>
+                           
                             <p id="usuarioLogin" class="text-muted"></p>
                         </div>
                         <div class="col-md-8">
@@ -28,8 +28,12 @@
                                     <i class="fa fa-info-circle"></i> Información de contacto
                                 </div>
                                 <div class="panel-body">
+                                    <p><strong><i class="icon_clipboard"></i> Nombre: </strong> <span id="usuarioNombre"></span></p>
+                                    <p><strong><i class="icon_paperclip"></i> Nacimiento: </strong> <span id="usuarioFechaNacimiento"></span></p>
+                                    <p><strong><i class="icon_paperclip"></i> Genero: </strong> <span id="usuarioGenero"></span></p>
                                     <p><strong><i class="fa fa-envelope"></i> Email:</strong> <span id="usuarioEmail"></span></p>
-                                    <p><strong><i class="fa fa-phone"></i> Teléfono:</strong> <span id="usuarioTelefono"></span></p>
+                                    <p><strong><i class="fa fa-phone"></i> Teléfono:</strong> <span id="usuarioTelefono"><i class="icon_link_alt"></i></span></p>
+
                                     <p><strong><i class="fa fa-map-marker"></i> Dirección:</strong> <span id="usuarioDireccion"></span></p>
                                 </div>
                             </div>

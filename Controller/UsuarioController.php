@@ -49,6 +49,13 @@ class UsuarioController {
         // Obtener redes sociales del usuario
         $redes = $this->conexion->getSocialNetworks($id_usuario);
         
+        if (!$redes) {
+            $this->sendJsonResponse([
+                'success' => false,
+                'message' => 'Usuario no encontrado'
+            ], 404);
+            return;
+        }
         $this->sendJsonResponse([
             'success' => true,
             'data' => [

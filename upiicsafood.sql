@@ -119,8 +119,14 @@ INSERT INTO ROLES_USUARIO(id_usuario, id_rol) VALUES
 (9, 3); -- Cliente (rol 3)
 
 
+INSERT INTO REDES_SOCIALES (id_usuario, tipo_red, url_perfil ) VALUES
+(3, 'Facebook', 'https://facebook.com/henry'),
+(3, 'LinkedIn', 'https://linkedin.com/in/henry'),
+(3, 'Twitter', 'https://twitter.com/henry'),
+(3, 'Instagram', 'https://instagram.com/henry');
 
 
+SELECT*FROM USUARIOS
 SELECT*from REDES_SOCIALES
 
 --TABLA DE REDES SOCIALES

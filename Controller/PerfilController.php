@@ -198,13 +198,13 @@ class ProfileController
             throw new Exception("La URL de Facebook no es válida");
         }
         if (!empty($facebook) && !filter_var($instagram, FILTER_VALIDATE_URL)) {
-            throw new Exception("La URL de Facebook no es válida");
+            throw new Exception("La URL de Instagram no es válida");
         }
         if (!empty($facebook) && !filter_var($twitter, FILTER_VALIDATE_URL)) {
-            throw new Exception("La URL de Facebook no es válida");
+            throw new Exception("La URL de Twitter no es válida");
         }
         if (!empty($facebook) && !filter_var($linkedin, FILTER_VALIDATE_URL)) {
-            throw new Exception("La URL de Facebook no es válida");
+            throw new Exception("La URL de LinkedIn no es válida");
         }
 
 
