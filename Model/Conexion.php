@@ -6,30 +6,39 @@ class Conexion
     private $user;
     private $password;
     private $connection;
-    public function __construct()
+    private $useManagedIdentity;
+
+    public function __construct($useManagedIdentity = false)
     {
-        // Configuración del servidor
         $this->server = "prototipo.database.windows.net";
         $this->database = "Prototipo";
-        $accessToken = $this->getAccessToken();
-        //$this->user = "adminsql";  //USUARIO DE SQL SERVER
-        //$this->password = "CoC0Play$.";
-        //Configuración de la conexión
-        $connectionInfo = array(
-            "Database" => $this->database,
-            "Authentication" => 6,
-            "AccessToken" => $accessToken,  // <- FALTABA ESTO
-            //"UID" => $this->user,
-            //"PWD" => $this->password,
-            "CharacterSet" => "UTF-8",
-            "TrustServerCertificate" => true,
-            "LoginTimeout" => 5, // 5 segundos de timeout
-            //"ConnectionPooling" => false
-        );
+        $this->useManagedIdentity = $useManagedIdentity;
 
+        // Configuración de la conexión
+        if ($this->useManagedIdentity) {
+            $accessToken = $this->getAccessToken();
 
-        //MOSTRAR ERRORES
+            $connectionInfo = array(
+                "Database" => $this->database,
+                "Authentication" => 6, // Authentication = Active Directory Managed Identity
+                "AccessToken" => $accessToken,
+                "CharacterSet" => "UTF-8",
+                "TrustServerCertificate" => true,
+                "LoginTimeout" => 5
+            );
+        } else {
+            $this->user = "adminsql";
+            $this->password = "CoC0Play$.";
 
+            $connectionInfo = array(
+                "Database" => $this->database,
+                "UID" => $this->user,
+                "PWD" => $this->password,
+                "CharacterSet" => "UTF-8",
+                "TrustServerCertificate" => true,
+                "LoginTimeout" => 5
+            );
+        }
 
         // Conectar a SQL Server
         $this->connection = sqlsrv_connect($this->server, $connectionInfo);
@@ -37,7 +46,7 @@ class Conexion
         if (!$this->connection) {
             $errors = sqlsrv_errors();
             error_log("Error de conexión a SQL Server: " . print_r($errors, true));
-            throw new DatabaseConnectionException("No se puede conectar al servidor de base de datos. Por favor, intente más tarde.");
+            throw new Exception("No se puede conectar al servidor de base de datos.");
         }
     }
 
@@ -51,19 +60,19 @@ class Conexion
         $response = curl_exec($ch);
 
         if (!$response) {
-            die("Error al consultar metadata service: " . curl_error($ch));
+            die("❌ Error al consultar metadata service: " . curl_error($ch));
         }
+
         curl_close($ch);
         $result = json_decode($response, true);
 
-
-        $result = json_decode($response, true);
         if (!isset($result['access_token'])) {
-            die("No se pudo obtener el token de acceso.");
+            die("❌ No se pudo obtener el token de acceso.");
         }
 
         return $result['access_token'];
     }
+
     public function getConnection()
     {
         return $this->connection;

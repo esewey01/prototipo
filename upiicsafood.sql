@@ -389,3 +389,46 @@ CREATE TABLE DETALLE_ORDEN (
 
 SELECT*FROM ROLES_USUARIO
 SELECT*FROM USUARIOS
+
+USE prototipo
+
+prototipo.database.windows.net - prototipo
+
+--PERMISOS PARA ID ENTRA
+-- Reemplaza 'nombre-del-app-service' por el nombre real del recurso App Service
+-- Crea el usuario usando la identidad administrada de tu App Service
+CREATE USER [upiicsafood] FROM EXTERNAL PROVIDER;
+
+-- Otorga permisos básicos
+ALTER ROLE db_datareader ADD MEMBER [upiicsafood];
+ALTER ROLE db_datawriter ADD MEMBER [upiicsafood];
+
+
+--validar la información
+SELECT name, type_desc
+FROM sys.database_principals
+WHERE authentication_type = 2;
+
+
+SELECT dp.name, r.name as role_name
+FROM sys.database_principals dp
+JOIN sys.database_role_members rm ON dp.principal_id = rm.member_principal_id
+JOIN sys.database_principals r ON rm.role_principal_id = r.principal_id
+WHERE dp.authentication_type = 2;
+
+--nombre bd
+SELECT DB_NAME() AS CurrentDatabase;
+
+
+
+CREATE USER [4ae7711d-aa58-4aa1-a5bf-97fa3715d850] FROM EXTERNAL PROVIDER;
+ALTER ROLE db_datareader ADD MEMBER [4ae7711d-aa58-4aa1-a5bf-97fa3715d850];
+ALTER ROLE db_datawriter ADD MEMBER [4ae7711d-aa58-4aa1-a5bf-97fa3715d850];
+
+SELECT m.name AS MemberName,
+       r.name AS RoleName
+FROM sys.database_role_members drm
+JOIN sys.database_principals r ON drm.role_principal_id = r.principal_id
+JOIN sys.database_principals m ON drm.member_principal_id = m.principal_id
+WHERE m.name = 'upiicsafood';
+
