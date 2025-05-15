@@ -11,17 +11,19 @@ class Conexion
         // Configuración del servidor
         $this->server = "prototipo.database.windows.net";
         $this->database = "Prototipo";
-        $this->user = "adminsql";  //USUARIO DE SQL SERVER
-        $this->password = "CoC0Play$.";
+        $accessToken = $this->getAccessToken();
+        //$this->user = "adminsql";  //USUARIO DE SQL SERVER
+        //$this->password = "CoC0Play$.";
         //Configuración de la conexión
         $connectionInfo = array(
             "Database" => $this->database,
-            "UID" => $this->user,
-            "PWD" => $this->password,
+            "Authentication"=>6,
+            //"UID" => $this->user,
+            //"PWD" => $this->password,
             "CharacterSet" => "UTF-8",
             "TrustServerCertificate" => true,
             "LoginTimeout" => 5, // 5 segundos de timeout
-            "ConnectionPooling" => false
+            //"ConnectionPooling" => false
         );
 
 
@@ -36,6 +38,28 @@ class Conexion
             error_log("Error de conexión a SQL Server: " . print_r($errors, true));
             throw new DatabaseConnectionException("No se puede conectar al servidor de base de datos. Por favor, intente más tarde.");
         }
+    }
+
+    private function getAccessToken()
+    {
+        $tokenResource = "https://database.windows.net/";
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=" . urlencode($tokenResource));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array("Metadata: true"));
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        $result = json_decode($response, true);
+        if (!isset($result['access_token'])) {
+            die("No se pudo obtener el token de acceso.");
+        }
+
+        return $result['access_token'];
+    }
+    public function getConnection()
+    {
+        return $this->connection;
     }
 
     //EJECUTAR SELECT 
