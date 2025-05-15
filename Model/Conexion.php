@@ -18,6 +18,7 @@ class Conexion
         $connectionInfo = array(
             "Database" => $this->database,
             "Authentication"=>6,
+             "AccessToken" => $accessToken,  // <- FALTABA ESTO
             //"UID" => $this->user,
             //"PWD" => $this->password,
             "CharacterSet" => "UTF-8",
