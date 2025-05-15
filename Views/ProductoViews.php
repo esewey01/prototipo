@@ -67,14 +67,14 @@
                             <i class="fa fa-inbox"></i><a href="ProductoController.php?>">Producto</a>
                         </li>
                         <?php if ($id_rol == 2): ?>
-                        <li>
-                            <i class="fa fa-plus"></i><a href="#add>">Registrar Tipo Producto</a>
-                        </li>
+                            <li>
+                                <i class="fa fa-plus"></i><a href="#add>">Registrar Tipo Producto</a>
+                            </li>
                         <?php endif; ?>
                         <?php if ($id_rol == 1): ?>
-                        <li>
-                            <i class="fa fa-plus"></i><a>Reportar Producto</a>
-                        </li>
+                            <li>
+                                <i class="fa fa-plus"></i><a>Reportar Producto</a>
+                            </li>
                         <?php endif; ?>
                     </ol>
                 </div>
@@ -89,7 +89,7 @@
                     <!--BOTONES-->
                     <div align="right">
 
-                        <a href="ReporteProductosPdf.php?productos=productos" target="_blank"
+                        <a href="ProductoController.php?action=exportar-pdf" target="_blank"
                             class="btn btn-danger tooltips"><i
                                 class="fa fa-rotate-right"></i> EXPORTAR PDF </a>
                         <?php if ($id_rol == 2): ?>
@@ -104,6 +104,7 @@
                     <div id="add" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
                         aria-hidden="true">
                         <form action="ProductoController.php?action=guardar" method="POST" enctype="multipart/form-data">
+                            
                             <input name="usuarioLogin" value="<?php echo $usuario; ?>" type="hidden">
                             <input name="passwordLogin" value="<?php echo $password; ?>" type="hidden">
                             <div class="modal-dialog" id="mdialTamanio">

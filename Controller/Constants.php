@@ -8,6 +8,8 @@ if (!defined('URL_VIEWS')) {
     $base_path = str_replace('/Controller', '', $script_dir);
     $base_path = rtrim($base_path, '/');
 
+    define('PATH_LIBRARIES', '/path/to/libraries/');
+   
     define('URL_VIEWS', "{$protocol}://{$host}{$base_path}/Views/");
     define('URL_PUBLIC', "{$protocol}://{$host}{$base_path}/public/");
 }

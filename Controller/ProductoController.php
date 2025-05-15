@@ -2,6 +2,7 @@
 session_start();
 require_once('../Model/Conexion.php');
 require('Constants.php');
+ require_once('../public/tcpdf/tcpdf.php');
 
 class ProductoController {
     private $con;
@@ -71,7 +72,7 @@ class ProductoController {
             exit();
         }
     }
-    
+    //FUNCION ORIENTADA A GUARDAR UN NUEVO PRODUCTO
     public function guardar() {
         try {
             // Validar método de envío
@@ -139,6 +140,87 @@ class ProductoController {
             exit();
         }
     }
+    //FUNCION ORIENTADA A EXPORTAR A PDF
+    public function exportarPDF() {
+    try {
+        $id_rol = $_SESSION['usuario']['rol']['id_rol'];
+        
+        // Obtener productos según el rol
+        if ($id_rol == 2) { // Vendedor
+            $productos = $this->con->getProductosByVendedor($this->id_usuario);
+            $titulo = "MIS PRODUCTOS";
+        } else { // Admin/Super User
+            $productos = $this->con->getAllProductosWithVendedor();
+            $titulo = "TODOS LOS PRODUCTOS DEL SISTEMA";
+        }
+        
+        // Crear nuevo PDF
+        $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+        
+        // Configuración del documento
+        $pdf->SetCreator(PDF_CREATOR);
+        $pdf->SetAuthor('UPIICSA FOOD');
+        $pdf->SetTitle('Reporte de Productos');
+        $pdf->SetSubject('Reporte generado automáticamente');
+        
+        // Margenes
+        $pdf->SetMargins(10, 15, 10);
+        $pdf->SetHeaderMargin(5);
+        $pdf->SetFooterMargin(10);
+        
+        // Saltos de página automáticos
+        $pdf->SetAutoPageBreak(TRUE, 15);
+        
+        // Agregar página
+        $pdf->AddPage();
+        
+        // Contenido HTML
+        $html = '<h1 style="text-align:center;">'.$titulo.'</h1>';
+        $html .= '<p style="text-align:center;">Generado el: '.date('d/m/Y H:i:s').'</p>';
+        
+        // Tabla de productos
+        $html .= '<table border="1" cellpadding="5">';
+        $html .= '<tr style="background-color:#f2f2f2;">';
+        $html .= '<th><strong>Código</strong></th>';
+        $html .= '<th><strong>Producto</strong></th>';
+        if ($id_rol != 2) {
+            $html .= '<th><strong>Vendedor</strong></th>';
+        }
+        $html .= '<th><strong>Categoría</strong></th>';
+        $html .= '<th><strong>Stock</strong></th>';
+        $html .= '<th><strong>Precio Venta</strong></th>';
+        $html .= '<th><strong>Fecha Registro</strong></th>';
+        $html .= '</tr>';
+        
+        foreach ($productos as $producto) {
+            $html .= '<tr>';
+            $html .= '<td>'.$producto['codigo'].'</td>';
+            $html .= '<td>'.$producto['nombre_producto'].'</td>';
+            if ($id_rol != 2) {
+                $html .= '<td>'.$producto['nombre_usuario'].'</td>';
+            }
+            $html .= '<td>'.$producto['nombre_categoria'].'</td>';
+            $html .= '<td>'.$producto['cantidad'].'</td>';
+            $html .= '<td>$'.number_format($producto['precio_venta'], 2).'</td>';
+            $html .= '<td>'.$producto['fecha_registro']->format('d/m/Y').'</td>';
+            $html .= '</tr>';
+        }
+        
+        $html .= '</table>';
+        
+        // Escribir el HTML
+        $pdf->writeHTML($html, true, false, true, false, '');
+        
+        // Salida del PDF
+        $pdf->Output('reporte_productos_'.date('YmdHis').'.pdf', 'I');
+        
+    } catch (Exception $e) {
+        $_SESSION['error'] = "Error al generar PDF: " . $e->getMessage();
+        header("Location: ProductoController.php");
+        exit();
+    }
+}
+    
 }
 try{
 // Uso del controlador
@@ -148,6 +230,9 @@ $controller = new ProductoController();
 switch ($action) {
     case 'guardar':
         $controller->guardar();
+        break;
+    case 'exportar-pdf':
+        $controller->exportarPDF();
         break;
     case 'index':
     default:
