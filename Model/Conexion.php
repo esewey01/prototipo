@@ -17,8 +17,8 @@ class Conexion
         //Configuración de la conexión
         $connectionInfo = array(
             "Database" => $this->database,
-            "Authentication"=>6,
-             "AccessToken" => $accessToken,  // <- FALTABA ESTO
+            "Authentication" => 6,
+            "AccessToken" => $accessToken,  // <- FALTABA ESTO
             //"UID" => $this->user,
             //"PWD" => $this->password,
             "CharacterSet" => "UTF-8",
@@ -49,7 +49,13 @@ class Conexion
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array("Metadata: true"));
         $response = curl_exec($ch);
+
+        if (!$response) {
+            die("Error al consultar metadata service: " . curl_error($ch));
+        }
         curl_close($ch);
+        $result = json_decode($response, true);
+
 
         $result = json_decode($response, true);
         if (!isset($result['access_token'])) {
