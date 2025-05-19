@@ -432,3 +432,22 @@ JOIN sys.database_principals r ON drm.role_principal_id = r.principal_id
 JOIN sys.database_principals m ON drm.member_principal_id = m.principal_id
 WHERE m.name = 'upiicsafood';
 
+
+
+select*from usuarios
+SELECT*FROM ORDENES 
+
+SELECT 
+                    o.*,
+                    c.nombre as cliente_nombre,
+                    c.login as cliente_login,
+                    (SELECT COUNT(*) FROM DETALLE_ORDEN do WHERE do.id_orden = o.id_orden) as total_productos
+                FROM ORDENES o
+                JOIN USUARIOS c ON o.id_usuario = c.id_usuario
+                WHERE o.id_vendedor = ?
+                AND (? IS NULL OR o.estado = ?)
+                ORDER BY o.fecha_orden DESC;
+
+
+SELECT*FROM ORDENES
+UPDATE ORDENES SET estado = 'PAGADO', fecha_actualizacion = GETDATE() WHERE id_orden = 1
