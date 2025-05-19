@@ -56,8 +56,6 @@
 
 <!-- DataTables CSS -->
 <link href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap.min.css" rel="stylesheet">
-
-
 <!-- DataTables JavaScript -->
 <script src="<?=URL_PUBLIC?>js/jquery.dataTables.min.js"></script>
 <script src="<?=URL_PUBLIC?>js/dataTables.bootstrap.min.js"></script>

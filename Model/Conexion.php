@@ -10,8 +10,8 @@ class Conexion
 
     public function __construct($useManagedIdentity = false)
     {
-        $this->server = "prototipo.database.windows.net";
-        $this->database = "Prototipo";
+        $this->server = "servidor-proyecto123.database.windows.net";
+        $this->database = "prototipo";
         $this->useManagedIdentity = $useManagedIdentity;
 
         // Configuración de la conexión
@@ -1080,6 +1080,8 @@ class Conexion
     }
 
 
+
+
     //funciones para chechout
     // Agrega estos métodos en tu clase Conexion
 
@@ -1156,6 +1158,49 @@ class Conexion
         }
     }
 
+
+    // ACTUALIZAR ESTADO PARA VENTASCONTROLLER
+    public function actEstado($nuevo_estado, $id_orden)
+{
+    // Verificar conexión
+    if (!$this->connection) {
+        error_log("Error: No hay conexión a la base de datos");
+        return false;
+    }
+
+    // Iniciar transacción
+    sqlsrv_begin_transaction($this->connection);
+
+    try {
+        $sql = "UPDATE ORDENES SET estado = ?, fecha_actualizacion = GETDATE() WHERE id_orden = ?";
+        $params = [$nuevo_estado, $id_orden];
+
+        $stmt = sqlsrv_query($this->connection, $sql, $params);
+
+        if ($stmt === false) {
+            $errors = sqlsrv_errors();
+            error_log("Error en consulta SQL: " . print_r($errors, true));
+            sqlsrv_rollback($this->connection);
+            return false;
+        }
+
+        $rows_affected = sqlsrv_rows_affected($stmt);
+        
+        if ($rows_affected === false || $rows_affected === 0) {
+            sqlsrv_rollback($this->connection);
+            return false;
+        }
+
+        sqlsrv_commit($this->connection);
+        return true;
+    } catch (Exception $e) {
+        sqlsrv_rollback($this->connection);
+        error_log("Error en transacción: " . $e->getMessage());
+        return false;
+    }
+}
+
+
     public function getOrdenById($id_orden)
     {
         $sql = "SELECT 
@@ -1185,7 +1230,7 @@ class Conexion
     }
 
 
-    // Agrega estos métodos a tu clase Conexion
+
 
     /**
      * Obtiene el historial completo de órdenes para administradores

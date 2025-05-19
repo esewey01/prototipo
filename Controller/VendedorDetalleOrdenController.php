@@ -5,11 +5,16 @@ require('Constants.php');
 
 $db = new Conexion();
 $id_orden = $_GET['id'] ?? 0;
+$isModal = isset($_GET['modal']);
 
 // Verificar autenticación y rol de vendedor
 if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol']['id_rol'] != 2) {
-    header('Location: LoginController.php');
-    exit;
+    if ($isModal) {
+        die(json_encode(['error' => 'No autorizado']));
+    } else {
+        header('Location: LoginController.php');
+        exit;
+    }
 }
 
 $vendedor_id = $_SESSION['usuario']['id_usuario'];
@@ -26,11 +31,25 @@ try {
     // Obtener detalles
     $detalles = $db->getDetallesOrdenCompleto($id_orden);
     
-    include('../Views/VendedorDetalleOrdenView.php');
+    if ($isModal) {
+        // Solo incluir el contenido del modal sin layout
+        ob_start();
+        include('../Views/VendedorDetalleOrdenView.php');
+        $content = ob_get_clean();
+        echo $content;
+        exit;
+    } else {
+        // Vista normal
+        include('../Views/VendedorDetalleOrdenView.php');
+    }
     
 } catch (Exception $e) {
-    $_SESSION['error'] = $e->getMessage();
-    header('Location: VendedorOrdenesController.php');
-    exit;
+    if ($isModal) {
+        die(json_encode(['error' => $e->getMessage()]));
+    } else {
+        $_SESSION['error'] = $e->getMessage();
+        header('Location: VendedorOrdenesController.php');
+        exit;
+    }
 }
 ?>
