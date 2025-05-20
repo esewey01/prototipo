@@ -975,6 +975,53 @@ class Conexion
         }
     }
 
+    public function crearReporte(
+    string $tipo,
+    int $id_usuario_reportado,
+    int $id_administrador,
+    string $motivo,
+    string $accion_tomada = 'PENDIENTE',
+    string $estado = 'PENDIENTE',
+    string $comentarios = '',
+    ?int $id_producto = null
+): bool {
+    $sql = "INSERT INTO REPORTES (
+                tipo_reporte,
+                id_producto,
+                id_usuario_reportado,
+                id_administrador,
+                motivo,
+                accion_tomada,
+                estado,
+                comentarios,
+                fecha_reporte
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, GETDATE())";
+    
+    $params = [
+        $tipo,
+        $id_producto,
+        $id_usuario_reportado,
+        $id_administrador,
+        $motivo,
+        $accion_tomada,
+        $estado,
+        $comentarios
+    ];
+    
+    return $this->executeNonQuery($sql, $params);
+}
+
+public function obtenerAdministradorActivo(): ?array
+{
+    $sql = "SELECT TOP 1 id_usuario, nombre 
+            FROM USUARIOS 
+            WHERE id_rol = 1 AND activo = 1
+            ORDER BY NEWID()"; // Aleatorio para distribución equitativa
+    
+    $stmt = $this->executeQuery($sql);
+    return $this->getResults($stmt)[0] ?? null;
+}
+
     public function obtenerProductosCarrito($id_usuario)
     {
         $id_carrito = $this->obtenerCarritoActivo($id_usuario);
@@ -988,6 +1035,53 @@ class Conexion
         return $this->getResults($stmt);
     }
 
+    public function obtenerProductosCarritoAgrupados($id_usuario)
+    {
+        $id_carrito = $this->obtenerCarritoActivo($id_usuario);
+
+        $sql = "SELECT 
+                dc.*, 
+                p.nombre_producto, 
+                p.descripcion, 
+                p.imagen, 
+                p.id_usuario as id_vendedor,
+                u.nombre as nombre_vendedor,
+                (dc.cantidad * dc.precio_unitario) as subtotal
+            FROM DETALLE_CARRITO dc
+            JOIN PRODUCTOS p ON dc.id_producto = p.id_producto
+            JOIN USUARIOS u ON p.id_usuario = u.id_usuario
+            WHERE dc.id_carrito = ?
+            ORDER BY p.id_usuario";
+
+        $stmt = $this->executeQuery($sql, [$id_carrito]);
+        $productos = $this->getResults($stmt);
+
+        // Agrupar por vendedor
+        $agrupados = [];
+        foreach ($productos as $producto) {
+            $id_vendedor = $producto['id_vendedor'];
+            if (!isset($agrupados[$id_vendedor])) {
+                $agrupados[$id_vendedor] = [
+                    'vendedor' => [
+                        'id' => $id_vendedor,
+                        'nombre' => $producto['nombre_vendedor']
+                    ],
+                    'productos' => [],
+                    'subtotal' => 0
+                ];
+            }
+            $agrupados[$id_vendedor]['productos'][] = $producto;
+            $agrupados[$id_vendedor]['subtotal'] += $producto['subtotal'];
+        }
+
+        return array_values($agrupados);
+    }
+
+
+    public function actualizarComentarioCarrito($id_detalle, $comentario) {
+    $sql = "UPDATE DETALLE_CARRITO SET comentario = ? WHERE id_detalle = ?";
+    return $this->executeNonQuery($sql, [$comentario, $id_detalle]);
+}
     public function actualizarCantidadCarrito($id_detalle, $cantidad)
     {
         $sql = "UPDATE DETALLE_CARRITO SET cantidad = ? 
@@ -1085,97 +1179,98 @@ class Conexion
     //funciones para chechout
     // Agrega estos métodos en tu clase Conexion
 
-    public function crearOrden($id_usuario, $id_carrito, $total, $direccion = '', $comentarios = '') {
-    sqlsrv_begin_transaction($this->connection);
+    public function crearOrden($id_usuario, $id_carrito, $total, $direccion = '', $comentarios_generales  = '')
+    {
+        sqlsrv_begin_transaction($this->connection);
 
-    try {
-        // 1. Obtener todos los productos del carrito con sus vendedores
-        $sqlProductos = "SELECT dc.id_producto, p.id_usuario as id_vendedor, dc.cantidad, dc.precio_unitario
+        try {
+            // 1. Obtener todos los productos del carrito con sus vendedores
+            $sqlProductos = "SELECT dc.id_producto, p.id_usuario as id_vendedor, dc.cantidad, dc.precio_unitario
             FROM DETALLE_CARRITO dc
             JOIN PRODUCTOS p ON dc.id_producto = p.id_producto
             WHERE dc.id_carrito = ?";
-        
-        $stmtProductos = $this->executeQuery($sqlProductos, [$id_carrito]);
-        $productos = $this->getResults($stmtProductos);
 
-        if (empty($productos)) {
-            throw new Exception("El carrito está vacío");
-        }
+            $stmtProductos = $this->executeQuery($sqlProductos, [$id_carrito]);
+            $productos = $this->getResults($stmtProductos);
 
-        // Agrupar productos por vendedor
-        $ordenesPorVendedor = [];
-        foreach ($productos as $producto) {
-            $id_vendedor = $producto['id_vendedor'];
-            if (!isset($ordenesPorVendedor[$id_vendedor])) {
-                $ordenesPorVendedor[$id_vendedor] = [];
+            if (empty($productos)) {
+                throw new Exception("El carrito está vacío");
             }
-            $ordenesPorVendedor[$id_vendedor][] = $producto;
-        }
 
-        $idsOrdenes = [];
-        
-        // Crear una orden por cada vendedor
-        foreach ($ordenesPorVendedor as $id_vendedor => $productosVendedor) {
-            // Calcular subtotal para este vendedor
-            $subtotal = array_reduce($productosVendedor, function($carry, $item) {
-                return $carry + ($item['cantidad'] * $item['precio_unitario']);
-            }, 0);
+            // Agrupar productos por vendedor
+            $ordenesPorVendedor = [];
+            foreach ($productos as $producto) {
+                $id_vendedor = $producto['id_vendedor'];
+                if (!isset($ordenesPorVendedor[$id_vendedor])) {
+                    $ordenesPorVendedor[$id_vendedor] = [];
+                }
+                $ordenesPorVendedor[$id_vendedor][] = $producto;
+            }
 
-            // 2. Crear la orden para este vendedor
-            $sqlOrden = "INSERT INTO ORDENES 
+            $idsOrdenes = [];
+
+            // Crear una orden por cada vendedor
+            foreach ($ordenesPorVendedor as $id_vendedor => $productosVendedor) {
+                // Calcular subtotal para este vendedor
+                $subtotal = array_reduce($productosVendedor, function ($carry, $item) {
+                    return $carry + ($item['cantidad'] * $item['precio_unitario']);
+                }, 0);
+
+                // 2. Crear la orden para este vendedor
+                $sqlOrden = "INSERT INTO ORDENES 
                 (id_usuario, id_vendedor, id_carrito, total, direccion_entrega, comentarios)
                 OUTPUT INSERTED.id_orden
                 VALUES (?, ?, ?, ?, ?, ?)";
 
-            $paramsOrden = [
-                $id_usuario,
-                $id_vendedor,
-                $id_carrito,
-                $subtotal,
-                $direccion,
-                $comentarios
-            ];
+                $paramsOrden = [
+                    $id_usuario,
+                    $id_vendedor,
+                    $id_carrito,
+                    $subtotal,
+                    $direccion,
+                    $comentarios_generales 
+                ];
 
-            $stmt = $this->executeQuery($sqlOrden, $paramsOrden);
-            $result = $this->getResults($stmt);
-            $id_orden = $result[0]['id_orden'];
-            $idsOrdenes[] = $id_orden;
+                $stmt = $this->executeQuery($sqlOrden, $paramsOrden);
+                $result = $this->getResults($stmt);
+                $id_orden = $result[0]['id_orden'];
+                $idsOrdenes[] = $id_orden;
 
-            // 3. Mover los items del carrito a detalle_orden para este vendedor
-            $sqlItems = "INSERT INTO DETALLE_ORDEN
-                    (id_orden, id_producto, cantidad, precio_unitario)
-                    SELECT ?, id_producto, cantidad, precio_unitario
-                    FROM DETALLE_CARRITO
-                    WHERE id_carrito = ? AND id_producto IN (" . 
-                    implode(',', array_column($productosVendedor, 'id_producto')) . ")";
+                // 3. Mover los items del carrito a detalle_orden para este vendedor
+                 $sqlItems = "INSERT INTO DETALLE_ORDEN 
+        (id_orden, id_producto, cantidad, precio_unitario, comentario)
+        SELECT ?, id_producto, cantidad, precio_unitario, comentario
+        FROM DETALLE_CARRITO
+        WHERE id_carrito = ? AND id_producto IN (" . 
+        implode(',', array_column($productosVendedor, 'id_producto')) . ")";
 
-            $this->executeNonQuery($sqlItems, [$id_orden, $id_carrito]);
+                $this->executeNonQuery($sqlItems, [$id_orden, $id_carrito]);
 
-            // 4. Actualizar inventario para los productos de este vendedor
-            $sqlInventario = "UPDATE PRODUCTOS p
+                // 4. Actualizar inventario para los productos de este vendedor
+                $sqlInventario = "UPDATE PRODUCTOS p
                          SET cantidad = cantidad - dc.cantidad
                          FROM DETALLE_CARRITO dc
                          WHERE p.id_producto = dc.id_producto
                          AND dc.id_carrito = ?
                          AND p.id_usuario = ?";
 
-            $this->executeNonQuery($sqlInventario, [$id_carrito, $id_vendedor]);
+                $this->executeNonQuery($sqlInventario, [$id_carrito, $id_vendedor]);
+            }
+
+            // 5. Marcar carrito como completado
+            $this->executeNonQuery(
+                "UPDATE CARRITO SET estado = 'COMPLETADO' WHERE id_carrito = ?",
+                [$id_carrito]
+            );
+
+            sqlsrv_commit($this->connection);
+            return $idsOrdenes; // Retornar array de IDs de órdenes creadas
+        } catch (Exception $e) {
+            sqlsrv_rollback($this->connection);
+            error_log("Error al crear orden: " . $e->getMessage());
+            return false;
         }
-
-        // 5. Marcar carrito como completado
-        $this->executeNonQuery(
-            "UPDATE CARRITO SET estado = 'COMPLETADO' WHERE id_carrito = ?",
-            [$id_carrito]
-        );
-
-        sqlsrv_commit($this->connection);
-        return $idsOrdenes; // Retornar array de IDs de órdenes creadas
-    } catch (Exception $e) {
-        sqlsrv_rollback($this->connection);
-        error_log("Error al crear orden: " . $e->getMessage());
-        return false;
     }
-}
 
 
 

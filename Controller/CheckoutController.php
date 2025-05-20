@@ -14,13 +14,9 @@ class CheckoutController {
         }
         
         $this->conexion = $conexion ?? new Conexion();
-        $this->urlViews=URL_VIEWS;
+        $this->urlViews = URL_VIEWS;
         $this->usuario = $_SESSION['usuario'] ?? null;
         $this->isAjax = $this->isAjaxRequest();
-        
-        // Configuración de errores (quitar en producción)
-        error_reporting(E_ALL);
-        ini_set('display_errors', 1);
     }
     
     public function handleRequest() {
@@ -47,21 +43,24 @@ class CheckoutController {
         
         $id_usuario = $this->usuario['id_usuario'];
         $id_carrito = $this->conexion->obtenerCarritoActivo($id_usuario);
-        $total = $this->conexion->obtenerTotalCarrito($id_usuario);
         $direccion = $_POST['direccion'] ?? '';
         $comentarios = $_POST['comentarios'] ?? '';
         
-        if ($total <= 0) {
+        // Verificar que el carrito no esté vacío
+        $productos = $this->conexion->obtenerProductosCarrito($id_usuario);
+        if (empty($productos)) {
             $this->sendJsonResponse(false, 'El carrito está vacío');
         }
         
-        $id_orden = $this->conexion->crearOrden($id_usuario, $id_carrito, $total, $direccion, $comentarios);
+        // Crear órdenes (una por cada vendedor)
+        $ids_ordenes = $this->conexion->crearOrden($id_usuario, $id_carrito, $direccion, $comentarios);
         
-        if (!$id_orden) {
-            throw new Exception("Error al crear la orden");
+        if (!$ids_ordenes) {
+            throw new Exception("Error al crear las órdenes");
         }
         
-        $_SESSION['ultima_orden'] = $id_orden;
+        // Guardar las órdenes creadas en sesión
+        $_SESSION['ultimas_ordenes'] = $ids_ordenes;
         
         if ($this->isAjax) {
             $this->sendJsonResponse(true, '', [
@@ -108,7 +107,7 @@ class CheckoutController {
     
     private function handleDefaultAction() {
         if (!$this->isAjax) {
-            if (isset($_SESSION['ultima_orden'])) {
+            if (isset($_SESSION['ultimas_ordenes'])) {
                 $this->redirect('../Views/CheckoutView.php');
             } else {
                 $this->redirect('../Controller/CarritoController.php');

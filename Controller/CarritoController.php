@@ -2,22 +2,25 @@
 require_once '../Model/Conexion.php';
 require('Constants.php');
 
-class CarritoController {
+class CarritoController
+{
     private $conexion;
     private $usuario;
-    
-    public function __construct(Conexion $conexion = null) {
+
+    public function __construct(Conexion $conexion = null)
+    {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        
+
         $this->conexion = $conexion ?? new Conexion();
         $this->usuario = $_SESSION['usuario'] ?? null;
     }
-    
-    public function handleRequest() {
+
+    public function handleRequest()
+    {
         $action = $_GET['action'] ?? '';
-        
+
         try {
             switch ($action) {
                 case 'agregar':
@@ -32,6 +35,9 @@ class CarritoController {
                 case 'actualizar':
                     $this->actualizarCantidad();
                     break;
+                case 'actualizarComentario':  // Nuevo caso añadido
+                    $this->actualizarComentario();
+                    break;
                 case 'eliminar':
                     $this->eliminarProducto();
                     break;
@@ -45,89 +51,113 @@ class CarritoController {
             $this->handleError($e, $action);
         }
     }
-    
-    private function agregarProducto() {
+
+    private function agregarProducto()
+    {
         $this->validarSesion();
-        
+
         $id_producto = $_POST['id_producto'] ?? 0;
         $cantidad = $_POST['cantidad'] ?? 1;
-        
+
         if ($id_producto <= 0) {
             $this->sendJsonResponse(false, 'Producto inválido');
         }
-        
+
         $success = $this->conexion->agregarProductoCarrito(
-            $this->usuario['id_usuario'], 
-            $id_producto, 
+            $this->usuario['id_usuario'],
+            $id_producto,
             $cantidad
         );
-        
+
         $this->sendJsonResponse(
             $success,
             $success ? 'Producto añadido al carrito' : 'Error al agregar producto'
         );
     }
-    
-    private function obtenerContador() {
+
+    private function obtenerContador()
+    {
         $total = 0;
         if ($this->usuario) {
             $total = $this->conexion->obtenerCantidadTotalCarrito($this->usuario['id_usuario']);
         }
         $this->sendJsonResponse(true, '', ['total' => $total]);
     }
-    
-    private function verCarrito() {
+
+    private function verCarrito()
+    {
         $this->validarSesion();
-        
-        $productos = $this->conexion->obtenerProductosCarrito($this->usuario['id_usuario']);
+
+        $productosAgrupados = $this->conexion->obtenerProductosCarritoAgrupados($this->usuario['id_usuario']);
         $total = $this->conexion->obtenerTotalCarrito($this->usuario['id_usuario']);
-        
+
         $this->renderView('CarritoView.php', [
-            'productos' => $productos,
+            'productosAgrupados' => $productosAgrupados,
             'total' => $total
         ]);
     }
-    
-    private function actualizarCantidad() {
+
+    private function actualizarCantidad()
+    {
         $this->validarSesion();
-        
+
         $id_detalle = $_POST['id_detalle'] ?? 0;
         $cantidad = $_POST['cantidad'] ?? 1;
-        
+
         if ($id_detalle <= 0) {
             $this->sendJsonResponse(false, 'Ítem inválido');
         }
-        
+
         $success = $this->conexion->actualizarCantidadCarrito($id_detalle, $cantidad);
         $this->sendJsonResponse($success);
     }
-    
-    private function eliminarProducto() {
+
+    private function actualizarComentario()
+    {
         $this->validarSesion();
-        
+
         $id_detalle = $_POST['id_detalle'] ?? 0;
-        
+        $comentario = $_POST['comentario'] ?? '';
+
         if ($id_detalle <= 0) {
             $this->sendJsonResponse(false, 'Ítem inválido');
         }
-        
+
+        $success = $this->conexion->actualizarComentarioCarrito($id_detalle, $comentario);
+        $this->sendJsonResponse($success);
+    }
+
+
+    private function eliminarProducto()
+    {
+        $this->validarSesion();
+
+        $id_detalle = $_POST['id_detalle'] ?? 0;
+
+        if ($id_detalle <= 0) {
+            $this->sendJsonResponse(false, 'Ítem inválido');
+        }
+
         $success = $this->conexion->eliminarProductoCarrito($id_detalle);
         $this->sendJsonResponse($success);
     }
-    
-    private function vaciarCarrito() {
+
+    private function vaciarCarrito()
+    {
         $this->validarSesion();
-        
+
         $success = $this->conexion->vaciarCarrito($this->usuario['id_usuario']);
         $this->sendJsonResponse($success);
     }
-    
-    private function redirigirAVerCarrito() {
+
+    private function redirigirAVerCarrito()
+    {
         header('Location: CarritoController.php?action=ver');
         exit;
     }
-    
-    private function validarSesion() {
+
+    private function validarSesion()
+    {
         if (!$this->usuario) {
             if ($this->isAjaxRequest()) {
                 $this->sendJsonResponse(false, 'Debes iniciar sesión');
@@ -137,8 +167,9 @@ class CarritoController {
             }
         }
     }
-    
-    private function sendJsonResponse($success, $message = '', $data = []) {
+
+    private function sendJsonResponse($success, $message = '', $data = [])
+    {
         header('Content-Type: application/json');
         echo json_encode(array_merge([
             'success' => $success,
@@ -146,16 +177,18 @@ class CarritoController {
         ], $data));
         exit;
     }
-    
-    private function renderView($viewPath, $data = []) {
+
+    private function renderView($viewPath, $data = [])
+    {
         extract($data);
         require "../Views/{$viewPath}";
         exit;
     }
-    
-    private function handleError(Exception $e, $action) {
+
+    private function handleError(Exception $e, $action)
+    {
         error_log('Error en CarritoController: ' . $e->getMessage());
-        
+
         if ($this->isAjaxAction($action)) {
             $this->sendJsonResponse(false, 'Error en el servidor');
         } else {
@@ -165,16 +198,22 @@ class CarritoController {
             exit;
         }
     }
-    
-    private function isAjaxRequest() {
-        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
-               strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+
+    private function isAjaxRequest()
+    {
+        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
     }
-    
-    private function isAjaxAction($action) {
+
+    private function isAjaxAction($action)
+    {
         return in_array($action, [
-            'agregar', 'contador', 'actualizar', 
-            'eliminar', 'vaciar'
+            'agregar',
+            'contador',
+            'actualizar',
+            'actualizarComentario',
+            'eliminar',
+            'vaciar'
         ]);
     }
 }

@@ -65,7 +65,7 @@
 
             <div class="row">
                 <div class="col-md-8">
-                    <?php if (empty($productos)): ?>
+                    <?php if (empty($productosAgrupados)): ?>
                         <div class="panel panel-default empty-cart">
                             <div class="panel-body">
                                 <i class="fa fa-shopping-cart fa-4x text-muted"></i>
@@ -77,41 +77,57 @@
                             </div>
                         </div>
                     <?php else: ?>
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <i class="fa fa-list"></i> Productos en tu carrito
-                            </div>
-                            <div class="panel-body">
-                                <?php foreach ($productos as $producto): ?>
-                                    <div class="row producto-carrito">
-                                        <div class="col-xs-3">
-                                            <img src="<?= URL_VIEWS . htmlspecialchars($producto['imagen']) ?>"
-                                                class="img-thumbnail producto-imagen"
-                                                onerror="this.src='<?= URL_VIEWS ?>fotoproducto/default.png'">
+                        <?php foreach ($productosAgrupados as $grupo): ?>
+                            <div class="panel panel-default grupo-vendedor">
+                                <div class="panel-heading">
+                                    <i class="fa fa-user"></i> Vendedor: <?= htmlspecialchars($grupo['vendedor']['nombre']) ?>
+                                </div>
+                                <div class="panel-body">
+                                    <?php foreach ($grupo['productos'] as $producto): ?>
+                                        <div class="row producto-carrito">
+                                            <div class="col-xs-3">
+                                                <img src="<?= URL_VIEWS . htmlspecialchars($producto['imagen']) ?>"
+                                                    class="img-thumbnail producto-imagen"
+                                                    onerror="this.src='<?= URL_VIEWS ?>fotoproducto/default.png'">
+                                            </div>
+                                            <div class="col-xs-4">
+                                                <h5><?= htmlspecialchars($producto['nombre_producto']) ?></h5>
+                                                <p class="text-muted small"><?= htmlspecialchars($producto['descripcion']) ?></p>
+                                                <p class="text-success">
+                                                    <strong>$<?= number_format($producto['precio_unitario'], 2) ?></strong> c/u
+                                                </p>
+
+                                                <!-- Campo para comentarios -->
+                                                <div class="form-group">
+                                                    <textarea class="form-control input-sm comentario-producto"
+                                                        data-id="<?= $producto['id_detalle'] ?>"
+                                                        placeholder="Comentarios"><?=
+                                                                                    htmlspecialchars($producto['comentario'] ?? '') ?></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-2 text-center">
+                                                <input type="number" min="1" value="<?= $producto['cantidad'] ?>"
+                                                    class="form-control input-sm cantidad-producto"
+                                                    data-id="<?= $producto['id_detalle'] ?>">
+                                            </div>
+                                            <div class="col-xs-3 text-right">
+                                                <h5>$<?= number_format($producto['subtotal'], 2) ?></h5>
+                                                <button class="btn btn-danger btn-xs btn-eliminar"
+                                                    data-id="<?= $producto['id_detalle'] ?>">
+                                                    <i class="fa fa-trash"></i> Eliminar
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div class="col-xs-5">
-                                            <h5><?= htmlspecialchars($producto['nombre_producto']) ?></h5>
-                                            <p class="text-muted small"><?= htmlspecialchars($producto['descripcion']) ?></p>
-                                            <p class="text-success">
-                                                <strong>$<?= number_format($producto['precio_unitario'], 2) ?></strong> c/u
-                                            </p>
-                                        </div>
-                                        <div class="col-xs-2 text-center">
-                                            <input type="number" min="1" value="<?= $producto['cantidad'] ?>"
-                                                class="form-control input-sm cantidad-producto"
-                                                data-id="<?= $producto['id_detalle'] ?>">
-                                        </div>
-                                        <div class="col-xs-2 text-right">
-                                            <h5>$<?= number_format($producto['subtotal'], 2) ?></h5>
-                                            <button class="btn btn-danger btn-xs btn-eliminar"
-                                                data-id="<?= $producto['id_detalle'] ?>">
-                                                <i class="fa fa-trash"></i> Eliminar
-                                            </button>
+                                    <?php endforeach; ?>
+
+                                    <div class="row">
+                                        <div class="col-xs-12 text-right">
+                                            <strong>Subtotal vendedor: $<?= number_format($grupo['subtotal'], 2) ?></strong>
                                         </div>
                                     </div>
-                                <?php endforeach; ?>
+                                </div>
                             </div>
-                        </div>
+                        <?php endforeach; ?>
                     <?php endif; ?>
                 </div>
 
@@ -136,7 +152,7 @@
                                 </tr>
                             </table>
 
-                            <?php if (!empty($productos)): ?>
+                            <?php if (!empty($productosAgrupados)): ?> <!-- Cambio aquí -->
                                 <a href="CheckoutController.php" class="btn btn-success btn-block" id="btnPagar">
                                     <i class="fa fa-money"></i> Pagar en Efectivo
                                 </a>
@@ -279,6 +295,29 @@
                     error: function(xhr) {
                         alert('Error de conexión: ' + xhr.responseText);
                         $('#btnPagar').html('<i class="fa fa-money"></i> Pagar en Efectivo').prop('disabled', false);
+                    }
+                });
+            });
+            // Guardar comentario cuando cambia
+            $(document).on('change', '.comentario-producto', function() {
+                const id = $(this).data('id');
+                const comentario = $(this).val();
+
+                $.ajax({
+                    url: 'CarritoController.php?action=actualizarComentario',
+                    type: 'POST',
+                    data: {
+                        id_detalle: id,
+                        comentario: comentario
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (!response.success) {
+                            toastr.error(response.message || 'Error al guardar comentario');
+                        }
+                    },
+                    error: function() {
+                        toastr.error('Error en la conexión');
                     }
                 });
             });
