@@ -3,27 +3,14 @@
 --UPIICSAFOOD o PROTOTIPO
 --CREACION DE BASE DE DATOS UPIICSAFOOD
 
-USE PROTOTIPO
+--USE PROTOTIPO
 --CREATE DATABASE UPIICSAFOOD
 
-  API TWILIO
-  X1H984UR5SKMHZST98MHYYEL
-
+API TWILIO
+X1H984UR5SKMHZST98MHYYEL
 
 API NEWS
 2e753e63b75945719c69fe36071e907c
-
-SELECT*FROM USUARIOS
-
-SELECT*FROM ROLES_USUARIO
-
-update USUARIOS SET LOGIN='patricio'where id_usuario=3
-UPDATE ROLES_USUARIO SET id_rol=2 WHERE id_usuario=3
-
-
-
-
-SELECT*FROM REDES_SOCIALES
 
 
 --TABLA DE ROLES PARA LOS USUARIOS
@@ -38,15 +25,6 @@ INSERT INTO ROLES (nombre_rol, descripcion ) VALUES
 ('Administrador', 'Funciones autorizadas del manejo del sistema'),
 ('Vendedor', 'Puede gestionar productos y ventas'),
 ('Cliente', 'Puede realizar compras');
-
-
-
-SELECT*FROM ROLES
-
-
-
-
-
 
 
 
@@ -95,9 +73,6 @@ fecha_nacimiento, genero, foto_perfil, activo, verificado) VALUES
 ('2017656456', 'test.user@cliente.com', '123', 'Test', 'User', '81-7654-3210', 'Privada Jardines 369, Ciudad', NULL, NULL, 'fotoproducto/userM3.jpg', 1, 0);
 
 
-SELECT*from usuarios
-
-
 
 --TABLA DE ROLES DE USUARIO
 CREATE TABLE ROLES_USUARIO (
@@ -124,16 +99,6 @@ INSERT INTO ROLES_USUARIO(id_usuario, id_rol) VALUES
 (8, 3), -- Cliente (rol 3)
 (9, 3); -- Cliente (rol 3)
 
-
-INSERT INTO REDES_SOCIALES (id_usuario, tipo_red, url_perfil ) VALUES
-
-
-
-SELECT*FROM USUARIOS
-SELECT*from REDES_SOCIALES
-
---TABLA DE REDES SOCIALES
-DROP TABLE REDES_SOCIALES
 
 CREATE TABLE REDES_SOCIALES(
   id_red_social INT IDENTITY(1,1) PRIMARY KEY,
@@ -197,10 +162,6 @@ INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden
 ('Productos', 'Activo', 'icon_datareport_alt', 'ProductoController.php', '#ffffff', 'A', 2, 6),--TAMBIEN PARA ADMIN
 ('Ventas', 'Activo', 'icon_cart', 'VentasController.php', '#ffffff', 'A', 2, 7),
 ('Clientes', 'Activo', 'icon_organigrama', 'ClientesController.php', '#ffffff', 'A', 2, 8);
-
-
-
-
 
 
 
@@ -330,9 +291,6 @@ CREATE TABLE CARRITO (
   estado VARCHAR(20) DEFAULT 'ACTIVO' CHECK (estado IN ('ACTIVO', 'COMPLETADO', 'ABANDONADO')),
   FOREIGN KEY (id_usuario) REFERENCES USUARIOS(id_usuario) ON DELETE CASCADE
 );
-
-
-
 CREATE TABLE DETALLE_CARRITO (
   id_detalle INT IDENTITY(1,1) PRIMARY KEY,
   id_carrito INT NOT NULL,
@@ -365,11 +323,11 @@ CREATE TABLE ORDENES (
     id_vendedor INT NOT NULL,
     id_carrito INT NOT NULL,
     fecha_orden DATETIME DEFAULT GETDATE(),
-    estado VARCHAR(20) DEFAULT 'PENDIENTE' CHECK (estado IN ('PENDIENTE', 'PAGADO', 'CANCELADO', 'ENTREGADO')),
+    estado VARCHAR(20) DEFAULT 'PENDIENTE' CHECK (estado IN ('PENDIENTE', 'PAGADO', 'CANCELADO', 'ENTREGADO', 'VENDIDO')),
     total DECIMAL(10,2) NOT NULL,
     metodo_pago VARCHAR(20) DEFAULT 'EFECTIVO',
-    direccion_entrega VARCHAR(255),
-    comentarios VARCHAR(MAX),
+    direccion_entrega VARCHAR(255) DEFAULT 'NO ESPECIFICADO',
+    comentarios VARCHAR(MAX) DEFAULT 'SIN COMENTARIOS',
     fecha_actualizacion DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (id_usuario) REFERENCES USUARIOS(id_usuario),
     FOREIGN KEY (id_vendedor) REFERENCES USUARIOS(id_usuario),
@@ -386,68 +344,40 @@ CREATE TABLE DETALLE_ORDEN (
     FOREIGN KEY (id_producto) REFERENCES PRODUCTOS(id_producto)
 );
 
-
-SELECT*FROM ROLES_USUARIO
-SELECT*FROM USUARIOS
-
-USE prototipo
-
-prototipo.database.windows.net - prototipo
-
---PERMISOS PARA ID ENTRA
--- Reemplaza 'nombre-del-app-service' por el nombre real del recurso App Service
--- Crea el usuario usando la identidad administrada de tu App Service
-CREATE USER [upiicsafood] FROM EXTERNAL PROVIDER;
-
--- Otorga permisos básicos
-ALTER ROLE db_datareader ADD MEMBER [upiicsafood];
-ALTER ROLE db_datawriter ADD MEMBER [upiicsafood];
-
-
---validar la información
-SELECT name, type_desc
-FROM sys.database_principals
-WHERE authentication_type = 2;
-
-
-SELECT dp.name, r.name as role_name
-FROM sys.database_principals dp
-JOIN sys.database_role_members rm ON dp.principal_id = rm.member_principal_id
-JOIN sys.database_principals r ON rm.role_principal_id = r.principal_id
-WHERE dp.authentication_type = 2;
-
---nombre bd
-SELECT DB_NAME() AS CurrentDatabase;
-
-
-
-CREATE USER [4ae7711d-aa58-4aa1-a5bf-97fa3715d850] FROM EXTERNAL PROVIDER;
-ALTER ROLE db_datareader ADD MEMBER [4ae7711d-aa58-4aa1-a5bf-97fa3715d850];
-ALTER ROLE db_datawriter ADD MEMBER [4ae7711d-aa58-4aa1-a5bf-97fa3715d850];
-
-SELECT m.name AS MemberName,
-       r.name AS RoleName
-FROM sys.database_role_members drm
-JOIN sys.database_principals r ON drm.role_principal_id = r.principal_id
-JOIN sys.database_principals m ON drm.member_principal_id = m.principal_id
-WHERE m.name = 'upiicsafood';
-
-
-
-select*from usuarios
+select*from CARRITO
+SELECT*FROM DETALLE_CARRITO
 SELECT*FROM ORDENES 
-
-SELECT 
-                    o.*,
-                    c.nombre as cliente_nombre,
-                    c.login as cliente_login,
-                    (SELECT COUNT(*) FROM DETALLE_ORDEN do WHERE do.id_orden = o.id_orden) as total_productos
-                FROM ORDENES o
-                JOIN USUARIOS c ON o.id_usuario = c.id_usuario
-                WHERE o.id_vendedor = ?
-                AND (? IS NULL OR o.estado = ?)
-                ORDER BY o.fecha_orden DESC;
+SELECT*FROM DETALLE_ORDEN
 
 
-SELECT*FROM ORDENES
-UPDATE ORDENES SET estado = 'PAGADO', fecha_actualizacion = GETDATE() WHERE id_orden = 1
+DELETE FROM CARRITO
+DELETE FROM DETALLE_CARRITO
+
+DELETE FROM ORDENES
+DELETE FROM DETALLE_ORDEN
+
+
+-- Deshabilitar las restricciones de clave foránea que referencian a CARRITO
+ALTER TABLE DETALLE_CARRITO NOCHECK CONSTRAINT FK__DETALLE_C__id_carr__30F848ED;
+ALTER TABLE ORDENES NOCHECK CONSTRAINT FK__ORDENES__id_carri__38996AB5;
+
+-- Reiniciar el contador IDENTITY de la tabla CARRITO
+DBCC CHECKIDENT ('CARRITO', RESEED, 0);
+GO
+
+-- Deshabilitar la restricción de clave foránea que referencia a DETALLE_CARRITO
+ALTER TABLE DETALLE_ORDEN NOCHECK CONSTRAINT FK__DETALLE_O__id_deta__3F466844;
+
+-- Reiniciar el contador IDENTITY de la tabla DETALLE_CARRITO
+DBCC CHECKIDENT ('DETALLE_CARRITO', RESEED, 0);
+GO
+
+-- Reiniciar el contador IDENTITY de la tabla ORDENES
+DBCC CHECKIDENT ('ORDENES', RESEED, 0);
+GO
+
+-- Volver a habilitar las restricciones de clave foránea
+ALTER TABLE DETALLE_CARRITO CHECK CONSTRAINT FK__DETALLE_C__id_carr__30F848ED;
+ALTER TABLE ORDENES CHECK CONSTRAINT FK__ORDENES__id_carri__38996AB5;
+ALTER TABLE DETALLE_ORDEN CHECK CONSTRAINT FK__DETALLE_O__id_deta__3F466844;
+GO

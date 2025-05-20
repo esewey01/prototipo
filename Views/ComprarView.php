@@ -109,7 +109,7 @@
                                         <?= htmlspecialchars($producto['nombre_categoria']) ?>
                                     </span>
                                     <span class="label label-danger pull-right" style="cursor: pointer;" data-usuario-id="<?= $producto['id_usuario'] ?>">
-                                        <?= htmlspecialchars($producto['nombre_vendedor']) ?>
+                                        <?= htmlspecialchars($producto['nombre_vendedor']) ?> <i class="icon_info_alt"></i>
                                     </span>
                                 </div>
 
