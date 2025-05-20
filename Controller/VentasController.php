@@ -74,73 +74,33 @@ class VentasController
         }
     }
 
-    private function handleUpdateOrderStatus()
-    {
-        // Asegurar que siempre devolvemos JSON
-        header('Content-Type: application/json');
-
-        try {
-            // Verificación exhaustiva
-            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                throw new Exception("Método no permitido", 405);
-            }
-
-            if (!isset($_POST['id_orden'], $_POST['estado'])) {
-                throw new Exception("Datos incompletos", 400);
-            }
-
-            $id_orden = (int)$_POST['id_orden'];
-            $nuevo_estado = strtoupper(trim($_POST['estado']));
-
-            // Validaciones
-            if ($id_orden <= 0) {
-                throw new Exception("ID de orden inválido", 400);
-            }
-
-            $estados_permitidos = ['PENDIENTE', 'PAGADO', 'ENTREGADO', 'CANCELADO'];
-            if (!in_array($nuevo_estado, $estados_permitidos)) {
-                throw new Exception("Estado no válido: $nuevo_estado", 400);
-            }
-
-            // Obtener orden actual
-            $orden = $this->conexion->getOrdenById($id_orden);
-            if (!$orden) {
-                throw new Exception("Orden no encontrada", 404);
-            }
-
-            // Verificar permisos
-            if ($orden['id_vendedor'] != $this->vendedorId) {
-                throw new Exception("No tienes permiso para modificar esta orden", 403);
-            }
-
-            // Actualizar estado con transacción
-            $result = $this->conexion->actEstado($nuevo_estado, $id_orden);
-
-            if (!$result) {
-                throw new Exception("Error al ejecutar la actualización en BD", 500);
-            }
-
-            // Respuesta exitosa
-            echo json_encode([
-                'success' => true,
-                'message' => 'Estado actualizado correctamente',
-                'order' => [
-                    'id' => $id_orden,
-                    'previous_status' => $orden['estado'],
-                    'new_status' => $nuevo_estado
-                ]
-            ]);
-        } catch (Exception $e) {
-            http_response_code($e->getCode() ?: 500);
-            echo json_encode([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'error' => $e->getMessage(),
-                'code' => $e->getCode() ?: 500
-            ]);
+    private function handleUpdateOrderStatus() {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $id_orden = $_POST['id_orden'] ?? null;
+        $nuevo_estado = $_POST['estado'] ?? null;
+        
+        if (!$id_orden || !$nuevo_estado) {
+            $_SESSION['error'] = "Datos incompletos para actualizar el estado";
+            header('Location: VentasController.php');
+            exit();
         }
-        exit; // Asegurar que no se ejecute más código
+        
+        try {
+            $resultado = $this->conexion->actualizarEstadoOrden($id_orden, $nuevo_estado);
+            
+            if ($resultado) {
+                $_SESSION['success'] = "Estado de la orden actualizado correctamente";
+            } else {
+                $_SESSION['error'] = "Error al actualizar el estado de la orden";
+            }
+        } catch (Exception $e) {
+            $_SESSION['error'] = "Error: " . $e->getMessage();
+        }
+        
+        header('Location: VentasController.php');
+        exit();
     }
+}
 
   
     private function showOrdersList()

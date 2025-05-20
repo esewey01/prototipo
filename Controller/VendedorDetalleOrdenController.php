@@ -1,55 +1,42 @@
 <?php
 session_start();
 require_once('../Model/Conexion.php');
-require('Constants.php');
-
-$db = new Conexion();
-$id_orden = $_GET['id'] ?? 0;
-$isModal = isset($_GET['modal']);
-
-// Verificar autenticación y rol de vendedor
-if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol']['id_rol'] != 2) {
-    if ($isModal) {
-        die(json_encode(['error' => 'No autorizado']));
-    } else {
-        header('Location: LoginController.php');
-        exit;
-    }
-}
-
-$vendedor_id = $_SESSION['usuario']['id_usuario'];
 
 try {
-    // Obtener la orden
-    $orden = $db->getOrdenById($id_orden);
-    
-    // Verificar que la orden pertenece a este vendedor
-    if (!$orden || $orden['id_vendedor'] != $vendedor_id) {
-        throw new Exception("No tienes permiso para ver esta orden");
+    if (!isset($_SESSION['usuario'])) {
+        throw new Exception("Acceso no autorizado");
     }
-    
-    // Obtener detalles
-    $detalles = $db->getDetallesOrdenCompleto($id_orden);
-    
-    if ($isModal) {
-        // Solo incluir el contenido del modal sin layout
-        ob_start();
-        include('../Views/VendedorDetalleOrdenView.php');
-        $content = ob_get_clean();
-        echo $content;
-        exit;
-    } else {
-        // Vista normal
-        include('../Views/VendedorDetalleOrdenView.php');
+
+    $id_orden = $_GET['id'] ?? null;
+    if (!$id_orden) {
+        throw new Exception("ID de orden no especificado");
     }
-    
+
+    $conexion = new Conexion();
+    $orden = $conexion->getOrdenById($id_orden);
+    $detalles = $conexion->getDetalleOrden($id_orden);
+
+    if (!$orden) {
+        throw new Exception("Orden no encontrada");
+    }
+
+    // Mostrar solo si es una solicitud modal
+    if (isset($_GET['modal'])) {
+        include('../Views/VendedorDetalleOrdenView.php');
+        exit();
+    }
+
+    // Si no es modal, redirigir o mostrar vista completa
+    header('Location: VentasController.php');
+    exit();
+
 } catch (Exception $e) {
-    if ($isModal) {
-        die(json_encode(['error' => $e->getMessage()]));
+    error_log("Error en VendedorDetalleOrdenController: " . $e->getMessage());
+    if (isset($_GET['modal'])) {
+        echo "<div class='alert alert-danger'>".$e->getMessage()."</div>";
     } else {
         $_SESSION['error'] = $e->getMessage();
-        header('Location: VendedorOrdenesController.php');
-        exit;
+        header('Location: VentasController.php');
     }
+    exit();
 }
-?>

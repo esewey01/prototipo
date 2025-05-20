@@ -320,35 +320,31 @@ include('Head.php');
                     }
                 });
             });
+            // Manejar envío del formulario de cambio de estado
+            $('#formCambiarEstado').on('submit', function(e) {
+                e.preventDefault();
 
-           $(".btn-actualizar").click(function () {
-            const idOrden = $(this).data("id");
-            const nuevoEstado = $(this).data("estado");
+                var idOrden = $('#idOrden').val();
+                var nuevoEstado = $('#nuevoEstado').val();
 
-            $.ajax({
-                url: "VentasController.php",
-                type: "POST",
-                dataType: "json",
-                data: {
-                    accion: "actualizar_estado",
-                    id_orden: idOrden,
-                    nuevo_estado: nuevoEstado
-                },
-                success: function (respuesta) {
-                    if (respuesta.success) {
-                        alert("Estado actualizado correctamente");
-                        location.reload();
-                    } else {
-                        alert("Error al actualizar el estado");
-                        console.error(respuesta.error);
+                $.ajax({
+                    url: 'VentasController.php?action=actualizar_estado',
+                    type: 'POST',
+                    data: {
+                        id_orden: idOrden,
+                        estado: nuevoEstado
+                    },
+                    success: function(response) {
+                        $('#modalDetalles').modal('hide');
+                        location.reload(); // Recargar la página para ver los cambios
+                    },
+                    error: function() {
+                        alert('Error al actualizar el estado');
                     }
-                },
-                error: function (xhr, status, error) {
-                    console.error("Error en la solicitud AJAX:", error);
-                    alert("Error inesperado");
-                }
+                });
             });
-        });
+
+
         });
     </script>
 </body>
