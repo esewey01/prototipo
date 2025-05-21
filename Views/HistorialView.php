@@ -86,7 +86,7 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <section class="panel">
-                            <header class="panel-heading">
+                            
                                 <ul class="nav nav-tabs">
                                     <li class="nav-item">
                                         <a class="nav-link <?= (!isset($_GET['estado'])) ? 'active' : '' ?>"
@@ -109,7 +109,7 @@
                                             href="HistorialController.php?estado=CANCELADO">Cancelados</a>
                                     </li>
                                 </ul>
-                            </header>
+                           
                             <div class="panel-body">
                                 <?php if (empty($ordenes)): ?>
                                     <div class="alert alert-info text-center">
@@ -194,7 +194,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h4 class="modal-title">Reportar Orden #<span id="reportarOrdenId"></span></h4>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <button type="button" class="close" data-diFORMsmiss="modal">&times;</button>
                     </div>
                     <form id="formReportar">
                         <div class="modal-body">
@@ -304,7 +304,6 @@
                 });
 
                 // Enviar reporte
-                // En el script de HistorialView.php
                 $('#formReportar').on('submit', function(e) {
                     e.preventDefault();
 

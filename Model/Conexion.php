@@ -976,16 +976,16 @@ class Conexion
     }
 
     public function crearReporte(
-    string $tipo,
-    int $id_usuario_reportado,
-    int $id_administrador,
-    string $motivo,
-    string $accion_tomada = 'PENDIENTE',
-    string $estado = 'PENDIENTE',
-    string $comentarios = '',
-    ?int $id_producto = null
-): bool {
-    $sql = "INSERT INTO REPORTES (
+        string $tipo,
+        int $id_usuario_reportado,
+        int $id_administrador,
+        string $motivo,
+        string $accion_tomada = 'PENDIENTE',
+        string $estado = 'PENDIENTE',
+        string $comentarios = '',
+        ?int $id_producto = null
+    ): bool {
+        $sql = "INSERT INTO REPORTES (
                 tipo_reporte,
                 id_producto,
                 id_usuario_reportado,
@@ -996,31 +996,31 @@ class Conexion
                 comentarios,
                 fecha_reporte
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, GETDATE())";
-    
-    $params = [
-        $tipo,
-        $id_producto,
-        $id_usuario_reportado,
-        $id_administrador,
-        $motivo,
-        $accion_tomada,
-        $estado,
-        $comentarios
-    ];
-    
-    return $this->executeNonQuery($sql, $params);
-}
 
-public function obtenerAdministradorActivo(): ?array
-{
-    $sql = "SELECT TOP 1 id_usuario, nombre 
+        $params = [
+            $tipo,
+            $id_producto,
+            $id_usuario_reportado,
+            $id_administrador,
+            $motivo,
+            $accion_tomada,
+            $estado,
+            $comentarios
+        ];
+
+        return $this->executeNonQuery($sql, $params);
+    }
+
+    public function obtenerAdministradorActivo(): ?array
+    {
+        $sql = "SELECT TOP 1 id_usuario, nombre 
             FROM USUARIOS 
             WHERE id_rol = 1 AND activo = 1
             ORDER BY NEWID()"; // Aleatorio para distribución equitativa
-    
-    $stmt = $this->executeQuery($sql);
-    return $this->getResults($stmt)[0] ?? null;
-}
+
+        $stmt = $this->executeQuery($sql);
+        return $this->getResults($stmt)[0] ?? null;
+    }
 
     public function obtenerProductosCarrito($id_usuario)
     {
@@ -1078,10 +1078,11 @@ public function obtenerAdministradorActivo(): ?array
     }
 
 
-    public function actualizarComentarioCarrito($id_detalle, $comentario) {
-    $sql = "UPDATE DETALLE_CARRITO SET comentario = ? WHERE id_detalle = ?";
-    return $this->executeNonQuery($sql, [$comentario, $id_detalle]);
-}
+    public function actualizarComentarioCarrito($id_detalle, $comentario)
+    {
+        $sql = "UPDATE DETALLE_CARRITO SET comentario = ? WHERE id_detalle = ?";
+        return $this->executeNonQuery($sql, [$comentario, $id_detalle]);
+    }
     public function actualizarCantidadCarrito($id_detalle, $cantidad)
     {
         $sql = "UPDATE DETALLE_CARRITO SET cantidad = ? 
@@ -1228,7 +1229,7 @@ public function obtenerAdministradorActivo(): ?array
                     $id_carrito,
                     $subtotal,
                     $direccion,
-                    $comentarios_generales 
+                    $comentarios_generales
                 ];
 
                 $stmt = $this->executeQuery($sqlOrden, $paramsOrden);
@@ -1237,12 +1238,12 @@ public function obtenerAdministradorActivo(): ?array
                 $idsOrdenes[] = $id_orden;
 
                 // 3. Mover los items del carrito a detalle_orden para este vendedor
-                 $sqlItems = "INSERT INTO DETALLE_ORDEN 
+                $sqlItems = "INSERT INTO DETALLE_ORDEN 
         (id_orden, id_producto, cantidad, precio_unitario, comentario)
         SELECT ?, id_producto, cantidad, precio_unitario, comentario
         FROM DETALLE_CARRITO
-        WHERE id_carrito = ? AND id_producto IN (" . 
-        implode(',', array_column($productosVendedor, 'id_producto')) . ")";
+        WHERE id_carrito = ? AND id_producto IN (" .
+                    implode(',', array_column($productosVendedor, 'id_producto')) . ")";
 
                 $this->executeNonQuery($sqlItems, [$id_orden, $id_carrito]);
 

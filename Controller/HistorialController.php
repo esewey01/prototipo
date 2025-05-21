@@ -63,7 +63,6 @@ try {
             exit;
 
         case 'reportar':
-            $this->validarAutenticacion();
             $id_orden = $_POST['id_orden'] ?? 0;
             $motivo = $_POST['motivo'] ?? '';
 
@@ -76,19 +75,13 @@ try {
                 throw new Exception("No tienes permiso para reportar esta orden");
             }
 
-            // Obtener administrador activo (podrías implementar lógica para asignar uno)
-            $admin = $db->getRow("SELECT TOP 1 id_usuario FROM USUARIOS WHERE id_rol = 1 AND activo = 1");
+           
 
-            if (!$admin) {
-                throw new Exception("No hay administradores disponibles para procesar el reporte");
-            }
-
-            // Insertar reporte usando tu estructura existente
-            // Crear reporte usando el nuevo método
-            $success = $this->conexion->crearReporte(
+            // Crear reporte
+            $success = $db->crearReporte(
                 tipo: 'USUARIO',
                 id_usuario_reportado: $orden['id_vendedor'],
-                id_administrador: $admin['id_usuario'],
+                id_administrador: $_SESSION['usuario']['id_usuario'],
                 motivo: "Problema con orden #$id_orden",
                 comentarios: "El cliente reportó: " . $motivo . "\n\nOrden: " . json_encode($orden, JSON_PRETTY_PRINT)
             );
@@ -96,7 +89,6 @@ try {
             if (!$success) {
                 throw new Exception("Error al registrar el reporte");
             }
-
 
             $resultado = ['success' => true, 'message' => 'Reporte enviado correctamente'];
             header('Content-Type: application/json');
