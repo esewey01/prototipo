@@ -63,7 +63,7 @@
                     <div class="col-lg-12">
                         <h3 class="page-header"><i class="icon_document"></i> Mi Historial de Compras</h3>
 
-                        <?php if (isset($_SESSION['mensaje'])): ?>
+                         <?php if (isset($_SESSION['mensaje'])): ?>
                             <div class="alert <?= $_SESSION['alerta'] ?? 'alert-info' ?> alert-dismissible fade in" role="alert">
                                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                     <span aria-hidden="true">×</span>
@@ -73,8 +73,7 @@
                         <?php
                             unset($_SESSION['mensaje']);
                             unset($_SESSION['alerta']);
-                        endif;
-                        ?>
+                        endif; ?>
 
                         <ol class="breadcrumb">
                             <li><i class="fa fa-home"></i><a href="PrincipalController.php">Inicio</a></li>
@@ -86,30 +85,30 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <section class="panel">
-                            
-                                <ul class="nav nav-tabs">
-                                    <li class="nav-item">
-                                        <a class="nav-link <?= (!isset($_GET['estado'])) ? 'active' : '' ?>"
-                                            href="HistorialController.php">Todos</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link <?= ($_GET['estado'] ?? '') == 'PENDIENTE' ? 'active' : '' ?>"
-                                            href="HistorialController.php?estado=PENDIENTE">Pendientes</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link <?= ($_GET['estado'] ?? '') == 'PAGADO' ? 'active' : '' ?>"
-                                            href="HistorialController.php?estado=PAGADO">Pagados</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link <?= ($_GET['estado'] ?? '') == 'ENTREGADO' ? 'active' : '' ?>"
-                                            href="HistorialController.php?estado=ENTREGADO">Entregados</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link <?= ($_GET['estado'] ?? '') == 'CANCELADO' ? 'active' : '' ?>"
-                                            href="HistorialController.php?estado=CANCELADO">Cancelados</a>
-                                    </li>
-                                </ul>
-                           
+
+                            <ul class="nav nav-tabs">
+                                <li class="nav-item">
+                                    <a class="nav-link <?= (!isset($_GET['estado'])) ? 'active' : '' ?>"
+                                        href="HistorialController.php">Todos</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link <?= ($_GET['estado'] ?? '') == 'PENDIENTE' ? 'active' : '' ?>"
+                                        href="HistorialController.php?estado=PENDIENTE">Pendientes</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link <?= ($_GET['estado'] ?? '') == 'PAGADO' ? 'active' : '' ?>"
+                                        href="HistorialController.php?estado=PAGADO">Pagados</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link <?= ($_GET['estado'] ?? '') == 'ENTREGADO' ? 'active' : '' ?>"
+                                        href="HistorialController.php?estado=ENTREGADO">Entregados</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link <?= ($_GET['estado'] ?? '') == 'CANCELADO' ? 'active' : '' ?>"
+                                        href="HistorialController.php?estado=CANCELADO">Cancelados</a>
+                                </li>
+                            </ul>
+
                             <div class="panel-body">
                                 <?php if (empty($ordenes)): ?>
                                     <div class="alert alert-info text-center">
@@ -304,45 +303,61 @@
                 });
 
                 // Enviar reporte
+                // En el script de HistorialView.php, modifica el formulario de reporte
                 $('#formReportar').on('submit', function(e) {
                     e.preventDefault();
 
-                    // Validación adicional
-                    if ($('#formReportar textarea').val().length < 10) {
+                    var $form = $(this);
+                    var $submitBtn = $form.find('button[type="submit"]');
+                    var originalBtnText = $submitBtn.html();
+
+                    // Validación
+                    var motivo = $form.find('textarea[name="motivo"]').val();
+                    if (motivo.length < 10) {
                         alert('Por favor describe el problema con más detalle (mínimo 10 caracteres)');
                         return;
                     }
 
+                    // Deshabilitar botón y mostrar carga
+                    $submitBtn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Enviando...');
+
+                    // Enviar reporte
                     $.ajax({
-                        url: 'HistorialController.php?action=reportar',
-                        type: 'POST',
-                        data: $(this).serialize(),
-                        dataType: 'json',
-                        beforeSend: function() {
-                            $('#formReportar button[type="submit"]')
-                                .prop('disabled', true)
-                                .html('<i class="fa fa-spinner fa-spin"></i> Enviando...');
-                        },
-                        success: function(response) {
+                            url: 'HistorialController.php?action=reportar',
+                            type: 'POST',
+                            data: $form.serialize(),
+                            dataType: 'json'
+                        })
+                        .done(function(response) {
+                            console.log('Respuesta:', response);
+
                             if (response.success) {
-                                toastr.success(response.message);
+                                alert(response.message);
                                 $('#reportarModal').modal('hide');
-                                // Opcional: actualizar solo la fila afectada
+
+                                // Actualizar interfaz
                                 $('.btn-reportar[data-id="' + $('#idOrdenReportar').val() + '"]')
                                     .replaceWith('<span class="badge badge-info">Reportado</span>');
                             } else {
-                                toastr.error(response.message || 'Error al enviar reporte');
+                                alert('Error: ' + response.message);
                             }
-                        },
-                        error: function(xhr) {
-                            toastr.error('Error de conexión: ' + xhr.statusText);
-                        },
-                        complete: function() {
-                            $('#formReportar button[type="submit"]')
-                                .prop('disabled', false)
-                                .html('Enviar Reporte');
-                        }
-                    });
+                        })
+                        .fail(function(xhr, status, error) {
+                            console.error('Error en AJAX:', status, error);
+
+                            try {
+                                // Intentar parsear la respuesta como JSON aunque haya fallado
+                                var response = JSON.parse(xhr.responseText);
+                                alert('Error: ' + (response.message || error));
+                            } catch (e) {
+                                // Si no es JSON válido, mostrar el error crudo
+                                alert('Error de conexión: ' + error + '\nRespuesta del servidor: ' + xhr.responseText);
+                            }
+                        })
+                        .always(function() {
+                            // Restaurar botón
+                            $submitBtn.prop('disabled', false).html(originalBtnText);
+                        });
                 });
             });
         </script>

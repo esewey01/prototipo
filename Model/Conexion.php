@@ -779,19 +779,23 @@ class Conexion
         return $this->executeNonQuery($sql, array($estado, $id_usuario));
     }
     //FUNCION PARA REPORTESs
-    public function getReportes()
-    {
-        $sql = "SELECT r.*, p.nombre_producto, u.nombre as nombre_reportado, 
-                       a.nombre as nombre_administrador
-                FROM REPORTES r
-                JOIN PRODUCTOS p ON r.id_producto = p.id_producto
-                JOIN USUARIOS u ON r.id_usuario_reportado = u.id_usuario
-                JOIN USUARIOS a ON r.id_administrador = a.id_usuario
-                ORDER BY r.fecha_reporte DESC";
+    public function getReportes() {
+    $sql = "SELECT 
+                r.*, 
+                p.nombre_producto, 
+                u.nombre as nombre_reportado, 
+                a.nombre as nombre_administrador,
+                o.id_orden as id_orden
+            FROM REPORTES r
+            LEFT JOIN PRODUCTOS p ON r.id_producto = p.id_producto
+            LEFT JOIN USUARIOS u ON r.id_usuario_reportado = u.id_usuario
+            LEFT JOIN USUARIOS a ON r.id_administrador = a.id_usuario
+            LEFT JOIN ORDENES o ON r.id_orden = o.id_orden
+            ORDER BY r.fecha_reporte DESC";
 
-        $stmt = $this->executeQuery($sql);
-        return $this->getResults($stmt);
-    }
+    $stmt = $this->executeQuery($sql);
+    return $this->getResults($stmt);
+}
 
     public function getDetalleReporte($idReporte)
     {
@@ -983,23 +987,26 @@ class Conexion
         string $accion_tomada = 'PENDIENTE',
         string $estado = 'PENDIENTE',
         string $comentarios = '',
-        ?int $id_producto = null
+        ?int $id_producto = null,
+        ?int $id_orden = null
     ): bool {
         $sql = "INSERT INTO REPORTES (
-                tipo_reporte,
-                id_producto,
-                id_usuario_reportado,
-                id_administrador,
-                motivo,
-                accion_tomada,
-                estado,
-                comentarios,
-                fecha_reporte
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, GETDATE())";
+            tipo_reporte,
+            id_producto,
+            id_orden,
+            id_usuario_reportado,
+            id_administrador,
+            motivo,
+            accion_tomada,
+            estado,
+            comentarios,
+            fecha_reporte
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE())";
 
         $params = [
             $tipo,
             $id_producto,
+            $id_orden,
             $id_usuario_reportado,
             $id_administrador,
             $motivo,
@@ -1011,6 +1018,15 @@ class Conexion
         return $this->executeNonQuery($sql, $params);
     }
 
+    public function verificarReporteOrdenExistente($id_orden, $id_usuario) {
+    $sql = "SELECT id_reporte FROM REPORTES 
+            WHERE tipo_reporte = 'ORDEN' 
+            AND id_orden = ? 
+            AND id_administrador = ?";
+    $stmt = $this->executeQuery($sql, [$id_orden, $id_usuario]);
+    $result = $this->getResults($stmt);
+    return !empty($result);
+}
     public function obtenerAdministradorActivo(): ?array
     {
         $sql = "SELECT TOP 1 id_usuario, nombre 

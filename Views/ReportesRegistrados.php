@@ -62,9 +62,10 @@
                     <li class="active"><a href="#reportes-productos" data-toggle="tab">Reportes de Productos</a></li>
                     <li><a href="#reportes-usuarios" data-toggle="tab">Reportes de Vendedores</a></li>
                     <li><a href="#reportes-clientes" data-toggle="tab">Reportes por Usuarios</a></li>
+                    <li><a href="#reportes-ordenes" data-toggle="tab">Reportes por Órdenes</a></li>
                 </ul>
 
-                <!-- Contenido de las pestañas -->
+                <
                 <!-- Contenido de las pestañas -->
                 <div class="tab-content">
                     <!-- Tabla de Reportes de Productos -->
@@ -135,6 +136,23 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Nueva Tabla de Reportes por Órdenes -->
+    <div class="tab-pane" id="reportes-ordenes">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                REPORTES POR ÓRDENES
+                <!-- Botón exportar... -->
+            </div>
+            <div class="panel-body">
+                <?php
+                $reportes = $reportesOrdenes;
+                $tipo_reporte = 'ORDEN';
+                include("_partials/tabla_reportes.php");
+                ?>
+            </div>
+        </div>
+    </div>
                 </div>
             </section>
         </section>
@@ -239,15 +257,26 @@
 
         // Función para ver detalles del reporte
         function verDetalleReporte(idReporte, tipoReporte) {
-            $.get('DetalleReporte.php?id=' + idReporte + '&tipo=' + tipoReporte, function(data) {
-                $('#detalleReporteContenido').html(data);
-                $('#accion_id_reporte').val(idReporte);
-                $('#accion_tipo_reporte').val(tipoReporte);
-                $('#detalleReporteModal').modal('show');
-            }).fail(function() {
-                alert('Error al cargar los detalles del reporte');
-            });
+    $.get('DetalleReporte.php', {
+        id: idReporte,
+        tipo: tipoReporte
+    }, function(data) {
+        $('#detalleReporteContenido').html(data);
+        $('#accion_id_reporte').val(idReporte);
+        $('#accion_tipo_reporte').val(tipoReporte);
+        
+        // Mostrar u ocultar botón según tipo
+        if (tipoReporte === 'ORDEN') {
+            $('#btnResolverReporte').show();
+        } else {
+            $('#btnResolverReporte').hide();
         }
+        
+        $('#detalleReporteModal').modal('show');
+    }).fail(function() {
+        alert('Error al cargar los detalles del reporte');
+    });
+}
 
         // Manejar el envío del formulario de acción
         $('#formAccionReporte').submit(function(e) {
