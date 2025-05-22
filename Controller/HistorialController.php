@@ -85,7 +85,7 @@ try {
                 if ($orden['estado'] != 'PENDIENTE') {
                     throw new Exception("Solo puedes reportar órdenes pendientes");
                 }
-/*
+                /*
                 $admin = $db->obtenerAdministradorActivo();
                 if (!$admin) {
                     throw new Exception("No hay administradores disponibles");
@@ -129,7 +129,7 @@ try {
     }
 } catch (Exception $e) {
     if (isset($_SERVER['HTTP_X_REQUESTED_WITH'])) {
-         $_SESSION['error'] = $e->getMessage();
+        $_SESSION['error'] = $e->getMessage();
         //header('Content-Type: application/json');
         //echo json_encode(['error' => $e->getMessage()]);
     } else {

@@ -63,7 +63,7 @@
                     <div class="col-lg-12">
                         <h3 class="page-header"><i class="icon_document"></i> Mi Historial de Compras</h3>
 
-                         <?php if (isset($_SESSION['mensaje'])): ?>
+                        <?php if (isset($_SESSION['mensaje'])): ?>
                             <div class="alert <?= $_SESSION['alerta'] ?? 'alert-info' ?> alert-dismissible fade in" role="alert">
                                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                     <span aria-hidden="true">×</span>
@@ -213,10 +213,57 @@
             </div>
         </div>
 
+
+        <!-- Modal para información del vendedor (similar al de ComprarView) -->
+        <div class="modal fade" id="vendedorDetalleModal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Información del Vendedor</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="loadingVendedor" class="text-center py-5">
+                            <i class="fa fa-spinner fa-spin fa-3x"></i>
+                            <p>Cargando información del vendedor...</p>
+                        </div>
+                        <div id="vendedorContent" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-4 text-center">
+                                    <img id="vendedorFoto" src="" class="img-thumbnail mb-3" style="width: 150px; height: 150px;">
+                                    <h4 id="vendedorNombre"></h4>
+                                    <p class="text-muted" id="vendedorLogin"></p>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p><strong>Teléfono:</strong> <span id="vendedorTelefono"></span></p>
+                                            <p><strong>Email:</strong> <span id="vendedorEmail"></span></p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p><strong>Dirección:</strong> <span id="vendedorDireccion"></span></p>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <h5>Redes Sociales</h5>
+                                    <div id="vendedorRedes"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <?PHP include("LibraryJs.php"); ?>
+        <?php include('../Views/UsuarioDetalleModal.php'); ?>
 
         <script>
             $(document).ready(function() {
+                var URL_VIEWS = '<?= URL_VIEWS ?>';
                 // Ver detalles de la orden
                 $(document).on('click', '.btn-ver-detalle', function() {
                     var id = $(this).data('id');
@@ -244,7 +291,13 @@
                                 </div>
                                 <div class="col-md-6">
                                     <h5>Vendedor</h5>
-                                    <p>${response.orden.vendedor_nombre || 'N/A'}</p>
+                                    <p>
+                                        <a href="#" class="btn-vendedor-info" data-id="${response.orden.id_vendedor}">
+                                            ${response.orden.vendedor_nombre || 'N/A'}
+                                            <i class="icon_info_alt"></i>
+                                        </a>
+                                    </p>
+                                    <p><strong>Dirección de entrega:</strong> ${response.orden.direccion_entrega || 'No especificada'}</p>
                                 </div>
                             </div>
                             
@@ -263,33 +316,143 @@
 
                             response.detalles.forEach(function(item) {
                                 html += `
-                                <tr>
-                                    <td>
-                                        <img src="<?= URL_VIEWS ?>${item.imagen}" width="50" height="50" class="img-thumbnail">
-                                        ${item.nombre_producto}
-                                    </td>
-                                    <td>${item.cantidad}</td>
-                                    <td>$${item.precio_unitario.toFixed(2)}</td>
-                                    <td>$${(item.cantidad * item.precio_unitario).toFixed(2)}</td>
-                                </tr>`;
+                                        <tr>
+                                            <td>
+                                                <img src="${URL_VIEWS}${item.imagen}" width="50" height="50" class="img-thumbnail">
+                                                ${item.nombre_producto}
+                                                ${item.descripcion ? '<br><small class="text-muted">' + item.descripcion.substring(0, 50) + '...</small>' : ''}
+                                            </td>
+                                            <td>${item.cantidad}</td>
+                                            <td>$${item.precio_unitario.toFixed(2)}</td>
+                                            <td>$${(item.cantidad * item.precio_unitario).toFixed(2)}</td>
+                                        </tr>`;
                             });
 
                             html += `
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <th colspan="3" class="text-right">Total:</th>
-                                            <th>$${response.orden.total.toFixed(2)}</th>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>`;
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="3" class="text-right">Total:</th>
+                                    <th>$${response.orden.total.toFixed(2)}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>`;
 
                             $('#detallesContenido').html(html);
                             $('#detalleModal').modal('show');
                         },
                         error: function() {
                             alert('Error al cargar los detalles');
+                        }
+                    });
+                });
+
+                // Mostrar información del vendedor
+
+                // Mostrar información del vendedor
+                $(document).on('click', '.btn-vendedor-info', function(e) {
+                    e.preventDefault();
+                    const idUsuario = $(this).data('id');
+                    console.log('ID Usuario:', idUsuario);
+                    const modal = $('#usuarioDetalleModal');
+
+                    // Mostrar loading
+                    modal.find('#loadingUsuario').show();
+                    modal.find('#usuarioContent').hide();
+                    modal.modal('show');
+
+                    // Obtener datos del vendedor via AJAX
+                    $.ajax({
+                        url: 'UsuarioController.php?action=detalle&id=' + idUsuario,
+                        type: 'GET',
+                        success: function(response) {
+                            console.log('Respuesta Success:', response);
+
+                            if (response.success) {
+                                const usuario = response.data.usuario;
+                                const redes = response.data.redes;
+
+                                // Actualizar información básica
+                                $('#usuarioFoto').attr('src', URL_VIEWS + (usuario.foto_perfil || 'fotoproducto/user.png'));
+                                $('#usuarioNombre').text(usuario.nombre + (usuario.apellido ? ' ' + usuario.apellido : ''));
+                                $('#usuarioLogin').text('@' + usuario.login);
+                                $('#usuarioFechaNacimiento').text(usuario.fecha_nacimiento);
+                                const genero = usuario.genero;
+                                const mapeoGenero = {
+                                    'M': 'Masculino',
+                                    'F': 'Femenino'
+                                };
+
+                                $('#usuarioGenero').text(mapeoGenero[genero] || 'No definido');
+                                $('#usuarioEmail').text(usuario.email || 'No proporcionado');
+                                $('#usuarioTelefono').text(usuario.telefono || 'No proporcionado');
+                                $('#usuarioDireccion').text(usuario.direccion || 'No proporcionada');
+
+                                // Función para WhatsApp
+                                const telefono = usuario.telefono;
+                                const telefonoLimpio = telefono ? telefono.replace(/\D/g, '') : null;
+                                const enlaceWhatsApp = telefonoLimpio ? `https://wa.me/${telefonoLimpio}` : null;
+
+                                const telefonoElemento = $('#usuarioTelefono');
+                                if (enlaceWhatsApp) {
+                                    telefonoElemento.html(`<a href="${enlaceWhatsApp}" target="_blank">${telefono} <i class="icon_link_alt"></i></a>`);
+                                } else {
+                                    telefonoElemento.text(telefono || 'No proporcionado');
+                                }
+
+                                // Actualizar redes sociales
+                                let redesHtml = '';
+                                if (response.data.redes && response.data.redes.length > 0) {
+                                    const redesObjeto = response.data.redes[0];
+
+                                    if (redesObjeto.facebook) {
+                                        redesHtml += `<a href="${redesObjeto.facebook}" target="_blank" class="btn btn-sm btn-default">
+                            <i class="fa fa-facebook"></i> Facebook
+                        </a> `;
+                                    }
+                                    if (redesObjeto.instagram) {
+                                        redesHtml += `<a href="${redesObjeto.instagram}" target="_blank" class="btn btn-sm btn-default">
+                            <i class="fa fa-instagram"></i> Instagram
+                        </a> `;
+                                    }
+                                    if (redesObjeto.linkedin) {
+                                        redesHtml += `<a href="${redesObjeto.linkedin}" target="_blank" class="btn btn-sm btn-default">
+                            <i class="fa fa-linkedin"></i> LinkedIn
+                        </a> `;
+                                    }
+                                    if (redesObjeto.twitter) {
+                                        redesHtml += `<a href="${redesObjeto.twitter}" target="_blank" class="btn btn-sm btn-default">
+                            <i class="fa fa-twitter"></i> Twitter
+                        </a> `;
+                                    }
+
+                                    if (redesHtml === '') {
+                                        redesHtml = '<p class="text-muted">El vendedor no ha agregado redes sociales</p>';
+                                    }
+                                } else {
+                                    redesHtml = '<p class="text-muted">El vendedor no ha agregado redes sociales</p>';
+                                }
+                                $('#usuarioRedes').html(redesHtml);
+
+                                // Mostrar contenido
+                                modal.find('#loadingUsuario').hide();
+                                modal.find('#usuarioContent').show();
+                            } else {
+                                modal.find('.modal-body').html(`
+                    <div class="alert alert-danger">
+                        ${response.message || 'Error al cargar la información del vendedor'}
+                    </div>
+                `);
+                            }
+                        },
+                        error: function(xhr) {
+                            console.log('Error AJAX:', xhr);
+                            modal.find('.modal-body').html(`
+                <div class="alert alert-danger">
+                    Error en la conexión: ${xhr.statusText}
+                </div>
+            `);
                         }
                     });
                 });

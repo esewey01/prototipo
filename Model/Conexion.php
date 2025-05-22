@@ -816,7 +816,7 @@ class Conexion
         return $this->getResults($stmt)[0] ?? null;
     }
 
-   
+
 
     public function getDetalleReporte($idReporte)
     {
@@ -1218,12 +1218,12 @@ class Conexion
     //funciones para chechout
     // Agrega estos métodos en tu clase Conexion
 
-    public function crearOrden($id_usuario, $id_carrito, $total, $direccion = '', $comentarios_generales  = '')
+    public function crearOrden($id_usuario, $id_carrito, $direccion = '', $comentarios = '')
     {
         sqlsrv_begin_transaction($this->connection);
 
         try {
-            // 1. Obtener todos los productos del carrito con sus vendedores
+            // Obtener productos del carrito
             $sqlProductos = "SELECT dc.id_producto, p.id_usuario as id_vendedor, dc.cantidad, dc.precio_unitario
             FROM DETALLE_CARRITO dc
             JOIN PRODUCTOS p ON dc.id_producto = p.id_producto
@@ -1248,14 +1248,13 @@ class Conexion
 
             $idsOrdenes = [];
 
-            // Crear una orden por cada vendedor
             foreach ($ordenesPorVendedor as $id_vendedor => $productosVendedor) {
                 // Calcular subtotal para este vendedor
                 $subtotal = array_reduce($productosVendedor, function ($carry, $item) {
                     return $carry + ($item['cantidad'] * $item['precio_unitario']);
                 }, 0);
 
-                // 2. Crear la orden para este vendedor
+                // Crear la orden para este vendedor
                 $sqlOrden = "INSERT INTO ORDENES 
                 (id_usuario, id_vendedor, id_carrito, total, direccion_entrega, comentarios)
                 OUTPUT INSERTED.id_orden
@@ -1267,7 +1266,7 @@ class Conexion
                     $id_carrito,
                     $subtotal,
                     $direccion,
-                    $comentarios_generales
+                    $comentarios
                 ];
 
                 $stmt = $this->executeQuery($sqlOrden, $paramsOrden);
@@ -1275,35 +1274,35 @@ class Conexion
                 $id_orden = $result[0]['id_orden'];
                 $idsOrdenes[] = $id_orden;
 
-                // 3. Mover los items del carrito a detalle_orden para este vendedor
+                // Mover los items del carrito a detalle_orden para este vendedor
                 $sqlItems = "INSERT INTO DETALLE_ORDEN 
-        (id_orden, id_producto, cantidad, precio_unitario, comentario)
-        SELECT ?, id_producto, cantidad, precio_unitario, comentario
-        FROM DETALLE_CARRITO
-        WHERE id_carrito = ? AND id_producto IN (" .
+                (id_orden, id_producto, cantidad, precio_unitario)
+                SELECT ?, id_producto, cantidad, precio_unitario
+                FROM DETALLE_CARRITO
+                WHERE id_carrito = ? AND id_producto IN (" .
                     implode(',', array_column($productosVendedor, 'id_producto')) . ")";
 
                 $this->executeNonQuery($sqlItems, [$id_orden, $id_carrito]);
 
-                // 4. Actualizar inventario para los productos de este vendedor
+                // Actualizar inventario para los productos de este vendedor
                 $sqlInventario = "UPDATE PRODUCTOS p
-                         SET cantidad = cantidad - dc.cantidad
-                         FROM DETALLE_CARRITO dc
-                         WHERE p.id_producto = dc.id_producto
-                         AND dc.id_carrito = ?
-                         AND p.id_usuario = ?";
+                SET cantidad = cantidad - dc.cantidad
+                FROM DETALLE_CARRITO dc
+                WHERE p.id_producto = dc.id_producto
+                AND dc.id_carrito = ?
+                AND p.id_usuario = ?";
 
                 $this->executeNonQuery($sqlInventario, [$id_carrito, $id_vendedor]);
             }
 
-            // 5. Marcar carrito como completado
+            // Marcar carrito como completado
             $this->executeNonQuery(
                 "UPDATE CARRITO SET estado = 'COMPLETADO' WHERE id_carrito = ?",
                 [$id_carrito]
             );
 
             sqlsrv_commit($this->connection);
-            return $idsOrdenes; // Retornar array de IDs de órdenes creadas
+            return $idsOrdenes;
         } catch (Exception $e) {
             sqlsrv_rollback($this->connection);
             error_log("Error al crear orden: " . $e->getMessage());
@@ -1334,13 +1333,26 @@ class Conexion
 
     public function getDetalleOrden($id_orden)
     {
-        $sql = "SELECT d.*, p.nombre_producto, p.imagen
-            FROM DETALLE_ORDEN d
-            JOIN PRODUCTOS p ON d.id_producto = p.id_producto
-            WHERE d.id_orden = ?";
+        $sql = "SELECT 
+            do.*, 
+            p.nombre_producto, 
+            p.descripcion,
+            p.imagen,
+            u.nombre as vendedor_nombre,
+            u.login as vendedor_login,
+            u.telefono as vendedor_telefono,
+            u.foto_perfil as vendedor_foto,
+            (do.cantidad * do.precio_unitario) as subtotal
+        FROM DETALLE_ORDEN do
+        JOIN PRODUCTOS p ON do.id_producto = p.id_producto
+        JOIN USUARIOS u ON p.id_usuario = u.id_usuario
+        WHERE do.id_orden = ?";
+
         $stmt = $this->executeQuery($sql, [$id_orden]);
         return $this->getResults($stmt);
     }
+
+
 
 
     //OBTENER ORDENES Y ACTUALIZAR ESTADO
@@ -1418,14 +1430,16 @@ class Conexion
     public function getDetallesOrdenCompleto($id_orden)
     {
         $sql = "SELECT 
-                do.*, 
-                p.nombre_producto,
-                p.imagen,
-                u.nombre as vendedor_nombre
-            FROM DETALLE_ORDEN do
-            JOIN PRODUCTOS p ON do.id_producto = p.id_producto
-            JOIN USUARIOS u ON p.id_usuario = u.id_usuario
-            WHERE do.id_orden = ?";
+            do.*, 
+            p.nombre_producto, 
+            p.descripcion,
+            p.imagen,
+            u.nombre as vendedor_nombre,
+            (do.cantidad * do.precio_unitario) as subtotal
+        FROM DETALLE_ORDEN do
+        JOIN PRODUCTOS p ON do.id_producto = p.id_producto
+        JOIN USUARIOS u ON p.id_usuario = u.id_usuario
+        WHERE do.id_orden = ?";
 
         $stmt = $this->executeQuery($sql, [$id_orden]);
         return $this->getResults($stmt);
