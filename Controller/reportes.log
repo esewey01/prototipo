@@ -141,3 +141,27 @@ Datos decodificados: Array
 ID Producto: 22
 ID Vendedor: 4
 Resultado operación: Éxito
+2025-05-22 04:48:13 - Inicio
+Raw input: {"id_producto":"12","motivo":"Contenido inapropiado","comentarios":"No creo que sea correcto vender esto en la escuela"}
+Datos decodificados: Array
+(
+    [id_producto] => 12
+    [motivo] => Contenido inapropiado
+    [comentarios] => No creo que sea correcto vender esto en la escuela
+)
+
+ID Producto: 12
+ID Vendedor: 4
+Resultado operación: Éxito
+2025-05-22 04:48:39 - Inicio
+Raw input: {"id_producto":"15","motivo":"Precio incorrecto","comentarios":"Muy caro, no es lo correcto"}
+Datos decodificados: Array
+(
+    [id_producto] => 15
+    [motivo] => Precio incorrecto
+    [comentarios] => Muy caro, no es lo correcto
+)
+
+ID Producto: 15
+ID Vendedor: 4
+Resultado operación: Éxito

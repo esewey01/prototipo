@@ -19,13 +19,18 @@ try {
     // Obtener todos los reportes incluyendo los de tipo ORDEN
     $reportes = $db->getReportes();
     
-    // Agrupar reportes por tipo
+    // reportes relacionados por prodcutos
     $reportesProductos = array_filter($reportes, function($r) { return $r['tipo_reporte'] == 'PRODUCTO'; });
+    // reportes relacionados hacia vendedores
+    $reportesVendedores = array_filter($reportes, function($r) { return $r['tipo_reporte'] == 'VENDEDOR'; });
+    // reportes relacionados hacia usuarios
     $reportesUsuarios = array_filter($reportes, function($r) { return $r['tipo_reporte'] == 'USUARIO'; });
+    //reportes relacionados hacia ordenes de clientes
     $reportesOrdenes = array_filter($reportes, function($r) { return $r['tipo_reporte'] == 'ORDEN'; });
 
     $data = [
         'reportesProductos' => $reportesProductos,
+        'reportesVendedores' => $reportesVendedores,
         'reportesUsuarios' => $reportesUsuarios,
         'reportesOrdenes' => $reportesOrdenes,
         'usuario' => $_SESSION['usuario']['login']

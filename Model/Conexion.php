@@ -779,8 +779,9 @@ class Conexion
         return $this->executeNonQuery($sql, array($estado, $id_usuario));
     }
     //FUNCION PARA REPORTESs
-    public function getReportes() {
-    $sql = "SELECT 
+    public function getReportes()
+    {
+        $sql = "SELECT 
                 r.*, 
                 p.nombre_producto, 
                 u.nombre as nombre_reportado, 
@@ -793,9 +794,29 @@ class Conexion
             LEFT JOIN ORDENES o ON r.id_orden = o.id_orden
             ORDER BY r.fecha_reporte DESC";
 
-    $stmt = $this->executeQuery($sql);
-    return $this->getResults($stmt);
-}
+        $stmt = $this->executeQuery($sql);
+        return $this->getResults($stmt);
+    }
+
+    public function getReporteById($id)
+    {
+        $sql = "SELECT r.*, 
+                   p.nombre_producto,
+                   u.nombre as nombre_reportado,
+                   a.nombre as nombre_administrador,
+                   ur.id_rol as rol_reportado
+            FROM REPORTES r
+            LEFT JOIN PRODUCTOS p ON r.id_producto = p.id_producto
+            LEFT JOIN USUARIOS u ON r.id_usuario_reportado = u.id_usuario
+            LEFT JOIN USUARIOS a ON r.id_administrador = a.id_usuario
+            LEFT JOIN ROLES_USUARIO ur ON u.id_usuario = ur.id_usuario
+            WHERE r.id_reporte = ?";
+
+        $stmt = $this->executeQuery($sql, [$id]);
+        return $this->getResults($stmt)[0] ?? null;
+    }
+
+   
 
     public function getDetalleReporte($idReporte)
     {
@@ -1018,15 +1039,16 @@ class Conexion
         return $this->executeNonQuery($sql, $params);
     }
 
-    public function verificarReporteOrdenExistente($id_orden, $id_usuario) {
-    $sql = "SELECT id_reporte FROM REPORTES 
+    public function verificarReporteOrdenExistente($id_orden, $id_usuario)
+    {
+        $sql = "SELECT id_reporte FROM REPORTES 
             WHERE tipo_reporte = 'ORDEN' 
             AND id_orden = ? 
             AND id_administrador = ?";
-    $stmt = $this->executeQuery($sql, [$id_orden, $id_usuario]);
-    $result = $this->getResults($stmt);
-    return !empty($result);
-}
+        $stmt = $this->executeQuery($sql, [$id_orden, $id_usuario]);
+        $result = $this->getResults($stmt);
+        return !empty($result);
+    }
     public function obtenerAdministradorActivo(): ?array
     {
         $sql = "SELECT TOP 1 id_usuario, nombre 
