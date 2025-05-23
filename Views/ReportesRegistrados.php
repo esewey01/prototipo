@@ -84,6 +84,7 @@
                                 </div>
                                 <div class="panel-body">
                                     <?php
+                                     $reportes = $reportesProductos;
                                     $tipo_reporte = 'PRODUCTO';
                                     include("_partials/tabla_reportes.php");
                                     ?>
@@ -217,7 +218,7 @@
                                 <div class="col-md-4 text-center">
                                     <img src="<?= URL_VIEWS ?>${usuario.foto_perfil}"
                                         class="img-thumbnail img-circle" width="120" height="120"
-                                        onerror="this.src='<?= URL_VIEWS ?>assets/img/user-default.png'">
+                                        onerror="this.src='<?= URL_VIEWS ?>fotoproducto/default.jpg'">
                                 </div>
                                 <div class="col-md-8">
                                     <table class="table table-condensed">
@@ -312,7 +313,7 @@
                         <div class="panel-body text-center">
                             <img src="<?= URL_VIEWS ?>${producto.imagen}"
                                 class="img-thumbnail" style="max-height: 200px;"
-                                onerror="this.src='<?= URL_VIEWS ?>assets/img/producto-default.png'">
+                                onerror="this.src='<?= URL_VIEWS ?>fotoproducto/default.jpg'">
                             <h4>${producto.nombre_producto}</h4>
                             <p>Código: ${producto.codigo}</p>
                         </div>
@@ -450,7 +451,7 @@
                                         <tr>
                                             <td>
                                                 <img src="<?= URL_VIEWS ?>${item.imagen}" width="50"
-                                                    onerror="this.src='<?= URL_VIEWS ?>assets/img/producto-default.png'">
+                                                    onerror="this.src='<?= URL_VIEWS ?>fotoproducto/default.jpg'">
                                                 ${item.nombre_producto}
                                             </td>
                                             <td>${item.cantidad}</td>
@@ -550,28 +551,8 @@
 
         });
 
-        // Función para ver detalles del reporte
-        function verDetalleReporte(idReporte, tipoReporte) {
-            $.get('DetalleReporte.php', {
-                id: idReporte,
-                tipo: tipoReporte
-            }, function(data) {
-                $('#detalleReporteContenido').html(data);
-                $('#accion_id_reporte').val(idReporte);
-                $('#accion_tipo_reporte').val(tipoReporte);
-
-                // Mostrar u ocultar botón según tipo
-                if (tipoReporte === 'ORDEN') {
-                    $('#btnResolverReporte').show();
-                } else {
-                    $('#btnResolverReporte').hide();
-                }
-
-                $('#detalleReporteModal').modal('show');
-            }).fail(function() {
-                alert('Error al cargar los detalles del reporte');
-            });
-        }
+        
+        
 
         // Manejar el envío del formulario de acción
         $('#formAccionReporte').submit(function(e) {
@@ -620,95 +601,98 @@
         });
 
         // Función para cargar los detalles del reporte
-function verDetalleReporte(idReporte, tipoReporte) {
-    // Mostrar carga
-    $('#detalleReporteContenido').html($('#cargando-reporte').html());
-    $('#reporte-id').text(idReporte);
-    $('#reporte-tipo').text('(' + tipoReporte + ')');
-    
-    // Mostrar/ocultar botones según tipo
-    if(tipoReporte === 'ORDEN' || tipoReporte === 'PRODUCTO') {
-        $('#btnResolverReporte').show();
-        $('#btnRechazarReporte').show();
-    } else {
-        $('#btnResolverReporte').hide();
-        $('#btnRechazarReporte').hide();
-    }
-    
-    // Obtener datos via AJAX
-    $.ajax({
-        url: 'obtenerDetalleReporte.php',
-        type: 'GET',
-        data: { id: idReporte, tipo: tipoReporte },
-        dataType: 'json',
-        success: function(response) {
-            if(response.success) {
-                let templateId = 'template-' + tipoReporte.toLowerCase();
-                let template = $('#' + templateId).html();
-                
-                // Reemplazar variables en el template
-                let html = template.replace(/\${([^}]+)}/g, (match, p1) => {
-                    return eval('response.data.' + p1) || match;
-                });
-                
-                $('#detalleReporteContenido').html(html);
+        function verDetalleReporte(idReporte, tipoReporte) {
+            // Mostrar carga
+            $('#detalleReporteContenido').html($('#cargando-reporte').html());
+            $('#reporte-id').text(idReporte);
+            $('#reporte-tipo').text('(' + tipoReporte + ')');
+
+            // Mostrar/ocultar botones según tipo
+            if (tipoReporte === 'ORDEN' || tipoReporte === 'PRODUCTO') {
+                $('#btnResolverReporte').show();
+                $('#btnRechazarReporte').show();
             } else {
-                $('#detalleReporteContenido').html(
-                    '<div class="alert alert-danger">Error al cargar los detalles: ' + response.message + '</div>'
-                );
+                $('#btnResolverReporte').hide();
+                $('#btnRechazarReporte').hide();
             }
-        },
-        error: function(xhr) {
-            $('#detalleReporteContenido').html(
-                '<div class="alert alert-danger">Error de conexión: ' + xhr.statusText + '</div>'
-            );
+
+            // Obtener datos via AJAX
+            $.ajax({
+                url: 'obtenerDetalleReporte.php',
+                type: 'GET',
+                data: {
+                    id: idReporte,
+                    tipo: tipoReporte
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        let templateId = 'template-' + tipoReporte.toLowerCase();
+                        let template = $('#' + templateId).html();
+
+                        // Reemplazar variables en el template
+                        let html = template.replace(/\${([^}]+)}/g, (match, p1) => {
+                            return eval('response.data.' + p1) || match;
+                        });
+
+                        $('#detalleReporteContenido').html(html);
+                    } else {
+                        $('#detalleReporteContenido').html(
+                            '<div class="alert alert-danger">Error al cargar los detalles: ' + response.message + '</div>'
+                        );
+                    }
+                },
+                error: function(xhr) {
+                    $('#detalleReporteContenido').html(
+                        '<div class="alert alert-danger">Error de conexión: ' + xhr.statusText + '</div>'
+                    );
+                }
+            });
+
+            $('#detalleReporteModal').modal('show');
         }
-    });
-    
-    $('#detalleReporteModal').modal('show');
-}
 
-// Manejar el botón de resolver reporte
-$('#btnResolverReporte').click(function() {
-    let idReporte = $('#reporte-id').text();
-    let tipoReporte = $('#reporte-tipo').text().replace(/[()]/g, '');
-    
-    if(confirm('¿Estás seguro de marcar este reporte como resuelto?')) {
-        $.post('resolverReporte.php', {
-            id: idReporte,
-            tipo: tipoReporte
-        }, function(response) {
-            if(response.success) {
-                alert('Reporte marcado como resuelto');
-                $('#detalleReporteModal').modal('hide');
-                location.reload(); // Recargar para actualizar la lista
-            } else {
-                alert('Error: ' + response.message);
-            }
-        }, 'json');
-    }
-});
+        // Manejar el botón de resolver reporte
+        $('#btnResolverReporte').click(function() {
+            let idReporte = $('#reporte-id').text();
+            let tipoReporte = $('#reporte-tipo').text().replace(/[()]/g, '');
 
-// Manejar el botón de rechazar reporte
-$('#btnRechazarReporte').click(function() {
-    let idReporte = $('#reporte-id').text();
-    let tipoReporte = $('#reporte-tipo').text().replace(/[()]/g, '');
-    
-    if(confirm('¿Estás seguro de rechazar este reporte? Esto no tomará ninguna acción sobre el elemento reportado.')) {
-        $.post('rechazarReporte.php', {
-            id: idReporte,
-            tipo: tipoReporte
-        }, function(response) {
-            if(response.success) {
-                alert('Reporte rechazado');
-                $('#detalleReporteModal').modal('hide');
-                location.reload(); // Recargar para actualizar la lista
-            } else {
-                alert('Error: ' + response.message);
+            if (confirm('¿Estás seguro de marcar este reporte como resuelto?')) {
+                $.post('resolverReporte.php', {
+                    id: idReporte,
+                    tipo: tipoReporte
+                }, function(response) {
+                    if (response.success) {
+                        alert('Reporte marcado como resuelto');
+                        $('#detalleReporteModal').modal('hide');
+                        location.reload(); // Recargar para actualizar la lista
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                }, 'json');
             }
-        }, 'json');
-    }
-});
+        });
+
+        // Manejar el botón de rechazar reporte
+        $('#btnRechazarReporte').click(function() {
+            let idReporte = $('#reporte-id').text();
+            let tipoReporte = $('#reporte-tipo').text().replace(/[()]/g, '');
+
+            if (confirm('¿Estás seguro de rechazar este reporte? Esto no tomará ninguna acción sobre el elemento reportado.')) {
+                $.post('rechazarReporte.php', {
+                    id: idReporte,
+                    tipo: tipoReporte
+                }, function(response) {
+                    if (response.success) {
+                        alert('Reporte rechazado');
+                        $('#detalleReporteModal').modal('hide');
+                        location.reload(); // Recargar para actualizar la lista
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                }, 'json');
+            }
+        });
     </script>
 </body>
 

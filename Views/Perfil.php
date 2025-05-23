@@ -38,7 +38,7 @@ $id_rol = $_SESSION['usuario']['rol']['id_rol'];
         <!-- Header -->
         <header class="header dark-bg">
             <div class="toggle-nav">
-                <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom">
+                <div class="icon-reorder tooltips" data-original-title="Menú Principal" data-placement="bottom">
                     <i class="icon_menu"></i>
                 </div>
             </div>

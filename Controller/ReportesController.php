@@ -18,6 +18,10 @@ if ($_SESSION['usuario']['rol']['id_rol'] != 1) {
 try {
     // Obtener todos los reportes incluyendo los de tipo ORDEN
     $reportes = $db->getReportes();
+
+    foreach ($reportes as &$reporte) {
+        $reporte['detalle'] = $db->getDetalleReporte($reporte['id_reporte']);
+    }
     
     // reportes relacionados por prodcutos
     $reportesProductos = array_filter($reportes, function($r) { return $r['tipo_reporte'] == 'PRODUCTO'; });

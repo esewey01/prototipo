@@ -9,8 +9,8 @@ class VentasController
     private $currentUser;
     private $isVendedor;
     private $vendedorId;
-    private $success;
-    private $error;
+    private $mensaje;
+    private $alerta;
     private $urlViews;
 
     public function __construct()
@@ -42,11 +42,12 @@ class VentasController
     private function initializeSession()
     {
         $this->urlViews = URL_VIEWS;
-        $this->success = $_SESSION['success'] ?? '';
-        $this->error = $_SESSION['error'] ?? '';
+        $this->mensaje = $_SESSION['mensaje'] ?? '';
+        $this->alerta = $_SESSION['alerta'] ?? '';
 
-        unset($_SESSION['success']);
-        unset($_SESSION['error']);
+        // Limpiar las variables de sesión después de asignarlas
+        unset($_SESSION['mensaje']);
+        unset($_SESSION['alerta']);
     }
 
     private function initializeProperties()
@@ -75,40 +76,42 @@ class VentasController
     }
 
     private function handleUpdateOrderStatus() {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $id_orden = $_POST['id_orden'] ?? null;
-        $nuevo_estado = $_POST['estado'] ?? null;
-        
-        if (!$id_orden || !$nuevo_estado) {
-            $_SESSION['error'] = "Datos incompletos para actualizar el estado";
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id_orden = $_POST['id_orden'] ?? null;
+            $nuevo_estado = $_POST['estado'] ?? null;
+            
+            if (!$id_orden || !$nuevo_estado) {
+                $_SESSION['mensaje'] = "Datos incompletos para actualizar el estado";
+                $_SESSION['alerta'] = 'alert-danger';
+                header('Location: VentasController.php');
+                exit();
+            }
+            
+            try {
+                $resultado = $this->conexion->actualizarEstadoOrden($id_orden, $nuevo_estado);
+                
+                if ($resultado) {
+                    $_SESSION['mensaje'] = "Estado de la orden actualizado correctamente";
+                    $_SESSION['alerta'] = 'alert-success';
+                } else {
+                    $_SESSION['mensaje'] = "Error al actualizar el estado de la orden";
+                    $_SESSION['alerta'] = 'alert-danger';
+                }
+            } catch (Exception $e) {
+                $_SESSION['mensaje'] = "Error: " . $e->getMessage();
+                $_SESSION['alerta'] = 'alert-danger';
+            }
+            
             header('Location: VentasController.php');
             exit();
         }
-        
-        try {
-            $resultado = $this->conexion->actualizarEstadoOrden($id_orden, $nuevo_estado);
-            
-            if ($resultado) {
-                $_SESSION['success'] = "Estado de la orden actualizado correctamente";
-            } else {
-                $_SESSION['error'] = "Error al actualizar el estado de la orden";
-            }
-        } catch (Exception $e) {
-            $_SESSION['error'] = "Error: " . $e->getMessage();
-        }
-        
-        header('Location: VentasController.php');
-        exit();
     }
-}
 
-  
     private function showOrdersList()
     {
         $filtro = $_GET['estado'] ?? null;
         $ordenes = $this->conexion->getHistorialVendedor($this->vendedorId, $filtro);
 
-        // Agregar conteo de productos por orden
         foreach ($ordenes as &$orden) {
             $detalles = $this->conexion->getDetalleOrden($orden['id_orden']);
             $orden['total_productos'] = count($detalles);
@@ -118,8 +121,8 @@ class VentasController
             'currentUser' => $this->currentUser,
             'isVendedor' => $this->isVendedor,
             'ordenes' => $ordenes,
-            'success' => $this->success,
-            'error' => $this->error,
+            'alerta' => $this->alerta,
+            'mensaje' => $this->mensaje,
             'urlViews' => $this->urlViews
         ];
 
@@ -135,7 +138,8 @@ class VentasController
     private function handleError(Exception $e)
     {
         error_log("Error en VentasController: " . $e->getMessage());
-        $_SESSION['error'] = $e->getMessage();
+        $_SESSION['mensaje'] = $e->getMessage();
+        $_SESSION['alerta'] = 'alert-danger';
         header('Location: VentasController.php');
         exit();
     }
@@ -146,13 +150,5 @@ try {
     $controller = new VentasController();
     $controller->handleRequest();
 } catch (Throwable $e) {
-    error_log("Error crítico en VentasController: " . $e->getMessage() . " en " . $e->getFile() . ":" . $e->getLine());
-
-    if (session_status() !== PHP_SESSION_ACTIVE) {
-        session_start();
+    error_log("Error crítico en VentasController: " . $e->getMessage() . " en " . $e->getFile());
     }
-
-    $_SESSION['error'] = "Error en el sistema. Por favor intente más tarde.";
-    header('Location: VentasController.php');
-    exit();
-}

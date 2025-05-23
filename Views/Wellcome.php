@@ -87,7 +87,7 @@
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                     <div class="info-box dark-bg">
                         <i class="fa fa-money"></i>
-                        <div class="count">$<?= number_format($gastos_totales, 2) ?></div>
+                        <div class="count">$<?= number_format($gastos_totales,2) ?></div>
                         <div class="title">Total gastado</div>
                     </div>
                 </div>
@@ -105,38 +105,38 @@
                 <!-- Últimos productos -->
                 <div class="col-md-8">
                     <div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title text-center">Nuevos Productos Disponibles</h3>
-    </div>
-    <div class="panel-body">
-        <div class="row">
-            <?php foreach (array_slice($productos_nuevos, 0, 4) as $producto): ?>
-                <div class="col-md-3 col-sm-6">
-                    <div class="product-card" style="display: flex; align-items: flex-start;">
-
-
-                    <!-- Columna derecha (resto de la información) -->
-                        <div class="product-info" style="flex: 1; text-align: left;">
-                            <img src="<?= URL_VIEWS . $producto['imagen'] ?>" alt="<?= $producto['nombre_producto'] ?>" class="img-responsive" style="height: 100px;">
-                            <h5><?= $producto['nombre_producto'] ?></h5>
-                            <p>$<?= number_format($producto['precio_venta'], 2) ?></p>
-                            <a href="ComprarController.php" class="btn btn-primary btn-sm">Ver más</a>
+                        <div class="panel-heading">
+                            <h3 class="panel-title text-center">Nuevos Productos Disponibles</h3>
                         </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <?php foreach (array_slice($productos_nuevos, 0, 4) as $producto): ?>
+                                    <div class="col-md-3 col-sm-6">
+                                        <div class="product-card" style="display: flex; align-items: flex-start;">
 
-                        <!-- Columna izquierda (descripción) -->
-                        <div class="product-description" style="flex: 1; padding-right: 10px;">
-                            <p class="card-text text-muted small">
-                                <?= htmlspecialchars(substr($producto['descripcion'], 0, 100)) ?>...
-                            </p>
+
+                                            <!-- Columna derecha (resto de la información) -->
+                                            <div class="product-info" style="flex: 1; text-align: left;">
+                                                <img src="<?= URL_VIEWS . $producto['imagen'] ?>" alt="<?= $producto['nombre_producto'] ?>" class="img-responsive" style="height: 100px;">
+                                                <h5><?= $producto['nombre_producto'] ?></h5>
+                                                <p>$<?= number_format($producto['precio_venta'], 2) ?></p>
+                                                <a href="ComprarController.php" class="btn btn-primary btn-sm">Ver más</a>
+                                            </div>
+
+                                            <!-- Columna izquierda (descripción) -->
+                                            <div class="product-description" style="flex: 1; padding-right: 10px;">
+                                                <p class="card-text text-muted small">
+                                                    <?= htmlspecialchars(substr($producto['descripcion'], 0, 100)) ?>...
+                                                </p>
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
                         </div>
-                        
-                        
                     </div>
-                </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-</div>
                 </div>
             </div>
 

@@ -1,8 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
-<?php
-include('Head.php');
-?>
+<html lang="es">
+<?php include('Head.php');?>
 
 <body>
     <section id="container" class="">
@@ -25,7 +23,7 @@ include('Head.php');
             <?PHP include("DropDown.php"); ?>
         </header>
         <?PHP include("Menu.php") ?>
-    </section>
+
 
     <section id="main-content">
         <section class="wrapper">
@@ -35,11 +33,12 @@ include('Head.php');
 
                     <!--FUNCION DE ALERTA DE MENSAJES-->
                     <?php if (isset($_SESSION['mensaje'])): ?>
-                        <div class="alert <?= $_SESSION['alerta'] ?? 'alert-info' ?> alert-dismissible fade in" role="alert">
+                        <div class="alert <?= $_SESSION['alerta'] ?? 'alert-info' ?> 
+                        alert-dismissible fade in" role="alert">
                             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                 <span aria-hidden="true">×</span>
                             </button>
-                            <strong><?= $_SESSION['mensaje'] . ': ' . $_SESSION['usuario']['rol']['nombre_rol'] ?></strong>
+                            <strong><?= htmlspecialchars($_SESSION['mensaje'])?></strong>
                         </div>
                     <?php
                         unset($_SESSION['mensaje']);

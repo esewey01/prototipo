@@ -1,57 +1,43 @@
 <?php
-require_once '../Model/Conexion.php';
+require_once('../Model/Conexion.php');
+
+// Debug
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 header('Content-Type: application/json');
 
-$idReporte = $_GET['id'] ?? 0;
-$tipoReporte = $_GET['tipo'] ?? '';
-
 try {
+    $id = $_GET['id'] ?? null;
+    $tipo = strtoupper($_GET['tipo'] ?? '');
+    
+    if (!$id || !in_array($tipo, ['PRODUCTO', 'VENDEDOR', 'USUARIO', 'ORDEN'])) {
+        throw new Exception("Parámetros inválidos");
+    }
+
     $db = new Conexion();
+    $data = $db->getDetalleReporte($id, $tipo);
     
-    // Obtener el reporte base
-    $reporte = $db->getReporteById($idReporte);
-    
-    if (!$reporte) {
-        throw new Exception("Reporte no encontrado");
+    if (!$data) {
+        throw new Exception("No se encontró el reporte");
     }
     
-    $response = [
+    echo json_encode([
         'success' => true,
-        'data' => [
-            'reporte' => $reporte
+        'data' => $data,
+        'debug' => [
+            'params_received' => ['id' => $id, 'tipo' => $tipo],
+            'reporte_type_in_db' => $data['reporte']['tipo_reporte'] ?? 'UNKNOWN'
         ]
-    ];
-    
-    // Añadir información específica según el tipo
-    switch(strtoupper($tipoReporte)) {
-        case 'CLIENTE':
-        case 'VENDEDOR':
-            $usuario = $db->getUserById($reporte['id_usuario_reportado']);
-            $response['data']['usuario'] = $usuario;
-            $response['data']['administrador'] = $db->getUserById($reporte['id_administrador']);
-            break;
-            
-        case 'PRODUCTO':
-            $producto = $db->getProductoById($reporte['id_producto']);
-            $response['data']['producto'] = $producto;
-            $response['data']['vendedor'] = $db->getUserById($producto['id_usuario']);
-            $response['data']['categoria'] = $db->getCategoriaById($producto['id_categoria']);
-            break;
-            
-        case 'ORDEN':
-            $orden = $db->getOrdenById($reporte['id_orden']);
-            $response['data']['orden'] = $orden;
-            $response['data']['cliente'] = $db->getUserById($orden['id_usuario']);
-            $response['data']['vendedor'] = $db->getUserById($orden['id_vendedor']);
-            $response['data']['detalles'] = $db->getDetallesOrdenCompleto($orden['id_orden']);
-            break;
-    }
+    ]);
     
 } catch (Exception $e) {
-    $response = [
+    http_response_code(500);
+    echo json_encode([
         'success' => false,
-        'message' => $e->getMessage()
-    ];
+        'message' => $e->getMessage(),
+        'debug' => [
+            'params_received' => $_GET,
+            'error' => $e->getTraceAsString()
+        ]
+    ]);
 }
-
-echo json_encode($response);
