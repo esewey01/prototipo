@@ -1,43 +1,107 @@
 <?php
 require_once('../Model/Conexion.php');
+session_start();
 
-// Debug
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 header('Content-Type: application/json');
 
 try {
-    $id = $_GET['id'] ?? null;
-    $tipo = strtoupper($_GET['tipo'] ?? '');
-    
-    if (!$id || !in_array($tipo, ['PRODUCTO', 'VENDEDOR', 'USUARIO', 'ORDEN'])) {
-        throw new Exception("Parámetros inválidos");
+    if (!isset($_GET['id']) || !isset($_GET['tipo'])) {
+        throw new Exception('Parámetros faltantes', 400);
     }
 
-    $db = new Conexion();
-    $data = $db->getDetalleReporte($id, $tipo);
+    $idReporte = $_GET['id'];
+    $tipoReporte = $_GET['tipo'];
     
-    if (!$data) {
-        throw new Exception("No se encontró el reporte");
+    $conexion = new Conexion();
+    $detalle = $conexion->getDetalleReporte($idReporte, $tipoReporte);
+    
+    if (!$detalle) {
+        throw new Exception('Reporte no encontrado', 404);
     }
     
-    echo json_encode([
+    // Formatear datos para la plantilla
+    $response = [
         'success' => true,
-        'data' => $data,
-        'debug' => [
-            'params_received' => ['id' => $id, 'tipo' => $tipo],
-            'reporte_type_in_db' => $data['reporte']['tipo_reporte'] ?? 'UNKNOWN'
+        'data' => [
+            'reporte' => [
+                'id' => $detalle['reporte']['id_reporte'],
+                'fecha_reporte' => $detalle['reporte']['fecha_reporte'],
+                'estado' => $detalle['reporte']['estado'],
+                'motivo' => $detalle['reporte']['motivo'],
+                'comentarios' => $detalle['reporte']['comentarios'],
+                'administrador' => [
+                    'id' => $detalle['reporte']['id_administrador'],
+                    'nombre' => $detalle['reporte']['nombre_administrador']
+                ]
+            ]
         ]
-    ]);
+    ];
+    
+    // Agregar datos específicos según el tipo de reporte
+    switch ($tipoReporte) {
+        case 'PRODUCTO':
+            if (isset($detalle['producto'])) {
+                $response['data']['producto'] = [
+                    'id_producto' => $detalle['producto']['id_producto'],
+                    'nombre_producto' => $detalle['producto']['nombre_producto'],
+                    'codigo' => $detalle['producto']['codigo'],
+                    'descripcion' => $detalle['producto']['descripcion'],
+                    'cantidad' => $detalle['producto']['cantidad'],
+                    'precio_venta' => $detalle['producto']['precio_venta'],
+                    'precio_compra' => $detalle['producto']['precio_compra'],
+                    'imagen' => $detalle['producto']['imagen'],
+                    'vendedor' => [
+                        'id' => $detalle['producto']['id_usuario'],
+                        'nombre' => $detalle['producto']['nombre_vendedor']
+                    ],
+                    'categoria' => [
+                        'nombre' => $detalle['producto']['nombre_categoria']
+                    ]
+                ];
+            }
+            break;
+            
+        case 'USUARIO':
+        case 'VENDEDOR':
+            if (isset($detalle['usuario'])) {
+                $response['data']['usuario'] = [
+                    'id_usuario' => $detalle['usuario']['id_usuario'],
+                    'nombre' => $detalle['usuario']['nombre'],
+                    'email' => $detalle['usuario']['email'],
+                    'telefono' => $detalle['usuario']['telefono'],
+                    'foto_perfil' => $detalle['usuario']['foto_perfil'],
+                    'fecha_registro' => $detalle['usuario']['fecha_registro']
+                ];
+            }
+            break;
+            
+        case 'ORDEN':
+            if (isset($detalle['orden'])) {
+                $response['data']['orden'] = [
+                    'id_orden' => $detalle['orden']['id_orden'],
+                    'fecha_orden' => $detalle['orden']['fecha_orden'],
+                    'total' => $detalle['orden']['total'],
+                    'estado' => $detalle['orden']['estado'],
+                    'vendedor' => [
+                        'id' => $detalle['orden']['id_vendedor'],
+                        'nombre' => $detalle['orden']['nombre_vendedor']
+                    ],
+                    'cliente' => [
+                        'id' => $detalle['orden']['id_usuario'],
+                        'nombre' => $detalle['orden']['nombre_cliente']
+                    ],
+                    'detalles' => isset($detalle['orden']['detalles']) ? $detalle['orden']['detalles'] : []
+                ];
+            }
+            break;
+    }
+    
+    echo json_encode($response);
     
 } catch (Exception $e) {
-    http_response_code(500);
+    http_response_code($e->getCode() ?: 500);
     echo json_encode([
         'success' => false,
-        'message' => $e->getMessage(),
-        'debug' => [
-            'params_received' => $_GET,
-            'error' => $e->getTraceAsString()
-        ]
+        'message' => $e->getMessage()
     ]);
 }

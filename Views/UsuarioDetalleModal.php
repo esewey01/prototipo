@@ -1,6 +1,7 @@
 <?php
 // UsuarioDetalleModal.php
 ?>
+
 <div class="modal fade" id="usuarioDetalleModal" tabindex="-1" role="dialog" aria-labelledby="usuarioDetalleModalLabel">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -19,7 +20,6 @@
                     <div class="row">
                         <div class="col-md-4 text-center">
                             <img id="usuarioFoto" src="" class="img-thumbnail" style="width: 150px; height: 150px;">
-                           
                             <p id="usuarioLogin" class="text-muted"></p>
                         </div>
                         <div class="col-md-8">
@@ -33,7 +33,6 @@
                                     <p><strong><i class="icon_paperclip"></i> Genero: </strong> <span id="usuarioGenero"></span></p>
                                     <p><strong><i class="fa fa-envelope"></i> Email:</strong> <span id="usuarioEmail"></span></p>
                                     <p><strong><i class="fa fa-phone"></i> Teléfono:</strong> <span id="usuarioTelefono"><i class="icon_link_alt"></i></span></p>
-
                                     <p><strong><i class="fa fa-map-marker"></i> Dirección:</strong> <span id="usuarioDireccion"></span></p>
                                 </div>
                             </div>
@@ -47,10 +46,46 @@
                             </div>
                         </div>
                     </div>
+                    <button type="button" class="btn btn-danger" id="reportarUsuarioBtn" data-toggle="modal" data-target="#reportarUsuarioModal">
+                        <i class="fa fa-exclamation-triangle"></i> Reportar Usuario
+                    </button>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="reportarUsuarioModal" tabindex="-1" role="dialog" aria-labelledby="reportarUsuarioModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="reportarUsuarioModalLabel">Reportar Usuario</h4>
+            </div>
+            <div class="modal-body">
+                <form id="reportarUsuarioForm">
+                    <input type="hidden" id="id_usuario_reportado" name="id_usuario_reportado" value="">
+                    <input type="hidden" id="id_administrador" name="id_administrador" value="">
+                    <div class="form-group">
+                        <label for="motivo">Motivo del reporte:</label>
+                        <textarea class="form-control" id="motivo" name="motivo" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="comentarios">Comentarios adicionales:</label>
+                        <textarea class="form-control" id="comentarios" name="comentarios" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="enviarReporteBtn">Enviar Reporte</button>
             </div>
         </div>
     </div>

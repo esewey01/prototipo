@@ -7,8 +7,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UPIICSAFOOD - Panel de Electromovilidad</title>
 </head>
+<style>
+    .title.has-help {
+        position: relative;
+        padding-right: 20px;
+        cursor: pointer;
+    }
+
+    .title.has-help:after {
+        content: "?";
+        position: absolute;
+        right: 5px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 16px;
+        height: 16px;
+        line-height: 16px;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        font-size: 12px;
+        color: white;
+    }
+
+    .title.has-help:hover:after {
+        background: rgba(255, 255, 255, 0.3);
+    }
+</style>
+
 
 <body>
+
+
 
     <!--Menu desplegable-->
     <section id="container" class="">
@@ -23,11 +53,7 @@
             <div class="nav search-row" id="top_menu">
                 <!--  search form start -->
                 <ul class="nav top-menu">
-                    <li>
-                        <form class="navbar-form">
-                            <input class="form-control" placeholder="Search" type="text">
-                        </form>
-                    </li>
+
                 </ul>
                 <!--  search form end -->
             </div>
@@ -72,7 +98,9 @@
                     <div class="info-box blue-bg">
                         <i class="icon_wallet_alt"></i>
                         <div class="count"><?= count($pagos_pendientes) ?></div>
-                        <div class="title>¡"> Pagos pendientes </div>
+                        <div class="title has-help" data-toggle="modal" data-target="#helpPagos">
+                            Pagos pendientes
+                        </div>
                     </div>
                 </div>
 
@@ -80,15 +108,24 @@
                     <div class="info-box brown-bg">
                         <i class="icon_cart"></i>
                         <div class="count"><?= $cantidad_carrito ?></div>
-                        <div class="title">Productos en carrito</div>
+                        <div class="title">
+                            <div class="title has-help" data-toggle="modal" data-target="#helpCarrito">
+                                Productos en carrito
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                     <div class="info-box dark-bg">
                         <i class="fa fa-money"></i>
-                        <div class="count">$<?= number_format($gastos_totales,2) ?></div>
-                        <div class="title">Total gastado</div>
+                        <div class="count">$<?= number_format($gastos_totales, 2) ?></div>
+                        <div class="title">
+
+                            <div class="title has-help" data-toggle="modal" data-target="#helpGastos">
+                                Total gastado
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -96,7 +133,11 @@
                     <div class="info-box green-bg">
                         <i class="fa fa-cubes"></i>
                         <div class="count"><?= count($ordenes_pagadas) ?></div>
-                        <div class="title">Compras realizadas</div>
+                        <div class="title">
+                            <div class="title has-help" data-toggle="modal" data-target="#helpCompras">
+                                Compras realizadas
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -153,11 +194,109 @@
             </div>
 
         </section>
+        <!-- Modal para Pagos pendientes -->
+        <div class="modal fade help-modal" id="helpPagos" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Información sobre Pagos Pendientes</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Los <strong>Pagos Pendientes</strong> son transacciones que has realizado pero que aún no han sido confirmadas por el <strong>Vendedor Correspondiente</strong>.</p>
+                        <ul>
+                            <li>Este número se actualiza automáticamente</li>
+                            <li>Los pagos pueden tardar hasta 24 horas en procesarse</li>
+                            <li>Si un pago permanece más de 48 horas, puedes mandar un reporte</li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Entendido</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para Productos en carrito -->
+        <div class="modal fade help-modal" id="helpCarrito" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Información sobre el Carrito</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>El <strong>Carrito de Compras</strong> contiene los productos que has seleccionado pero aún no has comprado.</p>
+                        <ul>
+                            <li>Puedes tener productos en el carrito por tiempo ilimitado</li>
+                            <li>Los precios pueden cambiar si no finalizas la compra</li>
+                            <li>Haz clic en "Ver carrito" para gestionar tus productos</li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Entendido</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para Total gastado -->
+        <div class="modal fade help-modal" id="helpGastos" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Información sobre Gastos Totales</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>El <strong>Total Gastado</strong> representa la suma de todas tus compras realizadas en nuestra plataforma.</p>
+                        <ul>
+                            <li>Solamente incluye las ventas confirmadas por vendedores</li>
+                            <li>Se actualiza automáticamente con cada compra</li>
+                            <li>Puedes ver el desglose en tu historial de compras</li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Entendido</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para Compras realizadas -->
+        <div class="modal fade help-modal" id="helpCompras" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Información sobre Compras Realizadas</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Las <strong>Compras Realizadas</strong> son pedidos que has completado y pagado satisfactoriamente.</p>
+                        <ul>
+                            <li>Cada compra tiene un número de seguimiento único</li>
+                            <li>Puedes ver el detalle de cada compra en tu historial</li>
+                            <li>Recibirás un correo de confirmación por cada compra (futuro jijiji)</li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Entendido</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
     <?PHP include("LibraryJs.php"); ?>
 
-    <!-- Incluir Leaflet para el mapa -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
@@ -166,6 +305,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/locale/es.js"></script>
+
 
     <script>
         $(document).ready(function() {

@@ -15,7 +15,7 @@
                 <?php endif; ?>
 
                 <?php if ($tipo_reporte == 'USUARIO'): ?>
-                    <th><?= ($reporte['rol_reportado'] ?? '') == 'VENDEDOR' ? 'Vendedor' : 'Cliente' ?></th>
+                    <th><?= ($reporte['rol_reportado'] ?? '') == 'VENDEDOR' ? 'Vendedor' : 'Usuario' ?></th>
                 <?php endif; ?>
 
                 <th>Motivo</th>

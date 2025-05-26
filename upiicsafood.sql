@@ -269,8 +269,9 @@ INSERT INTO PRODUCTOS (
 --TABLA PARA REPORTES DE PRODUCTOS DEL USUARIO
 CREATE TABLE REPORTES (
     id_reporte INT IDENTITY(1,1) PRIMARY KEY,
-    tipo_reporte VARCHAR(20) CHECK(tipo_reporte IN ('PRODUCTO', 'USUARIO')),
+    tipo_reporte VARCHAR(20) CHECK(tipo_reporte IN ('PRODUCTO', 'USUARIO', 'ORDEN', 'VENDEDOR')),
     id_producto INT NULL,
+    id_orden INT NULL,
     id_usuario_reportado INT NOT NULL,
     id_administrador INT NOT NULL,
     motivo VARCHAR(255) NOT NULL,
@@ -280,8 +281,29 @@ CREATE TABLE REPORTES (
     comentarios text, 
     FOREIGN KEY (id_producto) REFERENCES PRODUCTOS(id_producto),
     FOREIGN KEY (id_usuario_reportado) REFERENCES USUARIOS(id_usuario),
-    FOREIGN KEY (id_administrador) REFERENCES USUARIOS(id_usuario)
+    FOREIGN KEY (id_administrador) REFERENCES USUARIOS(id_usuario),
+    FOREIGN KEY (id_orden) REFERENCES ORDENES(id_orden)
 );
+
+DROP TABLE REPORTES;
+
+SELECT*FROM REPORTES
+SELECT*FROM USUARIOS
+
+
+
+
+TECNICAS Y ESTRATEGIAS PARA LA OBTENCION DE DATOS
+
+entrevistas
+encuestas
+
+
+10 encuestas 
+10 entrevistas 
+10 estudios de caso
+10 bitacoras
+10 estudios de campo
 
 
 CREATE TABLE CARRITO (
@@ -344,10 +366,73 @@ CREATE TABLE DETALLE_ORDEN (
     FOREIGN KEY (id_producto) REFERENCES PRODUCTOS(id_producto)
 );
 
-
-SELECT*FROM CARRITO
+select*from CARRITO
 SELECT*FROM DETALLE_CARRITO
-
-
-SELECT *FROM ORDENES
+SELECT*FROM ORDENES 
 SELECT*FROM DETALLE_ORDEN
+
+SELECT*FROM REPORTES
+
+DELETE FROM CARRITO
+DELETE FROM DETALLE_CARRITO
+
+DELETE FROM ORDENES
+DELETE FROM DETALLE_ORDEN
+
+use prototiponew
+
+ALTER TABLE DETALLE_CARRITO ADD comentario NVARCHAR(500) NULL;
+
+-- Deshabilitar las restricciones de clave foránea que referencian a CARRITO
+ALTER TABLE DETALLE_CARRITO NOCHECK CONSTRAINT FK__DETALLE_C__id_carr__30F848ED;
+ALTER TABLE ORDENES NOCHECK CONSTRAINT FK__ORDENES__id_carri__38996AB5;
+
+-- Reiniciar el contador IDENTITY de la tabla CARRITO
+DBCC CHECKIDENT ('CARRITO', RESEED, 0);
+GO
+
+-- Deshabilitar la restricción de clave foránea que referencia a DETALLE_CARRITO
+ALTER TABLE DETALLE_ORDEN NOCHECK CONSTRAINT FK__DETALLE_O__id_deta__3F466844;
+
+-- Reiniciar el contador IDENTITY de la tabla DETALLE_CARRITO
+DBCC CHECKIDENT ('DETALLE_CARRITO', RESEED, 0);
+GO
+
+-- Reiniciar el contador IDENTITY de la tabla ORDENES
+DBCC CHECKIDENT ('ORDENES', RESEED, 0);
+GO
+
+-- Volver a habilitar las restricciones de clave foránea
+ALTER TABLE DETALLE_CARRITO CHECK CONSTRAINT FK__DETALLE_C__id_carr__30F848ED;
+ALTER TABLE ORDENES CHECK CONSTRAINT FK__ORDENES__id_carri__38996AB5;
+ALTER TABLE DETALLE_ORDEN CHECK CONSTRAINT FK__DETALLE_O__id_deta__3F466844;
+GO
+
+
+select*from reportes
+
+
+
+SELECT*from usuarios
+SELECT*FROM ROLES_USUARIO
+
+SELECT*FROM PRODUCTOS
+
+SELECT*FROM REPORTES
+
+
+SELECT 
+                r.*, 
+                p.nombre_producto, 
+                u.nombre as nombre_reportado, 
+                a.nombre as nombre_administrador,
+                o.id_orden as id_orden
+            FROM REPORTES r
+            LEFT JOIN PRODUCTOS p ON r.id_producto = p.id_producto
+            LEFT JOIN USUARIOS u ON r.id_usuario_reportado = u.id_usuario
+            LEFT JOIN USUARIOS a ON r.id_administrador = a.id_usuario
+            LEFT JOIN ORDENES o ON r.id_orden = o.id_orden
+            ORDER BY r.fecha_reporte DESC
+
+
+SELECT*FROM REPORTES

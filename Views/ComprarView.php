@@ -39,7 +39,6 @@
         <section class="wrapper">
             <div class="row">
                 <div class="col-lg-12">
-                    <h3 class="page-header"><i class="icon_tag_alt"></i> PRODUCTOS DISPONIBLES</h3>
 
                     <!--FUNCION DE ALERTA DE MENSAJES-->
                     <?php if (isset($_SESSION['mensaje'])): ?>
@@ -180,6 +179,88 @@
     <script>
         $(document).ready(function() {
             var URL_VIEWS = '<?= URL_VIEWS ?>';
+            // Configuración inicial para capturar IDs correctamente
+            $(document).on('click', '.label-danger', function(e) {
+                e.preventDefault();
+                const idUsuario = $(this).data('usuario-id');
+                console.log('ID Usuario capturado:', idUsuario);
+                $('#id_usuario_reportado').val(idUsuario);
+
+                // Obtener ID del administrador desde la sesión PHP
+                $('#id_administrador').val(<?php echo $_SESSION['usuario']['id_usuario'] ?? 'null'; ?>);
+
+            });
+
+            // Enviar el reporte con validación y manejo de errores mejorado
+            $('#enviarReporteBtn').click(function() {
+                const $btn = $(this);
+                const idUsuario = $('#id_usuario_reportado').val();
+                const idAdmin = $('#id_administrador').val();
+                const motivo = $('#motivo').val();
+
+                if (!idUsuario || !idAdmin) {
+                    console.error('Faltan IDs de usuario o administrador');
+                    showMessage('Error: No se pudo identificar al usuario o administrador', 'error');
+                    return;
+                }
+
+                if (!motivo) {
+                    showMessage('Por favor complete el motivo del reporte', 'error');
+                    return;
+                }
+
+                // Estado de carga
+                $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Enviando...');
+
+                $.ajax({
+                    url: '../Controller/ReporteController.php?action=reportarUsuario',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        id_usuario_reportado: idUsuario,
+                        id_administrador: idAdmin,
+                        motivo: motivo,
+                        comentarios: $('#comentarios').val(),
+                        tipo_reporte: 'VENDEDOR'
+                    },
+                    success: function(response) {
+                        console.log('Respuesta del servidor:', response);
+
+                        // Cerrar modal y resetear siempre
+                        $('#reportarUsuarioModal').modal('hide');
+                        $('#reportarUsuarioForm')[0].reset();
+
+                        if (response.success) {
+                            showMessage('Reporte enviado correctamente', 'success');
+                        } else {
+                            showMessage(response.message || 'Error al enviar el reporte', 'error');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error en AJAX:', status, error, xhr.responseText);
+                        showMessage('Error de conexión: ' + error, 'error');
+                    },
+                    complete: function() {
+                        $btn.prop('disabled', false).html('Enviar Reporte');
+                    }
+                });
+            });
+
+            // Función auxiliar para mostrar mensajes
+            function showMessage(message, type) {
+                // Intenta usar toastr si está disponible
+                if (typeof toastr !== 'undefined' && toastr[type]) {
+                    toastr[type](message);
+                } else {
+                    // Fallback con alert estándar
+                    alert(type.toUpperCase() + ': ' + message);
+                }
+            }
+
+
+
+
+
             $(document).on('click', '.label-danger', function(e) {
                 e.preventDefault();
                 const idUsuario = $(this).data('usuario-id');
@@ -337,6 +418,8 @@
                     }
                 });
             });
+
+
         });
 
         // Función para actualizar el contador del carrito

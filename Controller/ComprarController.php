@@ -35,11 +35,24 @@ class ProductosController {
     try {
         $categorias = $this->conexion->getAllCategorias();
         $id_categoria = $_GET['categoria'] ?? null;
-        $productos = $this->conexion->getProductosByCategoria($id_categoria);
-        
+        $pagina_actual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
+        $productos_por_pagina = 12; // Número de productos por página
+
+        // Calcular el offset para la consulta SQL
+        $offset = ($pagina_actual - 1) * $productos_por_pagina;
+
+        // Obtener el total de productos activos
+        $total_productos = $this->conexion->getTotalProductosActivos($id_categoria);
+        $total_paginas = ceil($total_productos / $productos_por_pagina);
+
+        // Obtener los productos para la página actual
+        $productos = $this->conexion->getProductosByCategoria($id_categoria, $productos_por_pagina, $offset);
+
         $this->renderView('ComprarView.php', [
             'categorias' => $categorias,
             'productos' => $productos,
+            'total_paginas' => $total_paginas,
+            'pagina_actual' => $pagina_actual,
             'error' => empty($productos) ? 'No se encontraron productos' : null
         ]);
     } catch (Exception $e) {

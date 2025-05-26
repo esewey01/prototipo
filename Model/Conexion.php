@@ -652,26 +652,31 @@ class Conexion
     }
 
     public function newReport(
-
         $id_producto,
-        $id_usuario,
-        $id_admin,
+        $id_usuario_reportado,
+        $id_administrador,
         $motivo,
-        $comentarios,
         $accion_tomada,
+        $comentarios,
         $tipo_reporte,
         $estado
     ) {
-        $sql = "INSERT INTO REPORTES(
-            tipo_reporte,id_producto, id_usuario_reportado, 
-            id_administrador,
-            motivo,  accion_tomada, comentarios,estado
-            ) VALUES (?,?, ?, ?, ?,?, ?, ?)";
+        $sql = "INSERT INTO REPORTES (
+        tipo_reporte,
+        id_producto,
+        id_usuario_reportado,
+        id_administrador,
+        motivo,
+        accion_tomada,
+        comentarios,
+        estado
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
         $params = [
             $tipo_reporte,
             $id_producto,
-            $id_usuario,
-            $id_admin,
+            $id_usuario_reportado,
+            $id_administrador,
             $motivo,
             $accion_tomada,
             $comentarios,
@@ -997,18 +1002,31 @@ class Conexion
 
 
     //FUNCUINES PARA LOSS PRODUCTOS
-    public function getProductosByCategoria($id_categoria = null)
+    public function getTotalProductosActivos($id_categoria = null)
     {
-        $sql = "SELECT p.*, u.nombre as nombre_vendedor, c.nombre_categoria
-            FROM PRODUCTOS p
-            JOIN USUARIOS u ON p.id_usuario = u.id_usuario
-            JOIN CATEGORIAS c ON p.id_categoria = c.id_categoria
-            WHERE p.estado = 'ACTIVO' AND (? IS NULL OR p.id_categoria = ?)
-            ORDER BY NEWID()";
+        $sql = "SELECT COUNT(*) AS total 
+            FROM PRODUCTOS 
+            WHERE estado = 'ACTIVO' AND (? IS NULL OR id_categoria = ?)";
+        $stmt = $this->executeQuery($sql, [$id_categoria, $id_categoria]);
+        $result = $this->getResults($stmt);
+        return $result[0]['total'] ?? 0;
+    }
 
-        $params = $id_categoria ? [$id_categoria, $id_categoria] : [null, null];
-        $stmt = $this->executeQuery($sql, $params);
-        return $this->getResults($stmt);
+    public function getProductosByCategoria($id_categoria = null, $limit = null, $offset = null)
+    {
+        $sql = "SELECT p.*, c.nombre_categoria, u.nombre AS nombre_vendedor
+            FROM PRODUCTOS p
+            INNER JOIN CATEGORIAS c ON p.id_categoria = c.id_categoria
+            INNER JOIN USUARIOS u ON p.id_usuario = u.id_usuario
+            WHERE p.estado = 'ACTIVO' AND (? IS NULL OR p.id_categoria = ?)
+            ORDER BY p.fecha_registro DESC";
+
+        if ($limit !== null && $offset !== null) {
+            $sql .= " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+            return $this->getResults($this->executeQuery($sql, [$id_categoria, $id_categoria, $offset, $limit]));
+        }
+
+        return $this->getResults($this->executeQuery($sql, [$id_categoria, $id_categoria]));
     }
 
     public function getProductoById($id_producto)

@@ -59,6 +59,9 @@
 <!-- DataTables JavaScript -->
 <script src="<?=URL_PUBLIC?>js/jquery.dataTables.min.js"></script>
 <script src="<?=URL_PUBLIC?>js/dataTables.bootstrap.min.js"></script>
+<!-- En tu LibraryJs.php o donde cargues los scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
 <script>
     $(document).ready(function () {

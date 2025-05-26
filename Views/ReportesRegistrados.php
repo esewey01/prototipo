@@ -64,106 +64,104 @@
                     <li><a href="#reportes-usuarios" data-toggle="tab">Clientes Reportados</a></li>
                     <li><a href="#reportes-ordenes" data-toggle="tab">Reportes por Órdenes</a></li>
                 </ul>
-
-                <
-                    <!-- Contenido de las pestañas -->
-                    <div class="tab-content">
-                        <!-- Tabla de Reportes de Productos -->
-                        <div class="tab-pane active" id="reportes-productos">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    REPORTES DE PRODUCTOS
-                                    <div class="pull-right">
-                                        <button href="#" title="" data-placement="left" data-toggle="modal"
-                                            class="btn btn-primary tooltips" type="button"
-                                            data-original-title="Exportar PDF">
-                                            <span class="fa fa-file-pdf-o"> </span>
-                                            EXPORTAR A PDF
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="panel-body">
-                                    <?php
-                                     $reportes = $reportesProductos;
-                                    $tipo_reporte = 'PRODUCTO';
-                                    include("_partials/tabla_reportes.php");
-                                    ?>
+                <!-- Contenido de las pestañas -->
+                <div class="tab-content">
+                    <!-- Tabla de Reportes de Productos -->
+                    <div class="tab-pane active" id="reportes-productos">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                REPORTES DE PRODUCTOS
+                                <div class="pull-right">
+                                    <button href="#" title="" data-placement="left" data-toggle="modal"
+                                        class="btn btn-primary tooltips" type="button"
+                                        data-original-title="Exportar PDF">
+                                        <span class="fa fa-file-pdf-o"> </span>
+                                        EXPORTAR A PDF
+                                    </button>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Tabla de Reportes de Vendedores -->
-                        <div class="tab-pane" id="reportes-vendedores">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    VENDEDORES REPORTADOS
-                                    <div class="pull-right">
-                                        <button href="#" title="" data-placement="left" data-toggle="modal"
-                                            class="btn btn-primary tooltips" type="button"
-                                            data-original-title="Exportar PDF">
-                                            <span class="fa fa-file-pdf-o"> </span>
-                                            EXPORTAR A PDF
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="panel-body">
-                                    <?php
-                                    $reportes = $reportesVendedores;
-                                    $tipo_reporte = 'VENDEDOR';
-                                    include("_partials/tabla_reportes.php");
-                                    ?>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tabla de Reportes de Clientes -->
-                        <div class="tab-pane" id="reportes-usuarios">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    USUARIOS REPORTADOS
-                                    <div class="pull-right">
-                                        <button href="#" title="" data-placement="left" data-toggle="modal"
-                                            class="btn btn-primary tooltips" type="button"
-                                            data-original-title="Exportar PDF">
-                                            <span class="fa fa-file-pdf-o"> </span>
-                                            EXPORTAR A PDF
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="panel-body">
-                                    <?php
-                                    $reportes = $reportesUsuarios;
-                                    $tipo_reporte = 'USUARIO';
-                                    include("_partials/tabla_reportes.php");
-                                    ?>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Nueva Tabla de Reportes por Órdenes -->
-                        <div class="tab-pane" id="reportes-ordenes">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    REPORTES POR ÓRDENES
-                                    <div class="pull-right">
-                                        <button href="#" title="" data-placement="left" data-toggle="modal"
-                                            class="btn btn-primary tooltips" type="button"
-                                            data-original-title="Exportar PDF">
-                                            <span class="fa fa-file-pdf-o"> </span>
-                                            EXPORTAR A PDF
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="panel-body">
-                                    <?php
-                                    $reportes = $reportesOrdenes;
-                                    $tipo_reporte = 'ORDEN';
-                                    include("_partials/tabla_reportes.php");
-                                    ?>
-                                </div>
+                            <div class="panel-body">
+                                <?php
+                                $reportes = $reportesProductos;
+                                $tipo_reporte = 'PRODUCTO';
+                                include("_partials/tabla_reportes.php");
+                                ?>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Tabla de Reportes de Vendedores -->
+                    <div class="tab-pane" id="reportes-vendedores">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                VENDEDORES REPORTADOS
+                                <div class="pull-right">
+                                    <button href="#" title="" data-placement="left" data-toggle="modal"
+                                        class="btn btn-primary tooltips" type="button"
+                                        data-original-title="Exportar PDF">
+                                        <span class="fa fa-file-pdf-o"> </span>
+                                        EXPORTAR A PDF
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="panel-body">
+                                <?php
+                                $reportes = $reportesVendedores;
+                                $tipo_reporte = 'VENDEDOR';
+                                include("_partials/tabla_reportes.php");
+                                ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de Reportes de Clientes -->
+                    <div class="tab-pane" id="reportes-usuarios">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                USUARIOS REPORTADOS
+                                <div class="pull-right">
+                                    <button href="#" title="" data-placement="left" data-toggle="modal"
+                                        class="btn btn-primary tooltips" type="button"
+                                        data-original-title="Exportar PDF">
+                                        <span class="fa fa-file-pdf-o"> </span>
+                                        EXPORTAR A PDF
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="panel-body">
+                                <?php
+                                $reportes = $reportesUsuarios;
+                                $tipo_reporte = 'USUARIO';
+                                include("_partials/tabla_reportes.php");
+                                ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nueva Tabla de Reportes por Órdenes -->
+                    <div class="tab-pane" id="reportes-ordenes">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                REPORTES POR ÓRDENES
+                                <div class="pull-right">
+                                    <button href="#" title="" data-placement="left" data-toggle="modal"
+                                        class="btn btn-primary tooltips" type="button"
+                                        data-original-title="Exportar PDF">
+                                        <span class="fa fa-file-pdf-o"> </span>
+                                        EXPORTAR A PDF
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="panel-body">
+                                <?php
+                                $reportes = $reportesOrdenes;
+                                $tipo_reporte = 'ORDEN';
+                                include("_partials/tabla_reportes.php");
+                                ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
         </section>
     </section>
@@ -216,7 +214,7 @@
                         <div class="panel-body">
                             <div class="row">
                                 <div class="col-md-4 text-center">
-                                    <img src="<?= URL_VIEWS ?>${usuario.foto_perfil}"
+                                    <img src="<?= URL_VIEWS . htmlspecialchars($usuario['foto_perfil']) ?>"
                                         class="img-thumbnail img-circle" width="120" height="120"
                                         onerror="this.src='<?= URL_VIEWS ?>fotoproducto/default.jpg'">
                                 </div>
@@ -311,7 +309,7 @@
                     <h4><i class="fa fa-cube"></i> Producto Reportado</h4>
                     <div class="panel panel-default">
                         <div class="panel-body text-center">
-                            <img src="<?= URL_VIEWS ?>${producto.imagen}"
+                            <img src="<?= URL_VIEWS . htmlspecialchars($producto['imagen']) ?>"
                                 class="img-thumbnail" style="max-height: 200px;"
                                 onerror="this.src='<?= URL_VIEWS ?>fotoproducto/default.jpg'">
                             <h4>${producto.nombre_producto}</h4>
@@ -450,7 +448,7 @@
                                         ${orden.detalles.map(item => `
                                         <tr>
                                             <td>
-                                                <img src="<?= URL_VIEWS ?>${item.imagen}" width="50"
+                                                <img src="<?= URL_VIEWS . htmlspecialchars($item['imagen']) ?>" width="50"
                                                     onerror="this.src='<?= URL_VIEWS ?>fotoproducto/default.jpg'">
                                                 ${item.nombre_producto}
                                             </td>
@@ -475,14 +473,15 @@
     </div>
 
 
+
     <!-- Modal para Acciones sobre Reportes -->
-    <div class="modal fade" id="accionReporteModal" tabindex="-1" role="dialog"
-        aria-labelledby="accionReporteModalLabel">
+    <div class="modal fade" id="accionReporteModal" tabindex="-1" role="dialog" aria-labelledby="accionReporteModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <form id="formAccionReporte" method="POST">
+                <form id="formAccionReporte" method="POST" action="ProcesarAccionReporte.php">
                     <input type="hidden" name="id_reporte" id="accion_id_reporte">
                     <input type="hidden" name="tipo_reporte" id="accion_tipo_reporte">
+                    <input type="hidden" name="id_elemento" id="accion_id_elemento">
 
                     <div class="modal-header bg-warning">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -496,14 +495,18 @@
                             <select class="form-control" name="accion_tomada" id="accion_seleccionada" required>
                                 <option value="">Seleccione una acción</option>
                                 <option value="ADVERTENCIA">Enviar advertencia</option>
-                                <option value="DESACTIVAR">Desactivar producto/usuario</option>
-                                <option value="SUSPENDER">Suspender temporalmente</option>
-                                <option value="BANEAR">Banear permanentemente</option>
+                                <option value="DESACTIVAR_PRODUCTO">Desactivar producto</option>
+                                <option value="SUSPENDER_USUARIO">Suspender cuenta temporalmente</option>
+                                <option value="BANEAR_USUARIO">Banear cuenta permanentemente</option>
+                                <option value="ELIMINAR_REPORTE">Eliminar reporte (sin acción)</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="comentarios_accion">Comentarios:</label>
-                            <textarea class="form-control" name="comentarios" id="comentarios_accion" rows="3"></textarea>
+                            <label for="comentarios_accion">Comentarios (obligatorio para advertencias):</label>
+                            <textarea class="form-control" name="comentarios" id="comentarios_accion" rows="3" required></textarea>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fa fa-info-circle"></i> Esta acción quedará registrada en el historial del sistema.
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -551,8 +554,8 @@
 
         });
 
-        
-        
+
+
 
         // Manejar el envío del formulario de acción
         $('#formAccionReporte').submit(function(e) {
@@ -601,20 +604,15 @@
         });
 
         // Función para cargar los detalles del reporte
+        // Función para cargar los detalles del reporte
         function verDetalleReporte(idReporte, tipoReporte) {
             // Mostrar carga
             $('#detalleReporteContenido').html($('#cargando-reporte').html());
             $('#reporte-id').text(idReporte);
             $('#reporte-tipo').text('(' + tipoReporte + ')');
 
-            // Mostrar/ocultar botones según tipo
-            if (tipoReporte === 'ORDEN' || tipoReporte === 'PRODUCTO') {
-                $('#btnResolverReporte').show();
-                $('#btnRechazarReporte').show();
-            } else {
-                $('#btnResolverReporte').hide();
-                $('#btnRechazarReporte').hide();
-            }
+            // Configurar botones según el tipo de reporte
+            $('#btnResolverReporte, #btnRechazarReporte').show();
 
             // Obtener datos via AJAX
             $.ajax({
@@ -631,9 +629,21 @@
                         let template = $('#' + templateId).html();
 
                         // Reemplazar variables en el template
-                        let html = template.replace(/\${([^}]+)}/g, (match, p1) => {
-                            return eval('response.data.' + p1) || match;
-                        });
+                        let html = template;
+                        for (let key in response.data) {
+                            if (response.data.hasOwnProperty(key)) {
+                                const value = response.data[key];
+                                // Manejar fechas
+                                if (key.includes('fecha') || key.includes('date')) {
+                                    const date = new Date(value);
+                                    html = html.replace(new RegExp(`\\$\\{${key}\\}`, 'g'),
+                                        date.toLocaleDateString() + ' ' + date.toLocaleTimeString());
+                                } else {
+                                    html = html.replace(new RegExp(`\\$\\{${key}\\}`, 'g'),
+                                        value !== null ? value : 'N/A');
+                                }
+                            }
+                        }
 
                         $('#detalleReporteContenido').html(html);
                     } else {
@@ -687,6 +697,92 @@
                         alert('Reporte rechazado');
                         $('#detalleReporteModal').modal('hide');
                         location.reload(); // Recargar para actualizar la lista
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                }, 'json');
+            }
+        });
+        // Configurar modal de acción antes de mostrarlo
+        $('#accionReporteModal').on('show.bs.modal', function(event) {
+            var button = $(event.relatedTarget); // Botón que activó el modal
+            var idReporte = button.data('id');
+            var tipoReporte = button.data('tipo');
+            var idElemento = button.data('elemento');
+
+            $('#accion_id_reporte').val(idReporte);
+            $('#accion_tipo_reporte').val(tipoReporte);
+            $('#accion_id_elemento').val(idElemento);
+
+            // Resetear el formulario
+            $('#accion_seleccionada').val('');
+            $('#comentarios_accion').val('');
+        });
+
+        // Manejar envío del formulario de acción
+        $('#formAccionReporte').submit(function(e) {
+            e.preventDefault();
+
+            var formData = $(this).serialize();
+
+            $.ajax({
+                url: 'ProcesarAccionReporte.php',
+                type: 'POST',
+                data: formData,
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        alert(response.message);
+                        $('#accionReporteModal').modal('hide');
+                        // Recargar la página para ver los cambios
+                        location.reload();
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function(xhr) {
+                    alert('Error al procesar la acción: ' + xhr.statusText);
+                }
+            });
+        });
+
+        // Manejar botón "Marcar como Resuelto"
+        $('#btnResolverReporte').click(function() {
+            var idReporte = $('#reporte-id').text();
+            var tipoReporte = $('#reporte-tipo').text().replace(/[()]/g, '');
+
+            if (confirm('¿Estás seguro de marcar este reporte como resuelto?')) {
+                $.post('resolverReporte.php', {
+                    id: idReporte,
+                    tipo: tipoReporte,
+                    accion: 'RESUELTO'
+                }, function(response) {
+                    if (response.success) {
+                        alert('Reporte marcado como resuelto');
+                        $('#detalleReporteModal').modal('hide');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                }, 'json');
+            }
+        });
+
+        // Manejar botón "Rechazar Reporte"
+        $('#btnRechazarReporte').click(function() {
+            var idReporte = $('#reporte-id').text();
+            var tipoReporte = $('#reporte-tipo').text().replace(/[()]/g, '');
+
+            if (confirm('¿Estás seguro de rechazar este reporte? Esto no tomará ninguna acción sobre el elemento reportado.')) {
+                $.post('resolverReporte.php', {
+                    id: idReporte,
+                    tipo: tipoReporte,
+                    accion: 'RECHAZADO'
+                }, function(response) {
+                    if (response.success) {
+                        alert('Reporte rechazado');
+                        $('#detalleReporteModal').modal('hide');
+                        location.reload();
                     } else {
                         alert('Error: ' + response.message);
                     }

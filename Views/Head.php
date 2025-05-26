@@ -24,6 +24,7 @@
     <title>UPIICSA FOOD - Sistema de Compra y Venta</title>
 
     <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link href="<?=URL_PUBLIC?>css/bootstrap.min.css" rel="stylesheet">
     <!-- bootstrap theme -->
     <link href="<?=URL_PUBLIC?>css/bootstrap-theme.css" rel="stylesheet">
@@ -67,6 +68,9 @@
     <link rel="stylesheet" href="<?=URL_PUBLIC?>css/ngDialog-theme-default.css">
     <link rel="stylesheet" href="<?=URL_PUBLIC?>css/ngDialog-theme-plain.css">
     <link rel="stylesheet" href="<?=URL_PUBLIC?>css/ngDialog-custom-width.css">
+
+
+    
 
 
     <link href='<?=URL_PUBLIC?>css/adaptive-modal.css' rel='stylesheet' type='text/css'>
