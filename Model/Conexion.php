@@ -822,97 +822,6 @@ class Conexion
     }
 
 
-    public function getDetalleReporte($idReporte, $tipoReporte = null)
-    {
-        try {
-            // Primero obtenemos el reporte base
-            $sqlReporte = "SELECT r.*, a.nombre as nombre_administrador 
-                      FROM REPORTES r
-                      JOIN USUARIOS a ON r.id_administrador = a.id_usuario
-                      WHERE r.id_reporte = ?";
-
-            $stmtReporte = $this->executeQuery($sqlReporte, array($idReporte));
-
-            if (!$stmtReporte) {
-                error_log("Error en consulta de reporte: " . print_r(sqlsrv_errors(), true));
-                return null;
-            }
-
-            $reporte = $this->getResults($stmtReporte)[0] ?? null;
-
-            if (!$reporte) {
-                return null;
-            }
-
-            $detalle = ['reporte' => $reporte];
-
-            // Manejo específico para cada tipo de reporte
-            switch ($tipoReporte) {
-                case 'PRODUCTO':
-                    if (!empty($reporte['id_producto'])) {
-                        $sqlProducto = "SELECT p.*, u.nombre as nombre_vendedor 
-                                  FROM PRODUCTOS p
-                                  JOIN USUARIOS u ON p.id_usuario = u.id_usuario
-                                  WHERE p.id_producto = ?";
-                        $stmtProducto = $this->executeQuery($sqlProducto, array($reporte['id_producto']));
-                        if ($stmtProducto) {
-                            $producto = $this->getResults($stmtProducto)[0] ?? null;
-                            $detalle['producto'] = $producto;
-                        }
-                    }
-                    break;
-
-                case 'VENDEDOR':
-                case 'USUARIO':
-                    if (!empty($reporte['id_usuario_reportado'])) {
-                        $sqlUsuario = "SELECT * FROM USUARIOS WHERE id_usuario = ?";
-                        $stmtUsuario = $this->executeQuery($sqlUsuario, array($reporte['id_usuario_reportado']));
-                        if ($stmtUsuario) {
-                            $usuario = $this->getResults($stmtUsuario)[0] ?? null;
-                            $detalle['usuario'] = $usuario;
-                        }
-                    }
-                    break;
-
-                case 'ORDEN':
-                    if (!empty($reporte['id_orden'])) {
-                        // Datos básicos de la orden
-                        $sqlOrden = "SELECT o.*, 
-                                        c.nombre as nombre_cliente,
-                                        v.nombre as nombre_vendedor
-                                 FROM ORDENES o
-                                 JOIN USUARIOS c ON o.id_usuario = c.id_usuario
-                                 JOIN USUARIOS v ON o.id_vendedor = v.id_usuario
-                                 WHERE o.id_orden = ?";
-                        $stmtOrden = $this->executeQuery($sqlOrden, array($reporte['id_orden']));
-                        if ($stmtOrden) {
-                            $orden = $this->getResults($stmtOrden)[0] ?? null;
-                            $detalle['orden'] = $orden;
-
-                            // Detalles de los productos en la orden
-                            if ($orden) {
-                                $sqlDetalles = "SELECT d.*, p.nombre_producto, p.imagen
-                                           FROM DETALLE_ORDEN d
-                                           JOIN PRODUCTOS p ON d.id_producto = p.id_producto
-                                           WHERE d.id_orden = ?";
-                                $stmtDetalles = $this->executeQuery($sqlDetalles, array($orden['id_orden']));
-                                if ($stmtDetalles) {
-                                    $detalles = $this->getResults($stmtDetalles);
-                                    $detalle['orden']['detalles'] = $detalles;
-                                }
-                            }
-                        }
-                    }
-                    break;
-            }
-
-            return $detalle;
-        } catch (Exception $e) {
-            error_log("Error en getDetalleReporte: " . $e->getMessage());
-            return null;
-        }
-    }
-
 
 
 
@@ -1136,6 +1045,174 @@ class Conexion
         return $this->executeNonQuery($sql, $params);
     }
 
+    public function actualizarReporte(
+        int $id_reporte,
+        string $accion_tomada,
+        string $estado,
+        string $comentarios = ''
+    ) 
+    {
+       $sql = "UPDATE REPORTES SET 
+        accion_tomada = ?,
+        estado = ?,
+        comentarios = ?
+    WHERE id_reporte = ?";
+
+     $params = [
+            $id_reporte,
+            $accion_tomada,
+            $estado,
+            $comentarios
+        ];
+
+        return $this->executeNonQuery($sql,$params);
+        
+    }
+
+    public function getDetalleReporte($idReporte, $tipoReporte = null)
+    {
+        try {
+            // Primero obtenemos el reporte base
+            $sqlReporte = "SELECT r.*, a.nombre as nombre_administrador 
+                      FROM REPORTES r
+                      JOIN USUARIOS a ON r.id_administrador = a.id_usuario
+                      WHERE r.id_reporte = ?";
+
+            $stmtReporte = $this->executeQuery($sqlReporte, array($idReporte));
+
+            if (!$stmtReporte) {
+                error_log("Error en consulta de reporte: " . print_r(sqlsrv_errors(), true));
+                return null;
+            }
+
+            $reporte = $this->getResults($stmtReporte)[0] ?? null;
+
+            if (!$reporte) {
+               return []; // ¡Importante: Devuelve un array vacío si no se encuentra el reporte base!
+            }
+
+            $detalle = ['reporte' => $reporte];
+
+            // Manejo específico para cada tipo de reporte
+            switch ($tipoReporte) {
+                case 'PRODUCTO':
+                    if (!empty($reporte['id_producto'])) {
+                        $sqlProducto = "SELECT p.*, u.nombre as nombre_vendedor 
+                                  FROM PRODUCTOS p
+                                  JOIN USUARIOS u ON p.id_usuario = u.id_usuario
+                                  WHERE p.id_producto = ?";
+                        $stmtProducto = $this->executeQuery($sqlProducto, array($reporte['id_producto']));
+                        if ($stmtProducto) {
+                            $producto = $this->getResults($stmtProducto)[0] ?? null;
+                            $detalle['producto'] = $producto;
+                        }
+                    }
+                    break;
+
+                case 'VENDEDOR':
+                case 'USUARIO':
+                    if (!empty($reporte['id_usuario_reportado'])) {
+                        $sqlUsuario = "SELECT * FROM USUARIOS WHERE id_usuario = ?";
+                        $stmtUsuario = $this->executeQuery($sqlUsuario, array($reporte['id_usuario_reportado']));
+                        if ($stmtUsuario) {
+                            $usuario = $this->getResults($stmtUsuario)[0] ?? null;
+                            $detalle['usuario'] = $usuario;
+                        }
+                    }
+                    break;
+
+                case 'ORDEN':
+                    if (!empty($reporte['id_orden'])) {
+                        // Datos básicos de la orden
+                        $sqlOrden = "SELECT o.*, 
+                                    c.nombre as nombre_cliente,
+                                    v.nombre as nombre_vendedor
+                                 FROM ORDENES o
+                                 JOIN USUARIOS c ON o.id_usuario = c.id_usuario
+                                 JOIN USUARIOS v ON o.id_vendedor = v.id_usuario
+                                 WHERE o.id_orden = ?";
+                        $stmtOrden = $this->executeQuery($sqlOrden, array($reporte['id_orden']));
+                        if ($stmtOrden) {
+                            $orden = $this->getResults($stmtOrden)[0] ?? null;
+                            $detalle['orden'] = $orden;
+
+                            // Detalles de los productos en la orden
+                            if ($orden) {
+                                $sqlDetalles = "SELECT d.*, p.nombre_producto, p.imagen
+                                           FROM DETALLE_ORDEN d
+                                           JOIN PRODUCTOS p ON d.id_producto = p.id_producto
+                                           WHERE d.id_orden = ?";
+                                $stmtDetalles = $this->executeQuery($sqlDetalles, array($orden['id_orden']));
+                                if ($stmtDetalles) {
+                                    $detalles = $this->getResults($stmtDetalles);
+                                    $detalle['orden']['detalles'] = $detalles;
+                                }
+                            }
+                        }
+                    }
+                    break;
+            }
+            //devuelve un arreglo de los detalles aunque puede estar vacio
+            return $detalle;
+        } catch (Exception $e) {
+            error_log("Error en getDetalleReporte: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function registrarAccionReporte(
+        int $id_reporte,
+        int $id_administrador,
+        string $accion,
+        string $detalles
+    ): bool {
+        $sql = "INSERT INTO HISTORIAL_REPORTES (
+        id_reporte,
+        id_administrador,
+        accion,
+        detalles,
+        fecha_accion
+    ) VALUES (?, ?, ?, ?, GETDATE())";
+
+        return $this->executeNonQuery($sql, [
+            $id_reporte,
+            $id_administrador,
+            $accion,
+            $detalles
+        ]);
+    }
+
+    public function getHistorialReporte(int $id_reporte): array
+    {
+        $sql = "SELECT h.*, u.nombre as nombre_administrador
+        FROM HISTORIAL_REPORTES h
+        JOIN USUARIOS u ON h.id_administrador = u.id_usuario
+        WHERE h.id_reporte = ?
+        ORDER BY h.fecha_accion DESC";
+
+        $stmt = $this->executeQuery($sql, [$id_reporte]);
+        return $this->getResults($stmt);
+    }
+
+    public function getReportesByTipo(string $tipo): array
+    {
+        $sql = "SELECT r.*, 
+            u.nombre as nombre_reportado,
+            a.nombre as nombre_administrador,
+            p.nombre_producto,
+            o.id_orden as numero_orden
+        FROM REPORTES r
+        JOIN USUARIOS u ON r.id_usuario_reportado = u.id_usuario
+        JOIN USUARIOS a ON r.id_administrador = a.id_usuario
+        LEFT JOIN PRODUCTOS p ON r.id_producto = p.id_producto
+        LEFT JOIN ORDENES o ON r.id_orden = o.id_orden
+        WHERE r.tipo_reporte = ?
+        ORDER BY r.fecha_reporte DESC";
+
+        $stmt = $this->executeQuery($sql, [$tipo]);
+        return $this->getResults($stmt);
+    }
+
     public function verificarReporteOrdenExistente($id_orden, $id_usuario)
     {
         $sql = "SELECT id_reporte FROM REPORTES 
@@ -1210,6 +1287,11 @@ class Conexion
         }
 
         return array_values($agrupados);
+    }
+    public function actualizarEstadoReporte($id_reporte, $nuevo_estado)
+    {
+        $sql = "UPDATE REPORTES SET estado = ? WHERE id_reporte = ?";
+        return $this->executeNonQuery($sql, [$nuevo_estado, $id_reporte]);
     }
 
 

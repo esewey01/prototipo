@@ -2,6 +2,8 @@
 <html lang="es">
 <?php include('Head.php'); ?>
 
+
+
 <body>
     <section id="container" class="">
         <!-- Header -->
@@ -163,367 +165,93 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Modal Detalle de Reporte -->
+            <div class="modal fade" id="detalleReporteModal" tabindex="-1" role="dialog" aria-labelledby="detalleReporteModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            <h4 class="modal-title" id="detalleReporteModalLabel">Detalles del Reporte #<span id="reporte-id-modal"></span></h4>
+                           
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h3>Información del Reporte</h3>
+                                    <p><strong>Tipo de reporte:</strong> <span id="reporte-tipo"></span></p>
+                                    <p><strong>Motivo:</strong> <span id="reporte-motivo"></span></p>
+                                    <p><strong>Comentarios:</strong> <span id="reporte-comentarios"></span></p>
+                                    <p><strong>Fecha:</strong> <span id="reporte-fecha"></span></p>
+                                    <p><strong>Estado:</strong> <span id="reporte-estado"></span></p>
+                                    <p><strong>Acción tomada:</strong> <span id="reporte-accion-tomada"></span></p>
+                                    
+                                    <p><strong>Usuario que reportó:</strong> <span id="reporte-administrador"></span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <div id="detalle-producto-seccion" style="display:none;">
+                                        <h3>Información del Producto</h3>
+                                        <p><strong>Nombre:</strong> <span id="producto-nombre"></span></p>
+                                        <p><strong>Descripción:</strong> <span id="producto-descripcion"></span></p>
+                                        <p><strong>Precio:</strong> <span id="producto-precio"></span></p>
+                                        <p><strong>Stock:</strong> <span id="producto-stock"></span></p>
+                                        <p><strong>Vendedor:</strong> <span id="producto-vendedor"></span></p>
+                                        <p><strong>Imagen:</strong> <br><img id="producto-imagen" src="" alt="Imagen Producto" style="max-width: 150px; border: 1px solid #ddd;"></p>
+                                    </div>
+                                    <div id="detalle-usuario-seccion" style="display:none;">
+                                        <h3>Información del Usuario/Vendedor Reportado</h3>
+                                        <p><strong>Login:</strong> <span id="usuario-login"></span></p>
+                                        <p><strong>Nombre Completo:</strong> <span id="usuario-nombre"></span></p>
+                                        <p><strong>Email:</strong> <span id="usuario-email"></span></p>
+                                        <p><strong>Teléfono:</strong> <span id="usuario-telefono"></span></p>
+                                        <p><strong>Rol:</strong> <span id="usuario-rol"></span></p>
+                                    </div>
+                                    <div id="detalle-orden-seccion" style="display:none;">
+                                        <h3>Información de la Orden</h3>
+                                        <p><strong>ID Orden:</strong> <span id="orden-id"></span></p>
+                                        <p><strong>Cliente:</strong> <span id="orden-cliente"></span></p>
+                                        <p><strong>Fecha Orden:</strong> <span id="orden-fecha"></span></p>
+                                        <p><strong>Total:</strong> <span id="orden-total"></span></p>
+                                        <p><strong>Estado:</strong> <span id="orden-estado"></span></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <h3>Historial de Acciones</h3>
+                            <div id="historial-reporte-content">
+                                <p class="text-muted">Cargando historial...</p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <div class="form-inline">
+                                <label for="accionSeleccionada" class="mr-2">Acción a Tomar:</label>
+                                <select class="form-control mr-2" id="accionSeleccionada">
+                                    <option value="">Selecciona una acción</option>
+                                    <option value="SUSPENDER_PRODUCTO">Suspender Producto</option>
+                                    <option value="SUSPENDER_CUENTA_VENDEDOR">Suspender Cuenta Vendedor</option>
+                                    <option value="SUSPENDER_CUENTA_USUARIO">Suspender Cuenta Usuario</option>
+                                    <option value="ENVIAR_AVISO">Enviar Aviso</option>
+                                    <option value="BORRAR_REPORTE">Borrar Reporte</option>
+                                    <option value="MARCAR_RESUELTO">Marcar como Resuelto</option>
+                                    <option value="RECHAZAR_REPORTE">Rechazar Reporte</option>
+                                </select>
+                                <button type="button" class="btn btn-primary" id="btn-aplicar-accion">Aplicar Acción</button>
+                            </div>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                            <button type="button" class="btn btn-info" id="btn-descargar-pdf">Descargar PDF</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
     </section>
 
-    <!-- Modal para Detalles del Reporte -->
-    <!-- Modal para Detalles del Reporte -->
-    <div class="modal fade" id="detalleReporteModal" tabindex="-1" role="dialog" aria-labelledby="detalleReporteModalLabel">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    <h4 class="modal-title text-white" id="detalleReporteModalLabel">
-                        Detalles del Reporte #<span id="reporte-id"></span>
-                        <small id="reporte-tipo" class="text-light"></small>
-                    </h4>
-                </div>
-                <div class="modal-body" id="detalleReporteContenido">
-                    <!-- Contenido dinámico se cargará aquí -->
-                    <div class="text-center py-5" id="cargando-reporte">
-                        <i class="fa fa-spinner fa-spin fa-3x"></i>
-                        <p>Cargando detalles del reporte...</p>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">
-                        <i class="fa fa-times"></i> Cerrar
-                    </button>
-                    <button type="button" class="btn btn-success" id="btnResolverReporte">
-                        <i class="fa fa-check"></i> Marcar como Resuelto
-                    </button>
-                    <button type="button" class="btn btn-danger" id="btnRechazarReporte">
-                        <i class="fa fa-ban"></i> Rechazar Reporte
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Plantillas para los diferentes tipos de reporte (hidden) -->
-    <div id="templates" style="display:none;">
-
-        <!-- Plantilla para reporte de CLIENTE -->
-        <div id="template-cliente">
-            <div class="row">
-                <div class="col-md-6">
-                    <h4><i class="fa fa-user"></i> Información del Cliente Reportado</h4>
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <div class="row">
-                                <div class="col-md-4 text-center">
-                                    <img src="<?= URL_VIEWS . htmlspecialchars($usuario['foto_perfil']) ?>"
-                                        class="img-thumbnail img-circle" width="120" height="120"
-                                        onerror="this.src='<?= URL_VIEWS ?>fotoproducto/default.jpg'">
-                                </div>
-                                <div class="col-md-8">
-                                    <table class="table table-condensed">
-                                        <tr>
-                                            <th>ID:</th>
-                                            <td>${usuario.id_usuario}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Nombre:</th>
-                                            <td>${usuario.nombre}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Email:</th>
-                                            <td>${usuario.email}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Teléfono:</th>
-                                            <td>${usuario.telefono || 'N/A'}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Registrado:</th>
-                                            <td>${new Date(usuario.fecha_registro).toLocaleDateString()}</td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <h4><i class="fa fa-flag"></i> Detalles del Reporte</h4>
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <table class="table">
-                                <tr>
-                                    <th>Fecha:</th>
-                                    <td>${new Date(reporte.fecha_reporte).toLocaleString()}</td>
-                                </tr>
-                                <tr>
-                                    <th>Estado:</th>
-                                    <td>
-                                        <span class="label label-${reporte.estado == 'PENDIENTE' ? 'warning' : reporte.estado == 'RESUELTO' ? 'success' : 'danger'}">
-                                            ${reporte.estado}
-                                        </span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>Reportado por:</th>
-                                    <td>${reporte.administrador.nombre} (ID: ${reporte.id_administrador})</td>
-                                </tr>
-                                <tr>
-                                    <th>Motivo:</th>
-                                    <td>${reporte.motivo}</td>
-                                </tr>
-                                <tr>
-                                    <th>Comentarios:</th>
-                                    <td>${reporte.comentarios || 'Sin comentarios adicionales'}</td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-12">
-                    <h4><i class="fa fa-history"></i> Historial del Cliente</h4>
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <div class="alert alert-info">
-                                <i class="fa fa-info-circle"></i> Aquí puedes mostrar historial de compras,
-                                reportes anteriores, etc.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Plantilla para reporte de VENDEDOR -->
-        <div id="template-vendedor">
-            <!-- Similar al de cliente pero con datos específicos de vendedor -->
-        </div>
-
-        <!-- Plantilla para reporte de PRODUCTO -->
-        <div id="template-producto">
-            <div class="row">
-                <div class="col-md-4">
-                    <h4><i class="fa fa-cube"></i> Producto Reportado</h4>
-                    <div class="panel panel-default">
-                        <div class="panel-body text-center">
-                            <img src="<?= URL_VIEWS . htmlspecialchars($producto['imagen']) ?>"
-                                class="img-thumbnail" style="max-height: 200px;"
-                                onerror="this.src='<?= URL_VIEWS ?>fotoproducto/default.jpg'">
-                            <h4>${producto.nombre_producto}</h4>
-                            <p>Código: ${producto.codigo}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-8">
-                    <h4><i class="fa fa-info-circle"></i> Detalles del Reporte</h4>
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <h5>Información del Producto</h5>
-                                    <table class="table table-condensed">
-                                        <tr>
-                                            <th>ID:</th>
-                                            <td>${producto.id_producto}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Precio:</th>
-                                            <td>$${producto.precio_venta.toFixed(2)}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Stock:</th>
-                                            <td>${producto.cantidad}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Categoría:</th>
-                                            <td>${producto.categoria.nombre}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Vendedor:</th>
-                                            <td>${producto.vendedor.nombre} (ID: ${producto.id_usuario})</td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div class="col-md-6">
-                                    <h5>Detalles del Reporte</h5>
-                                    <table class="table table-condensed">
-                                        <tr>
-                                            <th>Fecha:</th>
-                                            <td>${new Date(reporte.fecha_reporte).toLocaleString()}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Estado:</th>
-                                            <td><span class="label label-${reporte.estado == 'PENDIENTE' ? 'warning' : 'success'}">${reporte.estado}</span></td>
-                                        </tr>
-                                        <tr>
-                                            <th>Motivo:</th>
-                                            <td>${reporte.motivo}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Comentarios:</th>
-                                            <td>${reporte.comentarios || 'N/A'}</td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <div class="alert alert-warning">
-                                <h5><i class="fa fa-exclamation-triangle"></i> Descripción del Producto</h5>
-                                <p>${producto.descripcion || 'Sin descripción disponible'}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Plantilla para reporte de ORDEN -->
-        <div id="template-orden">
-            <div class="row">
-                <div class="col-md-12">
-                    <h4><i class="fa fa-shopping-cart"></i> Información de la Orden #${orden.id_orden}</h4>
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <h5>Detalles de la Orden</h5>
-                                    <table class="table table-condensed">
-                                        <tr>
-                                            <th>Fecha:</th>
-                                            <td>${new Date(orden.fecha_orden).toLocaleString()}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Estado:</th>
-                                            <td><span class="label label-${orden.estado.toLowerCase()}">${orden.estado}</span></td>
-                                        </tr>
-                                        <tr>
-                                            <th>Total:</th>
-                                            <td>$${orden.total.toFixed(2)}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Vendedor:</th>
-                                            <td>${orden.vendedor.nombre} (ID: ${orden.id_vendedor})</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Cliente:</th>
-                                            <td>${orden.cliente.nombre} (ID: ${orden.id_usuario})</td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div class="col-md-6">
-                                    <h5>Detalles del Reporte</h5>
-                                    <table class="table table-condensed">
-                                        <tr>
-                                            <th>Fecha Reporte:</th>
-                                            <td>${new Date(reporte.fecha_reporte).toLocaleString()}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Estado:</th>
-                                            <td><span class="label label-${reporte.estado == 'PENDIENTE' ? 'warning' : 'success'}">${reporte.estado}</span></td>
-                                        </tr>
-                                        <tr>
-                                            <th>Motivo:</th>
-                                            <td>${reporte.motivo}</td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <h5 class="mt-3"><i class="fa fa-list"></i> Productos en la Orden</h5>
-                            <div class="table-responsive">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Producto</th>
-                                            <th>Cantidad</th>
-                                            <th>Precio Unitario</th>
-                                            <th>Subtotal</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${orden.detalles.map(item => `
-                                        <tr>
-                                            <td>
-                                                <img src="<?= URL_VIEWS . htmlspecialchars($item['imagen']) ?>" width="50"
-                                                    onerror="this.src='<?= URL_VIEWS ?>fotoproducto/default.jpg'">
-                                                ${item.nombre_producto}
-                                            </td>
-                                            <td>${item.cantidad}</td>
-                                            <td>$${item.precio_unitario.toFixed(2)}</td>
-                                            <td>$${(item.cantidad * item.precio_unitario).toFixed(2)}</td>
-                                        </tr>
-                                        `).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div class="alert alert-info mt-3">
-                                <h5><i class="fa fa-comment"></i> Comentarios del Reporte</h5>
-                                <p>${reporte.comentarios || 'No hay comentarios adicionales'}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-
-    <!-- Modal para Acciones sobre Reportes -->
-    <div class="modal fade" id="accionReporteModal" tabindex="-1" role="dialog" aria-labelledby="accionReporteModalLabel">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <form id="formAccionReporte" method="POST" action="ProcesarAccionReporte.php">
-                    <input type="hidden" name="id_reporte" id="accion_id_reporte">
-                    <input type="hidden" name="tipo_reporte" id="accion_tipo_reporte">
-                    <input type="hidden" name="id_elemento" id="accion_id_elemento">
-
-                    <div class="modal-header bg-warning">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                        <h4 class="modal-title text-white" id="accionReporteModalLabel">Tomar Acción</h4>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label for="accion_seleccionada">Acción a tomar:</label>
-                            <select class="form-control" name="accion_tomada" id="accion_seleccionada" required>
-                                <option value="">Seleccione una acción</option>
-                                <option value="ADVERTENCIA">Enviar advertencia</option>
-                                <option value="DESACTIVAR_PRODUCTO">Desactivar producto</option>
-                                <option value="SUSPENDER_USUARIO">Suspender cuenta temporalmente</option>
-                                <option value="BANEAR_USUARIO">Banear cuenta permanentemente</option>
-                                <option value="ELIMINAR_REPORTE">Eliminar reporte (sin acción)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="comentarios_accion">Comentarios (obligatorio para advertencias):</label>
-                            <textarea class="form-control" name="comentarios" id="comentarios_accion" rows="3" required></textarea>
-                        </div>
-                        <div class="alert alert-info">
-                            <i class="fa fa-info-circle"></i> Esta acción quedará registrada en el historial del sistema.
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-warning">Aplicar Acción</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-
     <?php include("LibraryJs.php"); ?>
 
-    <script>
+     <script>
         $(document).ready(function() {
-
             // Inicializar DataTables
             $('.table-reportes').DataTable({
                 responsive: true,
@@ -535,7 +263,7 @@
                 language: {
                     "search": "Buscar:",
                     "lengthMenu": "Mostrar _MENU_ registros por página",
-                    "zeroRecords": "No se encontraron resultados",
+                    "zeroRecords": "No se encontraron resultados :(",
                     "info": "Mostrando página _PAGE_ de _PAGES_",
                     "infoEmpty": "No hay registros disponibles",
                     "infoFiltered": "(filtrado de _MAX_ registros totales)",
@@ -551,244 +279,157 @@
                 ]
             });
 
+            // Abrir modal y cargar detalles del reporte
+            $(document).on('click', '.btn-ver-detalle', function() { // Cambié a .btn-ver-detalle para tu HTML
+                const idReporte = $(this).data('id');
+                const tipoReporte = $(this).data('tipo');
 
-        });
+                // Limpiar contenido previo y ocultar secciones
+                $('#detalleReporteContent').empty();
+                $('#detalle-producto-seccion').hide();
+                $('#detalle-usuario-seccion').hide();
+                $('#detalle-orden-seccion').hide();
+                $('#historial-reporte-content').html('<p class="text-muted">Cargando historial...</p>');
+                $('#reporte-id-modal').text(''); // Limpiar el ID en el título del modal
 
+                $.ajax({
+                    url: 'ReportesController.php',
+                    type: 'GET',
+                    data: {
+                        action: 'getDetalleReporte',
+                        id: idReporte,
+                        tipo: tipoReporte
+                    },
+                    dataType: 'json', // Es crucial especificar que esperas JSON
+                    success: function(response) {
+                        if (response.success) {
+                            const reporte = response.reporte;
+                            const producto = response.producto;
+                            const usuario = response.usuario;
+                            const orden = response.orden;
+                            const historial = response.historial;
 
+                            // Rellenar información del reporte
+                            $('#reporte-id-modal').text(reporte.id_reporte);
+                            $('#reporte-tipo').text(reporte.tipo_reporte || 'N/A');
+                            $('#reporte-motivo').text(reporte.motivo || 'N/A');
+                            $('#reporte-fecha').text(reporte.fecha_reporte||'N/A');
+                            $('#reporte-estado').text(reporte.estado || 'N/A');
+                            $('#reporte-accion-tomada').text(reporte.accion_tomada || 'N/A');
+                            $('#reporte-comentarios').text(reporte.comentarios || 'N/A');
+                            $('#reporte-administrador').text((reporte.nombre_administrador || '') + ' ' + (reporte.apellido_administrador || ''));
 
+                            // Mostrar información específica según el tipo de reporte
+                            if (reporte.tipo_reporte === 'PRODUCTO' && producto) {
+                                $('#detalle-producto-seccion').show();
+                                $('#producto-nombre').text(producto.nombre_producto || 'N/A');
+                                $('#producto-descripcion').text(producto.descripcion || 'N/A');
+                                $('#producto-precio').text(parseFloat(producto.precio || 0).toFixed(2));
+                                $('#producto-stock').text(producto.stock || 'N/A');
+                                $('#producto-vendedor').text((producto.vendedor_nombre || '') + ' ' + (producto.vendedor_apellido || ''));
+                                $('#producto-imagen').attr('src', '../Public/img/' + (producto.imagen || 'default.jpg')); // Asegúrate de tener una imagen por defecto
+                            } else if ((reporte.tipo_reporte === 'VENDEDOR' || reporte.tipo_reporte === 'USUARIO') && usuario) {
+                                $('#detalle-usuario-seccion').show();
+                                $('#usuario-login').text(usuario.login || 'N/A');
+                                $('#usuario-nombre').text((usuario.nombre || '') + ' ' + (usuario.apellido || ''));
+                                $('#usuario-email').text(usuario.email || 'N/A');
+                                $('#usuario-telefono').text(usuario.telefono || 'N/A');
+                                $('#usuario-rol').text(usuario.nombre_rol || 'N/A');
+                            } else if (reporte.tipo_reporte === 'ORDEN' && orden) {
+                                $('#detalle-orden-seccion').show();
+                                $('#orden-id').text(orden.id_orden || 'N/A');
+                                $('#orden-cliente').text((orden.cliente_nombre || '') + ' ' + (orden.cliente_apellido || ''));
+                                $('#orden-fecha').text(orden.fecha_orden ? new Date(orden.fecha_orden).toLocaleString() : 'N/A');
+                                $('#orden-total').text(parseFloat(orden.total || 0).toFixed(2));
+                                $('#orden-estado').text(orden.estado || 'N/A');
+                            }
 
-        // Manejar el envío del formulario de acción
-        $('#formAccionReporte').submit(function(e) {
-            e.preventDefault();
+                            // Cargar historial de acciones
+                            let historialHtml = '';
+                            if (historial && historial.length > 0) {
+                                historialHtml += '<table class="table table-bordered table-striped table-sm"><thead><tr><th>Fecha</th><th>Acción</th><th>Comentarios</th><th>Administrador</th></tr></thead><tbody>';
+                                historial.forEach(function(h) {
+                                    historialHtml += `<tr>
+                                        <td>${h.fecha_accion ? new Date(h.fecha_accion).toLocaleString() : 'N/A'}</td>
+                                        <td>${h.accion_tomada || 'N/A'}</td>
+                                        <td>${h.comentarios || 'N/A'}</td>
+                                        <td>${(h.nombre_administrador || '') + ' ' + (h.apellido_administrador || '')}</td>
+                                    </tr>`;
+                                });
+                                historialHtml += '</tbody></table>';
+                            } else {
+                                historialHtml = '<p class="text-muted">No hay historial de acciones para este reporte.</p>';
+                            }
+                            $('#historial-reporte-content').html(historialHtml);
 
-            $.ajax({
-                url: 'ProcesarAccionReporte.php',
-                type: 'POST',
-                data: $(this).serialize(),
-                success: function(response) {
-                    var result = JSON.parse(response);
-                    if (result.success) {
-                        alert(result.message);
-                        $('#accionReporteModal').modal('hide');
-                        location.reload();
-                    } else {
-                        alert('Error: ' + result.message);
-                    }
-                },
-                error: function() {
-                    alert('Error al procesar la acción');
-                }
-            });
-        });
-
-        // Botón para marcar como resuelto
-        $('#btnResolverReporte').click(function() {
-            var idReporte = $('#accion_id_reporte').val();
-            var tipoReporte = $('#accion_tipo_reporte').val();
-
-            if (confirm('¿Está seguro de marcar este reporte como resuelto?')) {
-                $.post('ResolverReporte.php', {
-                    id: idReporte,
-                    tipo: tipoReporte
-                }, function(response) {
-                    var result = JSON.parse(response);
-                    if (result.success) {
-                        alert(result.message);
-                        $('#detalleReporteModal').modal('hide');
-                        location.reload();
-                    } else {
-                        alert('Error: ' + result.message);
+                            $('#detalleReporteModal').modal('show');
+                        } else {
+                            alert('Error al cargar detalles del reporte: ' + (response.message || 'Error desconocido'));
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Error al cargar detalles del reporte: ' + error);
                     }
                 });
-            }
-        });
+            });
 
-        // Función para cargar los detalles del reporte
-        // Función para cargar los detalles del reporte
-        function verDetalleReporte(idReporte, tipoReporte) {
-            // Mostrar carga
-            $('#detalleReporteContenido').html($('#cargando-reporte').html());
-            $('#reporte-id').text(idReporte);
-            $('#reporte-tipo').text('(' + tipoReporte + ')');
+            // Aplicar acción al reporte
+            $('#btn-aplicar-accion').click(function() {
+                const idReporte = $('#reporte-id-modal').text(); // Obtener el ID del reporte desde el modal
+                const accion = $('#accionSeleccionada').val();
+                const comentarios = prompt("Ingrese comentarios adicionales para esta acción (opcional):");
 
-            // Configurar botones según el tipo de reporte
-            $('#btnResolverReporte, #btnRechazarReporte').show();
+                if (!accion) {
+                    alert('Por favor selecciona una acción');
+                    return;
+                }
 
-            // Obtener datos via AJAX
-            $.ajax({
-                url: 'obtenerDetalleReporte.php',
-                type: 'GET',
-                data: {
-                    id: idReporte,
-                    tipo: tipoReporte
-                },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.success) {
-                        let templateId = 'template-' + tipoReporte.toLowerCase();
-                        let template = $('#' + templateId).html();
+                let confirmacion = confirm(`¿Estás seguro de aplicar la acción "${$('#accionSeleccionada option:selected').text()}" al reporte #${idReporte}?`);
 
-                        // Reemplazar variables en el template
-                        let html = template;
-                        for (let key in response.data) {
-                            if (response.data.hasOwnProperty(key)) {
-                                const value = response.data[key];
-                                // Manejar fechas
-                                if (key.includes('fecha') || key.includes('date')) {
-                                    const date = new Date(value);
-                                    html = html.replace(new RegExp(`\\$\\{${key}\\}`, 'g'),
-                                        date.toLocaleDateString() + ' ' + date.toLocaleTimeString());
-                                } else {
-                                    html = html.replace(new RegExp(`\\$\\{${key}\\}`, 'g'),
-                                        value !== null ? value : 'N/A');
-                                }
+                if (confirmacion) {
+                    $.ajax({
+                        url: 'ReportesController.php',
+                        type: 'POST',
+                        data: {
+                            action: 'aplicarAccion',
+                            id_reporte: idReporte,
+                            accion: accion,
+                            comentarios: comentarios
+                        },
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.success) {
+                                alert('Acción aplicada correctamente');
+                                $('#detalleReporteModal').modal('hide');
+                                location.reload(); // Recargar la página para ver los cambios
+                            } else {
+                                alert('Error al aplicar la acción: ' + (response.message || 'Error desconocido'));
                             }
+                        },
+                        error: function(xhr, status, error) {
+                            alert('Error al aplicar la acción: ' + error);
                         }
-
-                        $('#detalleReporteContenido').html(html);
-                    } else {
-                        $('#detalleReporteContenido').html(
-                            '<div class="alert alert-danger">Error al cargar los detalles: ' + response.message + '</div>'
-                        );
-                    }
-                },
-                error: function(xhr) {
-                    $('#detalleReporteContenido').html(
-                        '<div class="alert alert-danger">Error de conexión: ' + xhr.statusText + '</div>'
-                    );
+                    });
                 }
             });
 
-            $('#detalleReporteModal').modal('show');
+            // Botón para descargar PDF
+            $('#btn-descargar-pdf').click(function() {
+                const idReporte = $('#reporte-id-modal').text();
+                if (idReporte) {
+                    window.open('ReportesController.php?action=generarPdfReporte&id=' + idReporte, '_blank');
+                } else {
+                    alert('No se pudo obtener el ID del reporte para descargar el PDF.');
+                }
+            });
+        });
+
+        // Asegúrate de que esta función exista si la llamas directamente desde el HTML (aunque ya no es necesario con el botón JS)
+        function descargarReporte(idReporte) {
+            // Esta función ahora es redundante si usas el $('#btn-descargar-pdf').click()
+            // Pero la mantengo por si hay alguna llamada residual en otro lugar
+            window.open('ReportesController.php?action=generarPdfReporte&id=' + idReporte, '_blank');
         }
-
-        // Manejar el botón de resolver reporte
-        $('#btnResolverReporte').click(function() {
-            let idReporte = $('#reporte-id').text();
-            let tipoReporte = $('#reporte-tipo').text().replace(/[()]/g, '');
-
-            if (confirm('¿Estás seguro de marcar este reporte como resuelto?')) {
-                $.post('resolverReporte.php', {
-                    id: idReporte,
-                    tipo: tipoReporte
-                }, function(response) {
-                    if (response.success) {
-                        alert('Reporte marcado como resuelto');
-                        $('#detalleReporteModal').modal('hide');
-                        location.reload(); // Recargar para actualizar la lista
-                    } else {
-                        alert('Error: ' + response.message);
-                    }
-                }, 'json');
-            }
-        });
-
-        // Manejar el botón de rechazar reporte
-        $('#btnRechazarReporte').click(function() {
-            let idReporte = $('#reporte-id').text();
-            let tipoReporte = $('#reporte-tipo').text().replace(/[()]/g, '');
-
-            if (confirm('¿Estás seguro de rechazar este reporte? Esto no tomará ninguna acción sobre el elemento reportado.')) {
-                $.post('rechazarReporte.php', {
-                    id: idReporte,
-                    tipo: tipoReporte
-                }, function(response) {
-                    if (response.success) {
-                        alert('Reporte rechazado');
-                        $('#detalleReporteModal').modal('hide');
-                        location.reload(); // Recargar para actualizar la lista
-                    } else {
-                        alert('Error: ' + response.message);
-                    }
-                }, 'json');
-            }
-        });
-        // Configurar modal de acción antes de mostrarlo
-        $('#accionReporteModal').on('show.bs.modal', function(event) {
-            var button = $(event.relatedTarget); // Botón que activó el modal
-            var idReporte = button.data('id');
-            var tipoReporte = button.data('tipo');
-            var idElemento = button.data('elemento');
-
-            $('#accion_id_reporte').val(idReporte);
-            $('#accion_tipo_reporte').val(tipoReporte);
-            $('#accion_id_elemento').val(idElemento);
-
-            // Resetear el formulario
-            $('#accion_seleccionada').val('');
-            $('#comentarios_accion').val('');
-        });
-
-        // Manejar envío del formulario de acción
-        $('#formAccionReporte').submit(function(e) {
-            e.preventDefault();
-
-            var formData = $(this).serialize();
-
-            $.ajax({
-                url: 'ProcesarAccionReporte.php',
-                type: 'POST',
-                data: formData,
-                dataType: 'json',
-                success: function(response) {
-                    if (response.success) {
-                        alert(response.message);
-                        $('#accionReporteModal').modal('hide');
-                        // Recargar la página para ver los cambios
-                        location.reload();
-                    } else {
-                        alert('Error: ' + response.message);
-                    }
-                },
-                error: function(xhr) {
-                    alert('Error al procesar la acción: ' + xhr.statusText);
-                }
-            });
-        });
-
-        // Manejar botón "Marcar como Resuelto"
-        $('#btnResolverReporte').click(function() {
-            var idReporte = $('#reporte-id').text();
-            var tipoReporte = $('#reporte-tipo').text().replace(/[()]/g, '');
-
-            if (confirm('¿Estás seguro de marcar este reporte como resuelto?')) {
-                $.post('resolverReporte.php', {
-                    id: idReporte,
-                    tipo: tipoReporte,
-                    accion: 'RESUELTO'
-                }, function(response) {
-                    if (response.success) {
-                        alert('Reporte marcado como resuelto');
-                        $('#detalleReporteModal').modal('hide');
-                        location.reload();
-                    } else {
-                        alert('Error: ' + response.message);
-                    }
-                }, 'json');
-            }
-        });
-
-        // Manejar botón "Rechazar Reporte"
-        $('#btnRechazarReporte').click(function() {
-            var idReporte = $('#reporte-id').text();
-            var tipoReporte = $('#reporte-tipo').text().replace(/[()]/g, '');
-
-            if (confirm('¿Estás seguro de rechazar este reporte? Esto no tomará ninguna acción sobre el elemento reportado.')) {
-                $.post('resolverReporte.php', {
-                    id: idReporte,
-                    tipo: tipoReporte,
-                    accion: 'RECHAZADO'
-                }, function(response) {
-                    if (response.success) {
-                        alert('Reporte rechazado');
-                        $('#detalleReporteModal').modal('hide');
-                        location.reload();
-                    } else {
-                        alert('Error: ' + response.message);
-                    }
-                }, 'json');
-            }
-        });
     </script>
 </body>
 
