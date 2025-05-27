@@ -128,9 +128,7 @@ if (!isset($producto)) {
 
 
             <div class="mt-4">
-                <h4 style="padding-top:10px"><i class="fa fa-flag text-danger"></i> Reportar Producto</h4>
-
-                <button class="btn btn-outline-danger btn-sm" data-toggle="modal" data-target="#reportarProductoModal">
+                <button class="btn btn-danger" data-toggle="modal" data-target="#reportarProductoModal">
                     <i class="fa fa-exclamation-triangle"></i> Reportar este producto
                 </button>
 

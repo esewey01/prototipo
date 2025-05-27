@@ -1,10 +1,10 @@
 <?php
 // Inicio de la vista Perfil.php
 
-    // Iniciar sesión si no está iniciada
-    if (session_status() !== PHP_SESSION_ACTIVE) {
-        session_start();
-    }
+// Iniciar sesión si no está iniciada
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
 
 // Verificar si el usuario está autenticado
 if (!isset($_SESSION['usuario'])) {
@@ -63,7 +63,13 @@ $id_rol = $_SESSION['usuario']['rol']['id_rol'];
             <section class="wrapper">
                 <div class="row ">
                     <div class="col-lg-12">
-                        <h3 class="page-header"><i class="fa fa-user"></i> MI PERFIL</h3>
+
+                        <div class="title has-help" data-toggle="modal" data-target="#helpMiPerfil" style="cursor: pointer;">
+                            <h3 class="page-header">
+                                <i class="fa fa-user"></i> MI PERFIL
+                            </h3>
+                        </div>
+
 
                         <!--FUNCION DE ALERTA DE MENSAJES-->
                         <?php if (isset($_SESSION['mensaje'])): ?>
@@ -74,7 +80,7 @@ $id_rol = $_SESSION['usuario']['rol']['id_rol'];
                                 <strong><?= $_SESSION['ultima_actualizacion_perfil'][$id_usuario] ?? '' ?></strong>
                                 <strong><?= $_SESSION['mensaje'] ?></strong>
                             </div>
-                            <?php
+                        <?php
                             unset($_SESSION['mensaje']);
                             unset($_SESSION['alerta']);
                         endif; ?>
@@ -226,7 +232,7 @@ $id_rol = $_SESSION['usuario']['rol']['id_rol'];
                                             </div>
                                         </form>
                                     </div>
-                                    
+
                                     <!-- Cambio de Contraseña -->
                                     <div class="tab-pane" id="password">
                                         <form method="POST" class="form-horizontal" style="margin-top: 20px;">
@@ -267,10 +273,10 @@ $id_rol = $_SESSION['usuario']['rol']['id_rol'];
                                             <input type="hidden" name="action" value="update_social">
 
                                             <div class="form-group">
-                                                
+
                                                 <label class="col-sm-2 control-label"><i class="fa fa-facebook"></i> Facebook</label>
                                                 <div class="col-sm-10">
-                                                    <input type="text" name="facebook" class="form-control" value="<?= htmlspecialchars($social_data['facebook'])?? 'Url de tu perfil'?>">
+                                                    <input type="text" name="facebook" class="form-control" value="<?= htmlspecialchars($social_data['facebook']) ?? 'Url de tu perfil' ?>">
                                                 </div>
                                             </div>
 
@@ -347,8 +353,7 @@ $id_rol = $_SESSION['usuario']['rol']['id_rol'];
                                                             <p class="form-control-static">
                                                                 <strong>ESTADO:</strong>
                                                                 <span class="label label-<?=
-                                                                    $ultimaSolicitud['estado'] == 'APROBADA' ? 'success' : 
-                                                                    ($ultimaSolicitud['estado'] == 'RECHAZADA' ? 'danger' : 'warning') ?>">
+                                                                                            $ultimaSolicitud['estado'] == 'APROBADA' ? 'success' : ($ultimaSolicitud['estado'] == 'RECHAZADA' ? 'danger' : 'warning') ?>">
                                                                     <?= $ultimaSolicitud['estado'] ?>
                                                                 </span><br>
                                                                 <small>Categoría: <?= $ultimaSolicitud['categoria'] ?? '' ?></small><br>
@@ -368,6 +373,42 @@ $id_rol = $_SESSION['usuario']['rol']['id_rol'];
                     </div>
                 </div>
             </section>
+            <!-- Modal para Pagina Principal -->
+            <div class="modal fade" id="helpMiPerfil" tabindex="-1" role="dialog" aria-labelledby="editProfileModalTitle" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            <h4 class="modal-title" id="editProfileModalTitle">Actualiza tu Perfil</h4>
+                            
+                        </div>
+                        <div class="modal-body">
+                            <p>Aquí puedes <strong> la información de tu perfil</strong> para mantener tus datos actualizados y asegurar una mejor experiencia en la plataforma. Por favor, revisa cuidadosamente los campos antes de guardar.</p>
+
+                            <hr>
+                            <h5>Consideraciones Importantes:</h5>
+                            <ul>
+                                <li>Los cambios que realices en tu perfil se guardarán<strong> inmediatamente</strong>.</li>
+                                <li>Después de <STRONG>una hora</STRONG> de haber guardado tus cambios, no podrás volver a editar tu perfil. Si necesitas hacer más modificaciones transcurrido ese tiempo, por favor, contacta a soporte técnico.</li>
+                                <li>Mantener tu perfil actualizado es crucial para la comunicación y para el uso de ciertas funcionalidades de la plataforma.</li>
+                            </ul>
+
+                            <hr>
+
+                            <p>Si tienes alguna duda o problema al actualizar tu perfil, no dudes en <a href="#contacto">contactar a nuestro equipo de soporte</a>.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Entendido</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
         </section>
     </section>
 
@@ -398,4 +439,5 @@ $id_rol = $_SESSION['usuario']['rol']['id_rol'];
         });
     </script>
 </body>
+
 </html>

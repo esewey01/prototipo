@@ -9,7 +9,7 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
-                <h4 class="modal-title" id="usuarioDetalleModalLabel">Información del Vendedor</h4>
+                <h3 class="modal-title" id="usuarioDetalleModalLabel">Información del Vendedor</h3>
             </div>
             <div class="modal-body">
                 <div class="text-center py-5" id="loadingUsuario">

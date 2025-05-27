@@ -104,7 +104,7 @@
                     <div id="add" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
                         aria-hidden="true">
                         <form action="ProductoController.php?action=guardar" method="POST" enctype="multipart/form-data">
-                            
+
                             <input name="usuarioLogin" value="<?php echo $usuario; ?>" type="hidden">
                             <input name="passwordLogin" value="<?php echo $password; ?>" type="hidden">
                             <div class="modal-dialog" id="mdialTamanio">
@@ -254,17 +254,40 @@
                                 <td> <?PHP echo htmlspecialchars($product['nombre_usuario']); ?></td>
                                 <td> <?PHP echo htmlspecialchars($product['descripcion']); ?></td>
                                 <td> <?PHP echo htmlspecialchars($product['nombre_categoria']); ?></td>
-                                <td> <?PHP echo htmlspecialchars($product['cantidad']); ?></td>
+                                <td>
+                                    <?php if ($product['estado'] == 'AGOTADO'): ?>
+                                        <span class="label label-warning">AGOTADO</span>
+                                    <?php else: ?>
+                                        <?PHP echo htmlspecialchars($product['cantidad']); ?>
+                                    <?php endif; ?>
+                                    
+
+                                </td>
                                 <td> <?PHP echo htmlspecialchars($product['precio_compra']); ?></td>
                                 <td> <?PHP echo htmlspecialchars($product['precio_venta']); ?></td>
                                 <td> <?PHP echo htmlspecialchars($product['fecha_registro']->format('Y-m-d H:i:s')); ?></td>
                                 <td>
+
+
                                     <?php if ($id_rol == 2): // Si es vendedor 
                                     ?>
-                                        <a href="#editProduct<?php echo $product['id_producto']; ?>"
-                                            class="btn btn-success" data-toggle="modal">
-                                            <i class="icon_check_alt2"></i>
-                                        </a>
+
+                                        <!-- Botón de edición - Solo para productos ACTIVOS o AGOTADOS -->
+                                        <?php if ($product['estado'] != 'INACTIVO'): ?>
+                                            <a href="#editProduct<?php echo $product['id_producto']; ?>"
+                                                class="btn btn-success" data-toggle="modal">
+                                                <i class="icon_check_alt2"></i>
+                                            </a>
+                                        <?php endif; ?>
+
+                                        <!-- Botón para cambiar estado -->
+                                        <button class="btn btn-warning btn-estado"
+                                            data-id="<?= $product['id_producto'] ?>"
+                                            data-estado="<?= $product['estado'] ?>">
+                                            <i class="fa fa-exchange"></i>
+                                        </button>
+
+                                        <!-- Botón de eliminar -->
                                         <a href="RegistroProducto.php?idborrar=<?php echo $product['id_producto']; ?>&usuarioLogin=<?php echo urlencode($usuario); ?>&passwordLogin=<?php echo urlencode($password); ?>"
                                             role="button" class="btn btn-danger"
                                             onclick="return confirm('¿Estás seguro de eliminar este producto?')">
@@ -272,16 +295,34 @@
                                         </a>
                                     <?php else: // Para administradores 
                                     ?>
-                                        <!-- Solo vista para admin -->
-                                        <button class="btn btn-danger btn-sm"
-                                            onclick="cargarDatosReporte(
-                                                '<?= $product['id_producto'] ?>',
-                                                '<?= htmlspecialchars($product['nombre_producto']) ?>',
-                                                '<?= $product['id_usuario'] ?>',
-                                                '<?= htmlspecialchars($product['nombre_usuario']) ?>'
-                                            )">
-                                            Reportar
-                                        </button>
+                                        <!-- Mostrar motivo si está INACTIVO -->
+                                        <?php if ($product['estado'] == 'INACTIVO' && isset($reportesProductos[$product['id_producto']])): ?>
+                                            <button class="btn btn-info btn-motivo"
+                                                data-motivo="<?= htmlspecialchars($reportesProductos[$product['id_producto']]['comentarios']) ?>">
+                                                <i class="fa fa-info-circle"></i> Ver motivo
+                                            </button>
+                                        <?php endif; ?>
+
+                                        <!-- Botón para reactivar producto (solo admin) -->
+                                        <?php if ($product['estado'] == 'INACTIVO'): ?>
+                                            <button class="btn btn-primary btn-reactivar"
+                                                data-id="<?= $product['id_producto'] ?>">
+                                                <i class="fa fa-check"></i> Reactivar
+                                            </button>
+                                        <?php endif; ?>
+
+                                        <!-- Botón para reportar (solo para productos activos) -->
+                                        <?php if ($product['estado'] == 'ACTIVO'): ?>
+                                            <button class="btn btn-danger btn-sm"
+                                                onclick="cargarDatosReporte(
+                                            '<?= $product['id_producto'] ?>',
+                                            '<?= htmlspecialchars($product['nombre_producto']) ?>',
+                                            '<?= $product['id_usuario'] ?>',
+                                            '<?= htmlspecialchars($product['nombre_usuario']) ?>'
+                    )">
+                                                Reportar
+                                            </button>
+                                        <?php endif; ?>
                                     <?php endif; ?>
                                 </td>
                             </tr>
@@ -301,8 +342,7 @@
                                                 <button type="button" class="close" data-dismiss="modal"
                                                     aria-hidden="true">x
                                                 </button>
-                                                <h3 id="myModalLabel" align="center">Cambiar Informacion del
-                                                    Producto</h3>
+                                                <h3 id="myModalLabel" align="center">Cambiar Informacion del Producto</h3>
                                             </div>
                                             <div class="modal-body">
                                                 <div class="row">
@@ -486,8 +526,115 @@
                     </div>
                 </div>
             </div>
+            <!-- Modal para cambiar estado -->
+            <div class="modal fade" id="modalEstado" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <form action="ProductoController.php?action=cambiar-estado" method="POST">
+                            <input type="hidden" name="id_producto" id="estado_id_producto">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                <h4 class="modal-title">Cambiar estado del producto</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label>Estado actual:</label>
+                                    <p class="form-control-static" id="estado_actual"></p>
+                                </div>
+                                <div class="form-group">
+                                    <label for="nuevo_estado">Nuevo estado:</label>
+                                    <select class="form-control" name="nuevo_estado" id="nuevo_estado" required>
+                                        <option value="">Seleccione un estado</option>
+                                        <option value="ACTIVO">Activo</option>
+                                        <option value="AGOTADO">Agotado</option>
+                                        <?php if ($id_rol == 1): ?>
+                                            <option value="INACTIVO">Inactivar</option>
+                                        <?php endif; ?>
+                                    </select>
+                                </div>
+                                <div class="form-group" id="grupo_comentarios" style="display:none;">
+                                    <label for="comentarios">Comentarios:</label>
+                                    <textarea class="form-control" name="comentarios" id="comentarios" rows="3"></textarea>
+                                    <small class="text-muted">Explique el motivo de la inactivación</small>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal para ver motivo -->
+            <div class="modal fade" id="modalMotivo" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            <h4 class="modal-title">Motivo de inactivación</h4>
+                        </div>
+                        <div class="modal-body">
+                            <p id="texto_motivo"></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <?php include("LibraryJs.php"); ?>
+
 
             <script>
+                $(document).ready(function() {
+                    // Manejar clic en botón de estado
+                    $('.btn-estado').click(function() {
+                        var id = $(this).data('id');
+                        var estadoActual = $(this).data('estado');
+
+                        $('#estado_id_producto').val(id);
+                        $('#estado_actual').text(estadoActual);
+
+                        // Mostrar/ocultar campo de comentarios según estado seleccionado
+                        $('#nuevo_estado').change(function() {
+                            if ($(this).val() == 'INACTIVO') {
+                                $('#grupo_comentarios').show();
+                            } else {
+                                $('#grupo_comentarios').hide();
+                            }
+                        });
+
+                        $('#modalEstado').modal('show');
+                    });
+
+                    // Manejar clic en botón de motivo
+                    $('.btn-motivo').click(function() {
+                        $('#texto_motivo').text($(this).data('motivo'));
+                        $('#modalMotivo').modal('show');
+                    });
+
+                    // Manejar clic en botón de reactivar
+                    $('.btn-reactivar').click(function() {
+                        if (confirm('¿Está seguro de reactivar este producto?')) {
+                            var id = $(this).data('id');
+                            $.post('ProductoController.php?action=cambiar-estado', {
+                                id_producto: id,
+                                nuevo_estado: 'ACTIVO'
+                            }, function(response) {
+                                location.reload();
+                            });
+                        }
+                    });
+                });
+
+
                 // Función para cargar datos en el modal
                 function cargarDatosReporte(idProducto, nombreProducto, idUsuario, nombreUsuario) {
                     $('#reporte_id_producto').val(idProducto);
@@ -510,7 +657,6 @@
 
 
 
-    <?php include("LibraryJs.php"); ?>
 
 </body>
 

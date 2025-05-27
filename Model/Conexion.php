@@ -608,6 +608,25 @@ class Conexion
         return $this->executeNonQuery($sql, $params);
     }
 
+    //OBTENER PRODUCTOS QUE ESTEN REPORTADOS
+    public function getReporteByProducto($id_producto)
+    {
+        $sql = "SELECT TOP 1 r.*, a.nombre as nombre_admin 
+            FROM REPORTES r
+            JOIN USUARIOS a ON r.id_administrador = a.id_usuario
+            WHERE r.id_producto = ? AND r.tipo_reporte = 'PRODUCTO'
+            ORDER BY r.fecha_reporte DESC";
+        $stmt = $this->executeQuery($sql, [$id_producto]);
+        return $this->getResults($stmt)[0] ?? null;
+    }
+
+    public function cambiarEstadoProducto($id_producto, $nuevo_estado)
+    {
+        $sql = "UPDATE PRODUCTOS SET estado = ? WHERE id_producto = ?";
+        return $this->executeNonQuery($sql, [$nuevo_estado, $id_producto]);
+    }
+
+
     public function updateProducto(
         $id_categoria,
         $codigo,
@@ -1050,23 +1069,21 @@ class Conexion
         string $accion_tomada,
         string $estado,
         string $comentarios = ''
-    ) 
-    {
-       $sql = "UPDATE REPORTES SET 
+    ) {
+        $sql = "UPDATE REPORTES SET 
         accion_tomada = ?,
         estado = ?,
         comentarios = ?
     WHERE id_reporte = ?";
 
-     $params = [
+        $params = [
             $id_reporte,
             $accion_tomada,
             $estado,
             $comentarios
         ];
 
-        return $this->executeNonQuery($sql,$params);
-        
+        return $this->executeNonQuery($sql, $params);
     }
 
     public function getDetalleReporte($idReporte, $tipoReporte = null)
@@ -1088,7 +1105,7 @@ class Conexion
             $reporte = $this->getResults($stmtReporte)[0] ?? null;
 
             if (!$reporte) {
-               return []; // ¡Importante: Devuelve un array vacío si no se encuentra el reporte base!
+                return []; // ¡Importante: Devuelve un array vacío si no se encuentra el reporte base!
             }
 
             $detalle = ['reporte' => $reporte];

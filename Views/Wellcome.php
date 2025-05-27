@@ -70,7 +70,11 @@
 
             <div class="row">
                 <div class="col-lg-12">
-                    <h3 class="page-header"><i class="fa fa-laptop"></i> PRINCIPAL</h3>
+                    <div class="title has-help" data-toggle="modal" data-target="#helpPaginaPrincipal" style="cursor: pointer;">
+                        <h3 class="page-header">
+                            <i class="fa fa-laptop"></i> PAGINA PRINCIPAL
+                        </h3>
+                    </div>
                     <!--FUNCION DE ALERTA DE MENSAJES-->
                     <?php if (isset($_SESSION['mensaje'])): ?>
                         <div class="alert <?= $_SESSION['alerta'] ?? 'alert-info' ?> alert-dismissible fade in" role="alert">
@@ -194,15 +198,45 @@
             </div>
 
         </section>
+        <!-- Modal para Pagina Principal -->
+        <div class="modal fade help-modal" id="helpPaginaPrincipal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title" id="helpModalTitle">Bienvenido a la Tienda Oficial UPIICSA - ¡Tu Espacio Politécnico!</h4>
+
+                    </div>
+                    <div class="modal-body">
+                        <p>¡Hola, <strong>Politécnico</strong>! Te damos la bienvenida a la plataforma exclusiva de la <strong>UPIICSA</strong>, diseñada para facilitar la <strong>compra y venta de productos</strong> dentro de nuestro campus. Aquí encontrarás todo lo que necesitas, ¡directamente de politécnicos para politécnicos!</p>
+                        <p>En esta página principal, podrás:</p>
+                        <ul>
+                            <li><strong>Explorar productos:</strong> Descubre una amplia variedad de artículos disponibles, desde comida, material de estudio hasta productos de vendedores UPIICSA.</li>
+                            <li><strong>Comprar fácilmente:</strong> Añade tus productos favoritos al carrito y realiza tus compras de forma segura y sencilla.</li>
+                            <li><strong>Vender tus artículos:</strong> ¿Tienes algo que ofrecer a la comunidad? Publica tus productos y llega a miles de compañeros.</li>
+                            <li><strong>Filtrar y buscar:</strong> Encuentra rápidamente lo que necesitas usando nuestras opciones de búsqueda y filtros por categoría o precio.</li>
+                            <li><strong>Gestionar tus pedidos:</strong> Revisa el estado de tus compras y ventas desde tu perfil.</li>
+
+                        </ul>
+                        <p>Nuestro objetivo es crear un espacio de <strong>comercio seguro y eficiente</strong> para todos los miembros de la <strong>UPIICSA</strong>. ¡Esperamos que disfrutes tu experiencia!</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">¡Comenzar a Explorar!</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- Modal para Pagos pendientes -->
         <div class="modal fade help-modal" id="helpPagos" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Información sobre Pagos Pendientes</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
+                        <h4 class="modal-title">Información sobre Pagos Pendientes</h4>
                     </div>
                     <div class="modal-body">
                         <p>Los <strong>Pagos Pendientes</strong> son transacciones que has realizado pero que aún no han sido confirmadas por el <strong>Vendedor Correspondiente</strong>.</p>
@@ -224,10 +258,11 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Información sobre el Carrito</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
+                        <h4 class="modal-title">Información sobre el Carrito</h4>
+
                     </div>
                     <div class="modal-body">
                         <p>El <strong>Carrito de Compras</strong> contiene los productos que has seleccionado pero aún no has comprado.</p>
@@ -249,10 +284,11 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Información sobre Gastos Totales</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
+                        <h4 class="modal-title">Información sobre Gastos Totales</h4>
+
                     </div>
                     <div class="modal-body">
                         <p>El <strong>Total Gastado</strong> representa la suma de todas tus compras realizadas en nuestra plataforma.</p>
@@ -274,10 +310,11 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Información sobre Compras Realizadas</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
+                        <h4 class="modal-title">Información sobre Compras Realizadas</h5>
+
                     </div>
                     <div class="modal-body">
                         <p>Las <strong>Compras Realizadas</strong> son pedidos que has completado y pagado satisfactoriamente.</p>

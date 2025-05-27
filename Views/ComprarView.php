@@ -39,6 +39,12 @@
         <section class="wrapper">
             <div class="row">
                 <div class="col-lg-12">
+                    <div class="title has-help" data-toggle="modal" data-target="#helpComprar" style="cursor: pointer;">
+                        <h3 class="page-header">
+                            <i class="icon_wallet"></i>SEGURO QUE TE GUSTA!
+                        </h3>
+                    </div>
+
 
                     <!--FUNCION DE ALERTA DE MENSAJES-->
                     <?php if (isset($_SESSION['mensaje'])): ?>
@@ -169,6 +175,44 @@
                     </div>
                 </div>
             <?php endif; ?>
+
+            <!-- Modal para Pagina Principal -->
+            <div class="modal fade help-modal" id="helpComprar" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            <h4 class="modal-title" id="helpModalTitle">Informacion sobre la Tienda </h4>
+
+                        </div>
+                        <div class="modal-body">
+                            <p>¡Bienvenido a la sección de <strong>Productos</strong>
+                            ! Aquí puedes explorar todos los artículos que nuestra comunidad UPIICSA ofrece.
+                            Estamos comprometidos con una experiencia de compra y venta <strong>justa y segura</strong> para todos los politécnicos.</p>
+
+                            
+
+                            <h4>¿Cómo usar esta sección?</h4>
+                            <ul>
+                                <li><strong>Añadir al carrito:</strong> ¿Te interesa un producto? Haz clic en el botón  <i class="fa fa-shopping-cart"></i><strong> Añadir</strong> para guardarlo mientras sigues explorando. .</li>
+                                <li><strong>Ver comentarios:</strong> Antes de decidirte, puedes leer lo que otros usuarios opinan del producto o del vendedor. Ve más detalles en la sección de <i class="fa fa-eye"></i><strong> Ver</strong> ¡Tu opinión también es valiosa!</li>
+                                <li><strong>Comprar:</strong> Cuando estés listo para adquirir un producto, ve a tu carrito y procede a comprarlo o haz clic en el botón <i class="fa fa-money-bill-alt"></i>  <strong> Pagar en Efectivo </strong></li>
+                                <li><strong>Reportar:</strong> Si encuentras un producto inapropiado, una descripción engañosa o tienes algún problema con un vendedor, puedes <i class="fa fa-exclamation-triangle"></i><strong> Reportarlo</strong>.  </li>
+                            </ul>
+
+                            
+
+                            <p>Recuerda siempre revisar la descripción del producto y contactar al vendedor si tienes alguna pregunta antes de finalizar tu compra.</p>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" data-dismiss="modal">Entendido</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
     </section>
 

@@ -4,10 +4,10 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header bg-primary">
-                <h5 class="modal-title text-white" id="productoDetalleModalLabel">Detalles del Producto</h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
+                <h3 class="modal-title text-white" id="productoDetalleModalLabel">Detalles del Producto</h3>          
             </div>
             <div class="modal-body">
                 <!-- Contenido dinámico se cargará aquí via AJAX -->

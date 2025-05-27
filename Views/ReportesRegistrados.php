@@ -35,7 +35,7 @@
                 <!-- Título y Breadcrumb -->
                 <div class="row">
                     <div class="col-lg-12">
-                        <h3 class="page-header"><i class="fa fa-flag"></i> ADMINISTRACIÓN DE REPORTES</h3>
+                        <h3 class="page-header"><i class="fa fa-flag"></i>ADMINISTRACIÓN DE REPORTES</h3>
                         <!-- Alerta de mensajes -->
                         <?php if (isset($_SESSION['mensaje'])): ?>
                             <div class="alert <?= $_SESSION['alerta'] ?? 'alert-info' ?> alert-dismissible fade in" role="alert">
@@ -168,83 +168,78 @@
 
             <!-- Modal Detalle de Reporte -->
             <div class="modal fade" id="detalleReporteModal" tabindex="-1" role="dialog" aria-labelledby="detalleReporteModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                            <h4 class="modal-title" id="detalleReporteModalLabel">Detalles del Reporte #<span id="reporte-id-modal"></span></h4>
-                           
-                        </div>
-                        <div class="modal-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <h3>Información del Reporte</h3>
-                                    <p><strong>Tipo de reporte:</strong> <span id="reporte-tipo"></span></p>
-                                    <p><strong>Motivo:</strong> <span id="reporte-motivo"></span></p>
-                                    <p><strong>Comentarios:</strong> <span id="reporte-comentarios"></span></p>
-                                    <p><strong>Fecha:</strong> <span id="reporte-fecha"></span></p>
-                                    <p><strong>Estado:</strong> <span id="reporte-estado"></span></p>
-                                    <p><strong>Acción tomada:</strong> <span id="reporte-accion-tomada"></span></p>
-                                    
-                                    <p><strong>Usuario que reportó:</strong> <span id="reporte-administrador"></span></p>
-                                </div>
-                                <div class="col-md-6">
-                                    <div id="detalle-producto-seccion" style="display:none;">
-                                        <h3>Información del Producto</h3>
-                                        <p><strong>Nombre:</strong> <span id="producto-nombre"></span></p>
-                                        <p><strong>Descripción:</strong> <span id="producto-descripcion"></span></p>
-                                        <p><strong>Precio:</strong> <span id="producto-precio"></span></p>
-                                        <p><strong>Stock:</strong> <span id="producto-stock"></span></p>
-                                        <p><strong>Vendedor:</strong> <span id="producto-vendedor"></span></p>
-                                        <p><strong>Imagen:</strong> <br><img id="producto-imagen" src="" alt="Imagen Producto" style="max-width: 150px; border: 1px solid #ddd;"></p>
-                                    </div>
-                                    <div id="detalle-usuario-seccion" style="display:none;">
-                                        <h3>Información del Usuario/Vendedor Reportado</h3>
-                                        <p><strong>Login:</strong> <span id="usuario-login"></span></p>
-                                        <p><strong>Nombre Completo:</strong> <span id="usuario-nombre"></span></p>
-                                        <p><strong>Email:</strong> <span id="usuario-email"></span></p>
-                                        <p><strong>Teléfono:</strong> <span id="usuario-telefono"></span></p>
-                                        <p><strong>Rol:</strong> <span id="usuario-rol"></span></p>
-                                    </div>
-                                    <div id="detalle-orden-seccion" style="display:none;">
-                                        <h3>Información de la Orden</h3>
-                                        <p><strong>ID Orden:</strong> <span id="orden-id"></span></p>
-                                        <p><strong>Cliente:</strong> <span id="orden-cliente"></span></p>
-                                        <p><strong>Fecha Orden:</strong> <span id="orden-fecha"></span></p>
-                                        <p><strong>Total:</strong> <span id="orden-total"></span></p>
-                                        <p><strong>Estado:</strong> <span id="orden-estado"></span></p>
-                                    </div>
-                                </div>
-                            </div>
-                            <hr>
-                            <h3>Historial de Acciones</h3>
-                            <div id="historial-reporte-content">
-                                <p class="text-muted">Cargando historial...</p>
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="detalleReporteModalLabel">
+                    <i class="fa fa-clipboard-list mr-2"></i> Detalles del Reporte #<span id="reporte-id-modal"></span>
+                </h4>
+                
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6 border-right"> <h3 class="mb-3"><i class="fa fa-info-circle mr-2"></i> Información del Reporte</h3>
+                        <p><strong>Tipo de Reporte:</strong> <span id="reporte-tipo" class="font-weight-bold"></span></p>
+                        <p><strong>Motivo:</strong> <span id="reporte-motivo"></span></p>
+                        <p><strong>Comentarios del Reportante:</strong> <span id="reporte-comentarios" class="text-muted"></span></p>
+                        <p><strong>Fecha de Reporte:</strong> <span id="reporte-fecha"></span></p>
+                        <p><strong>Estado Actual:</strong> <span id="reporte-estado" class="badge badge-info"></span></p> <p><strong>Última Acción Tomada:</strong> <span id="reporte-accion-tomada"></span></p>
+                        <p><strong>Reportado por:</strong> <span id="reporte-administrador"></span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <div id="detalle-producto-seccion" class="mb-4" style="display:none;">
+                            <h3 class="mb-3 text-danger"><i class="fa fa-flag"></i> Información del Producto</h3>
+                            <div class="media">
+                                <img id="producto-imagen" src="" alt="Imagen del Producto" class="mr-3 rounded" style="max-width: 100px; height: auto; border: 1px solid #ddd;">
+                                <div class="media-body">
+                                    <h5 class="mt-0"><strong id="producto-nombre"></strong></h5>
+                                    <p><strong>Descripción:</strong> <span id="producto-descripcion" class="text font-weight-bold"></span></p>     
+                                    <p><strong>Precio:</strong> <span id="producto-precio" class="text font-weight-bold"></span></p>
+                                    <p><strong>Stock Disponible:</strong> <span id="producto-stock"></span></p>
+                                    <p><strong>Vendedor:</strong> <span id="producto-vendedor"><a href="#">Ver Perfil</a></span></p> </div>
                             </div>
                         </div>
-                        <div class="modal-footer">
-                            <div class="form-inline">
-                                <label for="accionSeleccionada" class="mr-2">Acción a Tomar:</label>
-                                <select class="form-control mr-2" id="accionSeleccionada">
-                                    <option value="">Selecciona una acción</option>
-                                    <option value="SUSPENDER_PRODUCTO">Suspender Producto</option>
-                                    <option value="SUSPENDER_CUENTA_VENDEDOR">Suspender Cuenta Vendedor</option>
-                                    <option value="SUSPENDER_CUENTA_USUARIO">Suspender Cuenta Usuario</option>
-                                    <option value="ENVIAR_AVISO">Enviar Aviso</option>
-                                    <option value="BORRAR_REPORTE">Borrar Reporte</option>
-                                    <option value="MARCAR_RESUELTO">Marcar como Resuelto</option>
-                                    <option value="RECHAZAR_REPORTE">Rechazar Reporte</option>
-                                </select>
-                                <button type="button" class="btn btn-primary" id="btn-aplicar-accion">Aplicar Acción</button>
-                            </div>
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                            <button type="button" class="btn btn-info" id="btn-descargar-pdf">Descargar PDF</button>
-                        </div>
+
+                        <div id="detalle-usuario-seccion" class="mb-4" style="display:none;">
+                            <h3 class="mb-3 text-danger"><i class="fa fa-flag2"></i> Información del Usuario/Vendedor Reportado</h3>
+                            <p><strong>Login:</strong> <span id="usuario-login"></span></p>
+                            <p><strong>Nombre Completo:</strong> <span id="usuario-nombre"></span></p>
+                            <p><strong>Email:</strong> <span id="usuario-email"><a href="mailto:"></a></span></p> <p><strong>Teléfono:</strong> <span id="usuario-telefono"><a href="tel:"></a></span></p> <p><strong>Rol:</strong> <span id="usuario-rol" class="badge badge-secondary"></span></p> </div>
+
+                        <div id="detalle-orden-seccion" style="display:none;">
+                            <h3 class="mb-3 text-danger"><i class="fa fa-file-invoice-dollar mr-2"></i> Información de la Orden</h3>
+                            <p><strong>ID de Orden:</strong> <span id="orden-id"></span></p>
+                            <p><strong>Cliente:</strong> <span id="orden-cliente"></span></p>
+                            <p><strong>Fecha de Orden:</strong> <span id="orden-fecha"></span></p>
+                            <p><strong>Total de la Orden:</strong> <span id="orden-total" class="text-danger font-weight-bold"></span></p>
+                            <p><strong>Estado de la Orden:</strong> <span id="orden-estado" class="badge badge-warning"></span></p> </div>
                     </div>
                 </div>
+                <hr class="mt-4 mb-4"> </div>
+            <div class="modal-footer d-flex justify-content-between align-items-center"> <div class="form-inline">
+                    <label for="accionSeleccionada" class="mr-2 text-dark font-weight-bold">Tomar Acción:</label>
+                    <select class="form-control mr-2" id="accionSeleccionada">
+                        <option value="">-- Selecciona una acción --</option> <option value="SUSPENDER_PRODUCTO">Suspender Producto</option>
+                        <option value="SUSPENDER_CUENTA_VENDEDOR">Suspender Cuenta Vendedor</option>
+                        <option value="SUSPENDER_CUENTA_USUARIO">Suspender Cuenta Usuario</option>
+                        <option value="ENVIAR_AVISO">Enviar Aviso al Usuario</option>
+                        <option value="BORRAR_REPORTE">Eliminar Reporte</option>
+                        <option value="MARCAR_RESUELTO">Marcar como Resuelto</option>
+                        <option value="RECHAZAR_REPORTE">Rechazar Reporte (No Procede)</option>
+                    </select>
+                    <button type="button" class="btn btn-primary" id="btn-aplicar-accion">Aplicar Acción</button>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-info mr-2" id="btn-descargar-pdf"><i class="fa fa-file-pdf mr-1"></i> Exportar a PDF</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                </div>
             </div>
+        </div>
+    </div>
+</div>
         </section>
     </section>
 

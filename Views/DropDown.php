@@ -7,7 +7,7 @@
             <a data-toggle="dropdown" class="dropdown-toggle" >
                 <span class="profile-ava">
 
-                <img src="<?= URL_VIEWS . (isset($user_data['foto_perfil']) ? $user_data['foto_perfil'] : '') ?>"
+                <img src="<?= URL_VIEWS . (isset($_SESSION['usuario']['foto']) ? $_SESSION['usuario']['foto'] : '') ?>"
                 alt="Usuario" height="20" width="20"
                 onerror="this.onerror=null; this.src='<?= URL_VIEWS . 'fotoproducto/user.png' ?>'">
 
