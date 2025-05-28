@@ -7,33 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UPIICSAFOOD - Panel de Electromovilidad</title>
 </head>
-<style>
-    .title.has-help {
-        position: relative;
-        padding-right: 20px;
-        cursor: pointer;
-    }
 
-    .title.has-help:after {
-        content: "?";
-        position: absolute;
-        right: 5px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 16px;
-        height: 16px;
-        line-height: 16px;
-        text-align: center;
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 50%;
-        font-size: 12px;
-        color: white;
-    }
-
-    .title.has-help:hover:after {
-        background: rgba(255, 255, 255, 0.3);
-    }
-</style>
 
 
 <body>

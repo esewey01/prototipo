@@ -218,7 +218,7 @@ class ProductoController
             throw new Exception("Método no permitido");
         }
 
-        // Validar campos requeridos
+        /*
         $requiredFields = ['id_producto', 'id_categoria', 'codigo', 'nombre_producto', 'descripcion', 'cantidad', 'pventa', 'pcompra'];
         foreach ($requiredFields as $field) {
             if (empty($_POST[$field])) {
@@ -234,7 +234,7 @@ class ProductoController
         );
         if ($verificarProducto) {
             throw new Exception("Producto ya existente");
-        }
+        }*/
 
         // Procesar imagen
         $imagen = $_POST['imagen']; // Valor predeterminado si no se sube una nueva imagen
@@ -248,6 +248,7 @@ class ProductoController
             }
         }
 
+        error_log("ID del producto: " . $_POST['id_producto']);
         // Actualizar producto
         $resultado = $this->con->updateProducto(
             $_POST['id_categoria'],
@@ -255,8 +256,9 @@ class ProductoController
             $_POST['nombre_producto'],
             $_POST['descripcion'],
             $_POST['cantidad'],
-            $_POST['pventa'],
-            $_POST['pcompra'],
+            $_POST['precio_venta'],
+            $_POST['precio_compra'],
+            $imagen,
             $_POST['id_producto']
         );
 
@@ -363,7 +365,7 @@ try {
     $controller = new ProductoController();
 
     switch ($action) {
-        case 'ediar':
+        case 'editar':
             $controller->editar();
             break;
         case 'guardar':

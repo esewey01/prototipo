@@ -635,19 +635,20 @@ class Conexion
         $cantidad,
         $precio_venta,
         $precio_compra,
+        $imagen,
         $id_producto
     ) {
-
         $sql = "UPDATE PRODUCTOS SET 
-            id_categoria = ?,
-            codigo = ?,
-            nombre_producto = ?,
-            descripcion = ?,
-            cantidad = ?,
-            precio_venta = ?,
-            precio_compra = ?,
-            fecha_registro = GETDATE()
-            where id_producto=?";
+        id_categoria = ?,
+        codigo = ?,
+        nombre_producto = ?,
+        descripcion = ?,
+        cantidad = ?,
+        precio_venta = ?,
+        precio_compra = ?,
+        imagen = ?,
+        fecha_registro = GETDATE()
+    WHERE id_producto = ?";
 
         $params = array(
             $id_categoria,
@@ -657,8 +658,10 @@ class Conexion
             $cantidad,
             $precio_venta,
             $precio_compra,
+            $imagen,
             $id_producto
         );
+
         return $this->executeNonQuery($sql, $params);
     }
 

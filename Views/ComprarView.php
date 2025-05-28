@@ -119,7 +119,7 @@
                                 </div>
 
                                 <p class="card-text text-muted small">
-                                    <?= htmlspecialchars(substr($producto['descripcion'], 0, 100)) ?>...
+                                    <?= htmlspecialchars(substr($producto['descripcion'], 0, 20)) ?>...
                                 </p>
 
                                 <h4 class="text-success">$<?= number_format($producto['precio_venta'], 2) ?></h4>

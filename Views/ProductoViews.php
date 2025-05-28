@@ -34,19 +34,22 @@
             <!--ELEMENTOS Y CONTROL DE ERRORES-->
             <div class="row">
                 <div class="col-lg-12">
-                    <h3 class="page-header">
-                        <i class="fa fa-laptop"></i>
-                        <?php
-                        if ($_SESSION['usuario']['rol']['id_rol'] == 1) {
-                            echo "PRODUCTOS REGISTRADOS EN EL SISTEMA";
-                        } elseif ($_SESSION['usuario']['rol']['id_rol'] == 2) {
-                            echo "MIS PRODUCTOS";
-                        } else {
-                            // Puedes agregar un texto por defecto o dejarlo vacío si no coincide con los roles
-                            echo "NO POSEES PERMISOS PARA VER LOS PRODUCTOS";
-                        }
-                        ?>
-                    </h3>
+                    <div class="title has-help" data-toggle="modal" data-target="#helpProductos" style="cursor: pointer;">
+
+                        <h3 class="page-header">
+                            <i class="fa fa-laptop"></i>
+                            <?php
+                            if ($_SESSION['usuario']['rol']['id_rol'] == 1) {
+                                echo "PRODUCTOS REGISTRADOS EN EL SISTEMA";
+                            } elseif ($_SESSION['usuario']['rol']['id_rol'] == 2) {
+                                echo "MIS PRODUCTOS";
+                            } else {
+                                // Puedes agregar un texto por defecto o dejarlo vacío si no coincide con los roles
+                                echo "NO POSEES PERMISOS PARA VER LOS PRODUCTOS";
+                            }
+                            ?>
+                        </h3>
+                    </div>
                     <?php if (isset($_SESSION['mensaje'])): ?>
                         <div class="alert <?= $_SESSION['alerta'] ?? 'alert-info' ?> alert-dismissible fade in" role="alert">
                             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -260,7 +263,7 @@
                                     <?php else: ?>
                                         <?PHP echo htmlspecialchars($product['cantidad']); ?>
                                     <?php endif; ?>
-                                    
+
 
                                 </td>
                                 <td> <?PHP echo htmlspecialchars($product['precio_compra']); ?></td>
@@ -328,8 +331,7 @@
                             </tr>
                             <!-- Modal de edición -->
                             <div id="editProduct<?php echo $product['id_producto']; ?>" class="modal fade">
-                                <form class="form-validate form-horizontal" name="form2" enctype="multipart/form-data"
-                                    action="RegistroProducto.php" method="POST">
+                                <form class="form-validate form-horizontal" name="form2" enctype="multipart/form-data" action="ProductoController.php?action=editar" method="POST">
                                     <!-- Campos ocultos necesarios -->
                                     <input type="hidden" name="id_producto" value="<?php echo $product['id_producto']; ?>">
                                     <input type="hidden" name="imagen" value="<?php echo htmlspecialchars($product['imagen']); ?>">
@@ -348,11 +350,11 @@
                                                 <div class="row">
                                                     <div class="col-lg-4">
                                                         <section class="panel">
-                                                            <img src="<?PHP echo $urlViews . $product['imagen']; ?>" width="250"
-                                                                height="250">
                                                             <br><br>
-                                                            <div><strong>Cambiar Imagen</strong></div>
-                                                            <?php include("UploadViewImageEdit.php"); ?>
+                                                            <?php
+                                                            $producto_actual = $product; // Guardamos el producto actual en una variable
+                                                            include("UploadViewImageEdit.php");
+                                                            ?>
                                                         </section>
                                                     </div>
                                                     <div class="col-lg-8">
@@ -465,6 +467,50 @@
 
                         <?php endforeach; ?>
                     </table>
+                </div>
+            </div>
+
+            <!-- Modal para Pagina Principal -->
+            <div class="modal fade help-modal" id="helpProductos" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="helpModalTitle"><i class="fa fa-cubes mr-2"></i> Gestión de Productos</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Esta sección te permite administrar los productos disponibles en la plataforma de UPIICSA. La información y las acciones disponibles varían según tu rol:</p>
+
+                            <hr>
+
+                            <h5>Para Administradores:</h5>
+                            <ul>
+                                <li><strong>Visualización completa:</strong> Tendrás acceso a todos los productos cargados en el sistema, independientemente del vendedor.</li>
+                                <li><strong>Gestión total:</strong> Podrás editar, eliminar o suspender cualquier producto. Esto es crucial para mantener la calidad y la seguridad de la plataforma.</li>
+                                <li><strong>Monitoreo de vendedores:</strong> Supervisa el inventario y las publicaciones de todos los vendedores para asegurar el cumplimiento de las políticas.</li>
+                                <li><strong>Búsqueda y filtros avanzados:</strong> Utiliza las herramientas de búsqueda y filtrado para encontrar productos específicos o gestionar grandes volúmenes de artículos.</li>
+                            </ul>
+
+                            <hr>
+
+                            <h5>Para Vendedores:</h5>
+                            <ul>
+                                <li><strong>Tus propios productos:</strong> Solo podrás ver y gestionar los productos que tú has publicado en la plataforma.</li>
+                                <li><strong>Edición y gestión de tu inventario:</strong> Podrás modificar los detalles de tus productos, actualizar el stock, y pausar o eliminar tus publicaciones.</li>
+                                <li><strong>Añadir nuevos productos:</strong> Publica fácilmente nuevos artículos para que la comunidad UPIICSA los descubra.</li>
+                                <li><strong>Seguimiento de ventas:</strong> Accede a información relevante sobre el rendimiento de tus productos y su estado en el mercado.</li>
+                            </ul>
+
+                            <hr>
+
+                            <p>Nuestro objetivo es proporcionarte las herramientas necesarias para una gestión eficiente y transparente. Si tienes alguna duda sobre la funcionalidad de esta sección, no dudes en contactar a soporte.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" data-dismiss="modal">Entendido</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 

@@ -43,7 +43,10 @@
 
             <div class="row">
                 <div class="col-lg-12">
-                    <h3 class="page-header"><i class="icon_cart"></i> Carrito de Compras</h3>
+                    <div class="title has-help" data-toggle="modal" data-target="#helpCarrito" style="cursor: pointer;">
+                        <h3 class="page-header"><i class="icon_cart"></i> Carrito de Compras</h3>
+                    </div>
+
                     <!--FUNCION DE ALERTA DE MENSAJES-->
                     <?php if (isset($_SESSION['mensaje'])): ?>
                         <div class="alert <?= $_SESSION['alerta'] ?? 'alert-info' ?> alert-dismissible fade in" role="alert">
@@ -160,6 +163,43 @@
                                     <i class="fa fa-trash"></i> Vaciar carrito
                                 </button>
                             <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal para Pagina del Carrito del CLiente -->
+            <div class="modal fade help-modal" id="helpCarrito" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            <h4 class="modal-title" id="helpModalTitle">Tu carrito de Compras!</h4>
+
+                        </div>
+                        <div class="modal-body">
+                            <p>¡Bienvenido a tu <strong>Carrito de compras</strong>, politécnico! Aquí encontrarás todos los productos que has seleccionado para adquirir. Es el paso final antes de concretar tu compra en la plataforma UPIICSA.</p>
+
+                            <hr>
+
+                            <h5>¿Cómo usar tu carrito?</h5>
+                            <ul>
+                                <li><strong>Revisa tus productos:</strong> Asegúrate de que los artículos y las cantidades sean correctos. Puedes ajustar las cantidades o eliminar productos si cambias de opinión.</li>
+                                <li><strong>Precio total:</strong> Verás el total a pagar por todos los productos en tu carrito.</li>
+                                <li><strong>Proceder al pago:</strong> Cuando estés listo, haz clic en el botón "Proceder al Pago" o "Checkout". Esto te llevará a la página donde podrás seleccionar tu método de pago y finalizar la compra.</li>
+                                <li><strong>Vaciar carrito:</strong> Si deseas empezar de nuevo, puedes vaciar todo tu carrito con un solo clic.</li>
+                                <li><strong>Seguir comprando:</strong> Si quieres añadir más productos, simplemente cierra este modal y continúa navegando por la tienda. Tus artículos permanecerán en el carrito.</li>
+                            </ul>
+
+                            <hr>
+
+                            <p>Recuerda que los artículos en tu carrito no están reservados hasta que completes la compra. ¡No dejes pasar esa oferta especial!</p>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" data-dismiss="modal">¡Comenzar a Explorar!</button>
                         </div>
                     </div>
                 </div>

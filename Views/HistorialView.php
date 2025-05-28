@@ -61,7 +61,10 @@
             <section class="wrapper">
                 <div class="row">
                     <div class="col-lg-12">
-                        <h3 class="page-header"><i class="icon_document"></i> Mi Historial de Compras</h3>
+                        <div class="title has-help" data-toggle="modal" data-target="#helpHistorial" style="cursor: pointer;">
+                            <h3 class="page-header"><i class="icon_document"></i> Mi Historial de Compras</h3>
+                        </div>
+
 
                         <?php if (isset($_SESSION['mensaje'])): ?>
                             <div class="alert <?= $_SESSION['alerta'] ?? 'alert-info' ?> alert-dismissible fade in" role="alert">
@@ -168,6 +171,42 @@
                 </div>
             </section>
         </section>
+
+        <!--MODAL PARA EL HISTORIAL DEL CLIENTE-->
+        <div class="modal fade help-modal" id="helpHistorial" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title" id="helpHistorial"><i class="fa fa-history mr-2"></i> Mi Historial de Compras</h4>
+
+                    </div>
+                    <div class="modal-body">
+                        <p>Aquí puedes consultar todas tus compras realizadas en la plataforma de UPIICSA. Tu historial está organizado para que puedas rastrear fácilmente el estado de cada pedido.</p>
+
+                        <hr>
+
+                        <h5>Clasificación de tus Pedidos:</h5>
+                        <ul>
+                            <li><strong>Pendientes:</strong> Estos son los pedidos que aún no han sido confirmados o que esperan una acción de tu parte, como el pago. Te recomendamos revisar estos pedidos periódicamente para asegurarte de que se completen a tiempo.</li>
+                            <li><strong>Pagados:</strong> Estos son los pedidos que ya has pagado exitosamente y que están en proceso de preparación o envío por parte del vendedor.</li>
+                            <li><strong>Entregados:</strong> Aquí encontrarás los pedidos que han sido recibidos satisfactoriamente. ¡Disfruta de tus productos!</li>
+                            <li><strong>Cancelados:</strong> Revisa los pedidos que han sido anulados, ya sea por ti o por el vendedor. Si tienes dudas sobre una cancelación, puedes contactar a soporte.</li>
+                        </ul>
+
+                        <hr>
+
+                        <p>Para más detalles sobre un pedido específico, haz clic en el elemento correspondiente en tu lista del historial. Si necesitas ayuda con alguna de tus compras, no dudes en contactar a nuestro equipo de soporte.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">¡Comenzar a Explorar!</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
         <!-- Modal para detalles -->
         <div class="modal fade" id="detalleModal" tabindex="-1" role="dialog" aria-hidden="true">
