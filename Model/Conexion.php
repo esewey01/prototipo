@@ -792,10 +792,8 @@ class Conexion
     //FUNCION PARA ACCIONES
     public function desactivarProd($id_producto)
     {
-
-        $sql = "UPDATE PRODUCTOS SET ESTADO='INACTIVO'
-        WHERE ID_PRODUCTO=?";
-        return $this->executeNonQuery($sql, $id_producto);
+        $sql = "UPDATE PRODUCTOS SET estado = 'INACTIVO' WHERE id_producto = ?";
+        return $this->executeNonQuery($sql, [$id_producto]);
     }
 
     public function suspenderUser($id_usuario, $permanente = false)

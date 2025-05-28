@@ -332,7 +332,7 @@
                                 $('#producto-precio').text(parseFloat(producto.precio || 0).toFixed(2));
                                 $('#producto-stock').text(producto.stock || 'N/A');
                                 $('#producto-vendedor').text((producto.vendedor_nombre || '') + ' ' + (producto.vendedor_apellido || ''));
-                                $('#producto-imagen').attr('src', '../Public/img/' + (producto.imagen || 'default.jpg')); // Asegúrate de tener una imagen por defecto
+                                $('#producto-imagen').attr('src', '../Views/' + (producto.imagen || 'default.jpg')); // Asegúrate de tener una imagen por defecto
                             } else if ((reporte.tipo_reporte === 'VENDEDOR' || reporte.tipo_reporte === 'USUARIO') && usuario) {
                                 $('#detalle-usuario-seccion').show();
                                 $('#usuario-login').text(usuario.login || 'N/A');

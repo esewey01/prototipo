@@ -40,6 +40,7 @@ try {
     if ($action === 'aplicarAccion' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $id_reporte = $_POST['id_reporte'] ?? 0;
         $accion = $_POST['accion'] ?? '';
+        $comentarios = $_POST['comentarios'] ?? ''; // Obtener comentarios del POST
         $id_admin = $_SESSION['usuario']['id_usuario'] ?? 1; // Cambiar por el ID real del admin
 
         $reporte = $db->getReporteById($id_reporte);
@@ -53,19 +54,26 @@ try {
 
         switch ($accion) {
             case 'enviar_aviso':
-                $mensaje = 'Aviso enviado al usuario';
-                $resultado = $db->actualizarReporte($id_reporte, 'AVISO ENVIADO', 'PROCESADO', $mensaje, );
+                //$mensaje = 'Aviso enviado al usuario';
+                $resultado = $db->actualizarReporte($id_reporte, 'AVISO ENVIADO', 'PROCESADO', $comentarios, );
                 $db->registrarAccionReporte($id_reporte, $id_admin, 'AVISO', 'Aviso enviado al usuario');
                 break;
 
             case 'suspender_producto':
                 if ($reporte['id_producto']) {
                     $resultado = $db->desactivarProd($reporte['id_producto']);
-                    $mensaje = 'Producto suspendido temporalmente';
-                    $db->actualizarReporte($id_reporte, 'SUSPENSIÓN DE PRODUCTO', 'RESUELTO', $mensaje);
-                    $db->registrarAccionReporte($id_reporte, $id_admin, 'SUSPENSIÓN', 'Producto suspendido por reporte');
+                    if ($resultado) {
+                        $mensaje = 'Producto suspendido temporalmente';
+                        $db->actualizarReporte($id_reporte, 'SUSPENSIÓN DE PRODUCTO', 'RESUELTO', $mensaje);
+                        $db->registrarAccionReporte($id_reporte, $id_admin, 'SUSPENSIÓN', 'Producto suspendido por reporte');
+                    } else {
+                        throw new Exception("No se pudo suspender el producto");
+                    }
+                } else {
+                    throw new Exception("Producto no encontrado");
                 }
                 break;
+
 
             case 'suspender_cuenta':
                 if ($reporte['id_usuario_reportado']) {

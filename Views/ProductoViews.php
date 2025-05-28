@@ -275,6 +275,14 @@
                                     <?php if ($id_rol == 2): // Si es vendedor 
                                     ?>
 
+                                        <!-- Mostrar motivo si está INACTIVO -->
+                                        <?php if ($product['estado'] == 'INACTIVO' && isset($reportesProductos[$product['id_producto']])): ?>
+                                            <button class="btn btn-info btn-motivo"
+                                                data-motivo="<?= htmlspecialchars($reportesProductos[$product['id_producto']]['comentarios']) ?>">
+                                                <i class="fa fa-info-circle"></i> Ver motivo
+                                            </button>
+                                        <?php endif; ?>
+
                                         <!-- Botón de edición - Solo para productos ACTIVOS o AGOTADOS -->
                                         <?php if ($product['estado'] != 'INACTIVO'): ?>
                                             <a href="#editProduct<?php echo $product['id_producto']; ?>"
@@ -298,13 +306,7 @@
                                         </a>
                                     <?php else: // Para administradores 
                                     ?>
-                                        <!-- Mostrar motivo si está INACTIVO -->
-                                        <?php if ($product['estado'] == 'INACTIVO' && isset($reportesProductos[$product['id_producto']])): ?>
-                                            <button class="btn btn-info btn-motivo"
-                                                data-motivo="<?= htmlspecialchars($reportesProductos[$product['id_producto']]['comentarios']) ?>">
-                                                <i class="fa fa-info-circle"></i> Ver motivo
-                                            </button>
-                                        <?php endif; ?>
+
 
                                         <!-- Botón para reactivar producto (solo admin) -->
                                         <?php if ($product['estado'] == 'INACTIVO'): ?>
@@ -479,6 +481,7 @@
                                 <span aria-hidden="true">&times;</span>
                             </button>
                             <h4 class="modal-title" id="helpModalTitle"><i class="fa fa-cubes mr-2"></i> Gestión de Productos</h4>
+
                         </div>
                         <div class="modal-body">
                             <p>Esta sección te permite administrar los productos disponibles en la plataforma de UPIICSA. La información y las acciones disponibles varían según tu rol:</p>
