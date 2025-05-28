@@ -475,10 +475,10 @@
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h4 class="modal-title" id="helpModalTitle"><i class="fa fa-cubes mr-2"></i> Gestión de Productos</h4>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
                                 <span aria-hidden="true">&times;</span>
                             </button>
+                            <h4 class="modal-title" id="helpModalTitle"><i class="fa fa-cubes mr-2"></i> Gestión de Productos</h4>
                         </div>
                         <div class="modal-body">
                             <p>Esta sección te permite administrar los productos disponibles en la plataforma de UPIICSA. La información y las acciones disponibles varían según tu rol:</p>

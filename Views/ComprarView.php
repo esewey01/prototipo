@@ -184,7 +184,7 @@
                             <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
                                 <span aria-hidden="true">&times;</span>
                             </button>
-                            <h4 class="modal-title" id="helpModalTitle">Informacion sobre la Tienda </h4>
+                            <h4 class="modal-title" id="helpModalTitle"><i class="icon_wallet" ></i> Informacion sobre la Tienda </h4>
 
                         </div>
                         <div class="modal-body">

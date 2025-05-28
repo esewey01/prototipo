@@ -1080,13 +1080,19 @@ class Conexion
     WHERE id_reporte = ?";
 
         $params = [
-            $id_reporte,
-            $accion_tomada,
-            $estado,
-            $comentarios
+            $accion_tomada, // Primer parámetro
+            $estado,       // Segundo parámetro
+            $comentarios,  // Tercer parámetro
+            $id_reporte    // Cuarto parámetro
         ];
 
         return $this->executeNonQuery($sql, $params);
+    }
+
+    public function eliminarReporte($id_reporte)
+    {
+        $sql = "DELETE FROM REPORTES WHERE id_reporte = ?";
+        return $this->executeNonQuery($sql, [$id_reporte]);
     }
 
     public function getDetalleReporte($idReporte, $tipoReporte = null)

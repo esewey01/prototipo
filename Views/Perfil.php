@@ -381,7 +381,7 @@ $id_rol = $_SESSION['usuario']['rol']['id_rol'];
                             <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
                                 <span aria-hidden="true">&times;</span>
                             </button>
-                            <h4 class="modal-title" id="editProfileModalTitle">Actualiza tu Perfil</h4>
+                            <h4 class="modal-title" id="editProfileModalTitle"> <i class="fa fa-user"></i> Actualiza tu Perfil</h4>
                             
                         </div>
                         <div class="modal-body">

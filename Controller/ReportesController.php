@@ -52,14 +52,10 @@ try {
         $mensaje = '';
 
         switch ($accion) {
-            case 'suspender_cuenta':
-                if ($reporte['id_usuario_reportado']) {
-                    $resultado = $db->suspenderUser($reporte['id_usuario_reportado']);
-                    $mensaje = 'Cuenta suspendida temporalmente';
-                    $db->actualizarReporte($id_reporte, 'SUSPENSIÓN DE CUENTA', 'RESUELTO', $mensaje);
-                    
-                    $db->registrarAccionReporte($id_reporte, $id_admin, 'SUSPENSIÓN', 'Cuenta suspendida por reporte');
-                }
+            case 'enviar_aviso':
+                $mensaje = 'Aviso enviado al usuario';
+                $resultado = $db->actualizarReporte($id_reporte, 'AVISO ENVIADO', 'PROCESADO', $mensaje, );
+                $db->registrarAccionReporte($id_reporte, $id_admin, 'AVISO', 'Aviso enviado al usuario');
                 break;
 
             case 'suspender_producto':
@@ -71,29 +67,25 @@ try {
                 }
                 break;
 
-            case 'enviar_aviso':
-                $mensaje = 'Aviso enviado al usuario';
-                $resultado = $db->actualizarReporte($id_reporte, 'AVISO ENVIADO', 'PENDIENTE', $mensaje);
-                if($resultado){
-                    console.log('Reporte Actualizado');
+            case 'suspender_cuenta':
+                if ($reporte['id_usuario_reportado']) {
+                    $resultado = $db->suspenderUser($reporte['id_usuario_reportado']);
+                    $mensaje = 'Cuenta suspendida temporalmente';
+                    $db->actualizarReporte($id_reporte, 'SUSPENSIÓN DE CUENTA', 'RESUELTO', $mensaje);
+                    $db->registrarAccionReporte($id_reporte, $id_admin, 'SUSPENSIÓN', 'Cuenta suspendida por reporte');
                 }
-                else {
-                    console.log('Reporte no actualizado');
-                }
-                $db->registrarAccionReporte($id_reporte, $id_admin, 'AVISO', 'Aviso enviado al usuario');
                 break;
 
-            case 'resolver':
+            case 'eliminar_reporte':
+                $mensaje = 'Reporte eliminado del sistema';
+                $resultado = $db->eliminarReporte($id_reporte); // Asegúrate de implementar esta función
+                $db->registrarAccionReporte($id_reporte, $id_admin, 'ELIMINACIÓN', 'Reporte eliminado del sistema');
+                break;
+
+            case 'marcar_resuelto':
                 $mensaje = 'Reporte marcado como resuelto';
                 $resultado = $db->actualizarReporte($id_reporte, 'RESUELTO MANUALMENTE', 'RESUELTO', $mensaje);
                 $db->registrarAccionReporte($id_reporte, $id_admin, 'RESOLUCIÓN', 'Reporte marcado como resuelto');
-                break;
-
-            case 'eliminar':
-                // Aquí deberías implementar la lógica para eliminar el reporte si es necesario
-                $mensaje = 'Reporte eliminado del sistema';
-                $resultado = true; // Cambiar por la función real de eliminación
-                $db->registrarAccionReporte($id_reporte, $id_admin, 'ELIMINACIÓN', 'Reporte eliminado del sistema');
                 break;
 
             default:
@@ -108,25 +100,22 @@ try {
         exit();
     }
 
+
     $reportes = $db->getReportes();
 
     foreach ($reportes as &$reporte) {
         $detalle_reporte  = $db->getDetalleReporte($reporte['id_reporte']);
     }
 
-    // reportes relacionados por prodcutos
     $reportesProductos = array_filter($reportes, function ($r) {
         return $r['tipo_reporte'] == 'PRODUCTO';
     });
-    // reportes relacionados hacia vendedores
     $reportesVendedores = array_filter($reportes, function ($r) {
         return $r['tipo_reporte'] == 'VENDEDOR';
     });
-    // reportes relacionados hacia usuarios
     $reportesUsuarios = array_filter($reportes, function ($r) {
         return $r['tipo_reporte'] == 'USUARIO';
     });
-    //reportes relacionados hacia ordenes de clientes
     $reportesOrdenes = array_filter($reportes, function ($r) {
         return $r['tipo_reporte'] == 'ORDEN';
     });

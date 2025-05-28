@@ -62,9 +62,7 @@
                         </span>
                     </td>
                     <td>
-                        <span class="badge bg-<?=
-                                                $reporte['estado'] == 'PENDIENTE' ? 'warning' : ($reporte['estado'] == 'RESUELTO' ? 'success' : 'danger')
-                                                ?>">
+                        <span class="badge bg-<?= $reporte['estado'] == 'PENDIENTE' ? 'warning' : ($reporte['estado'] == 'PROCESADO' ? 'success' : 'danger') ?>">
                             <?= $reporte['estado'] ?>
                         </span>
                     </td>

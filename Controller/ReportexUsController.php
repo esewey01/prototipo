@@ -78,7 +78,7 @@ try {
                 $_SESSION['usuario']['id_usuario'],
                 $motivo,
                 $comentarios,
-                "Reporte creado por usuario"
+                "PENDIENTE"
             );
 
             if(!$success) {

@@ -44,7 +44,7 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="title has-help" data-toggle="modal" data-target="#helpCarrito" style="cursor: pointer;">
-                        <h3 class="page-header"><i class="icon_cart"></i> Carrito de Compras</h3>
+                        <h3 class="page-header"><i class="fa fa-shopping-cart"></i> Carrito de Compras</h3>
                     </div>
 
                     <!--FUNCION DE ALERTA DE MENSAJES-->
