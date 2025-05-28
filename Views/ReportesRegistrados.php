@@ -187,7 +187,7 @@
                                     <h3 class="mb-3"><i class="fa fa-info-circle mr-2"></i> Información del Reporte</h3>
                                     <p><strong>Tipo de Reporte:</strong> <span id="reporte-tipo" class="font-weight-bold"></span></p>
                                     <p><strong>Motivo:</strong> <span id="reporte-motivo"></span></p>
-                                    <p><strong>Comentarios del Reportante:</strong> <span id="reporte-comentarios" class="text-muted"></span></p>
+                                    <p><strong>Comentarios del Reportante:</strong> <span id="reporte-comentarios"></span></p>
                                     <p><strong>Fecha de Reporte:</strong> <span id="reporte-fecha"></span></p>
                                     <p><strong>Estado Actual:</strong> <span id="reporte-estado" class="badge badge-info"></span></p>
                                     <p><strong>Última Acción Tomada:</strong> <span id="reporte-accion-tomada"></span></p>
@@ -233,20 +233,24 @@
                             <div class="form-inline">
                                 <label for="accionSeleccionada" class="mr-2 text-dark font-weight-bold">Tomar Acción:</label>
                                 <select class="form-control mr-2" id="accionSeleccionada">
-                                    <option value="">-- Selecciona una acción --</option>
-                                    <option value="enviar_aviso">Enviar un Aviso</option>
-                                    <option value="suspender_producto">Suspender Producto</option>
-                                    <option value="suspender_cuenta">Suspender Cuenta</option>
-                                    <option value="eliminar_reporte">Eliminar Reporte</option>
-                                    <option value="marcar_resuelto">Marcar como Resuelto</option>
+                                    <!-- Opciones se llenan dinámicamente con JavaScript -->
                                 </select>
-                                <button type="button" class="btn btn-primary" id="btn-aplicar-accion">Aplicar Acción</button>
+
+                            </div>
+                            <!-- Campo de comentarios -->
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="comentarios" class="text-dark font-weight-bold">Comentarios (Requerido):</label>
+                                    <textarea class="form-control" id="comentarios" rows="3" required></textarea>
+                                </div>
                             </div>
                             <div>
+                                <button type="button" class="btn btn-primary" id="btn-aplicar-accion">Aplicar Acción</button>
                                 <button type="button" class="btn btn-info mr-2" id="btn-descargar-pdf"><i class="fa fa-file-pdf mr-1"></i> Exportar a PDF</button>
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -382,10 +386,15 @@
             $('#btn-aplicar-accion').click(function() {
                 const idReporte = $('#reporte-id-modal').text(); // Obtener el ID del reporte desde el modal
                 const accion = $('#accionSeleccionada').val();
-                const comentarios = prompt("Ingrese comentarios adicionales para esta acción (opcional):");
+                const comentarios = $('#comentarios').val();
+
 
                 if (!accion) {
                     alert('Por favor selecciona una acción');
+                    return;
+                }
+                if (!comentarios.trim()) {
+                    alert('Por favor ingrese un comentario');
                     return;
                 }
 
@@ -434,6 +443,110 @@
             // Esta función ahora es redundante si usas el $('#btn-descargar-pdf').click()
             // Pero la mantengo por si hay alguna llamada residual en otro lugar
             window.open('ReportesController.php?action=generarPdfReporte&id=' + idReporte, '_blank');
+        }
+        // Función para cargar detalles del reporte y personalizar opciones de acción
+        function verDetalleReporte(idReporte, tipoReporte) {
+            // Limpiar contenido previo y ocultar secciones
+            $('#detalleReporteContent').empty();
+            $('#detalle-producto-seccion').hide();
+            $('#detalle-usuario-seccion').hide();
+            $('#detalle-orden-seccion').hide();
+            $('#historial-reporte-content').html('<p class="text-muted">Cargando historial...</p>');
+            $('#reporte-id-modal').text(''); // Limpiar el ID en el título del modal
+
+            $.ajax({
+                url: 'ReportesController.php',
+                type: 'GET',
+                data: {
+                    action: 'getDetalleReporte',
+                    id: idReporte,
+                    tipo: tipoReporte
+                },
+                dataType: 'json', // Es crucial especificar que esperas JSON
+                success: function(response) {
+                    if (response.success) {
+                        const reporte = response.reporte;
+                        const producto = response.producto;
+                        const usuario = response.usuario;
+                        const orden = response.orden;
+                        const historial = response.historial;
+
+                        // Rellenar información del reporte
+                        $('#reporte-id-modal').text(reporte.id_reporte);
+                        $('#reporte-tipo').text(reporte.tipo_reporte || 'N/A');
+                        $('#reporte-motivo').text(reporte.motivo || 'N/A');
+                        $('#reporte-fecha').text(reporte.fecha_reporte || 'N/A');
+                        $('#reporte-estado').text(reporte.estado || 'N/A');
+                        $('#reporte-accion-tomada').text(reporte.accion_tomada || 'N/A');
+                        $('#reporte-comentarios').text(reporte.comentarios || 'N/A');
+                        $('#reporte-administrador').text((reporte.nombre_administrador || '') + ' ' + (reporte.apellido_administrador || ''));
+
+                        // Mostrar información específica según el tipo de reporte
+                        if (reporte.tipo_reporte === 'PRODUCTO' && producto) {
+                            $('#detalle-producto-seccion').show();
+                            $('#producto-nombre').text(producto.nombre_producto || 'N/A');
+                            $('#producto-descripcion').text(producto.descripcion || 'N/A');
+                            $('#producto-precio').text(parseFloat(producto.precio || 0).toFixed(2));
+                            $('#producto-stock').text(producto.stock || 'N/A');
+                            $('#producto-vendedor').text((producto.vendedor_nombre || '') + ' ' + (producto.vendedor_apellido || ''));
+                            $('#producto-imagen').attr('src', '../Public/img/' + (producto.imagen || 'default.jpg')); // Asegúrate de tener una imagen por defecto
+                        } else if ((reporte.tipo_reporte === 'VENDEDOR' || reporte.tipo_reporte === 'USUARIO') && usuario) {
+                            $('#detalle-usuario-seccion').show();
+                            $('#usuario-login').text(usuario.login || 'N/A');
+                            $('#usuario-nombre').text((usuario.nombre || '') + ' ' + (usuario.apellido || ''));
+                            $('#usuario-email').text(usuario.email || 'N/A');
+                            $('#usuario-telefono').text(usuario.telefono || 'N/A');
+                            $('#usuario-rol').text(usuario.nombre_rol || 'N/A');
+                        } else if (reporte.tipo_reporte === 'ORDEN' && orden) {
+                            $('#detalle-orden-seccion').show();
+                            $('#orden-id').text(orden.id_orden || 'N/A');
+                            $('#orden-cliente').text((orden.cliente_nombre || '') + ' ' + (orden.cliente_apellido || ''));
+                            $('#orden-fecha').text(orden.fecha_orden ? new Date(orden.fecha_orden).toLocaleString() : 'N/A');
+                            $('#orden-total').text(parseFloat(orden.total || 0).toFixed(2));
+                            $('#orden-estado').text(orden.estado || 'N/A');
+                        }
+
+                        // Personalizar opciones de acción según el tipo de reporte
+                        let opciones = '<option value="">-- Selecciona una acción --</option>';
+                        opciones += '<option value="enviar_aviso">Enviar un Aviso</option>';
+                        if (reporte.tipo_reporte === 'PRODUCTO') {
+                            opciones += '<option value="suspender_producto">Suspender Producto</option>';
+                        }
+                        if (reporte.tipo_reporte === 'VENDEDOR' || reporte.tipo_reporte === 'USUARIO') {
+                            opciones += '<option value="suspender_cuenta">Suspender Cuenta</option>';
+                        }
+                        opciones += '<option value="eliminar_reporte">Eliminar Reporte</option>';
+                        opciones += '<option value="marcar_resuelto">Marcar como Resuelto</option>';
+
+                        $('#accionSeleccionada').html(opciones);
+
+                        // Cargar historial de acciones
+                        let historialHtml = '';
+                        if (historial && historial.length > 0) {
+                            historialHtml += '<table class="table table-bordered table-striped table-sm"><thead><tr><th>Fecha</th><th>Acción</th><th>Comentarios</th><th>Administrador</th></tr></thead><tbody>';
+                            historial.forEach(function(h) {
+                                historialHtml += `<tr>
+                            <td>${h.fecha_accion ? new Date(h.fecha_accion).toLocaleString() : 'N/A'}</td>
+                            <td>${h.accion_tomada || 'N/A'}</td>
+                            <td>${h.comentarios || 'N/A'}</td>
+                            <td>${(h.nombre_administrador || '') + ' ' + (h.apellido_administrador || '')}</td>
+                        </tr>`;
+                            });
+                            historialHtml += '</tbody></table>';
+                        } else {
+                            historialHtml = '<p class="text-muted">No hay historial de acciones para este reporte.</p>';
+                        }
+                        $('#historial-reporte-content').html(historialHtml);
+
+                        $('#detalleReporteModal').modal('show');
+                    } else {
+                        alert('Error al cargar detalles del reporte: ' + (response.message || 'Error desconocido'));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert('Error al cargar detalles del reporte: ' + error);
+                }
+            });
         }
     </script>
 </body>
