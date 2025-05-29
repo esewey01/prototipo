@@ -84,103 +84,126 @@
             </section>
         </section>
 
-        <!-- Modal Detalle del Cliente -->
-        <div class="modal fade" id="clienteDetalleModal" tabindex="-1" role="dialog" aria-labelledby="clienteDetalleModalLabel">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                        <h3 class="modal-title" id="clienteDetalleModalLabel">Información del Cliente</h3>
-                    </div>
-                    <div class="modal-body">
-                        <div class="text-center py-5" id="loadingCliente">
-                            <i class="fa fa-spinner fa-spin fa-3x"></i>
-                            <p>Cargando información del cliente...</p>
-                        </div>
-                        <div id="clienteContent" style="display: none;">
-                            <div class="row">
-                                <div class="col-md-4 text-center">
-                                    <img id="clienteFoto" src="" class="img-thumbnail" style="width: 150px; height: 150px;">
-                                    <p id="clienteLogin" class="text-muted"></p>
-                                </div>
-                                <div class="col-md-8">
-                                    <div class="panel panel-default">
-                                        <div class="panel-heading">
-                                            <i class="fa fa-info-circle"></i> Información de contacto
-                                        </div>
-                                        <div class="panel-body">
-                                            <p><strong><i class="icon_paperclip"></i> Nombre: </strong> <span id="clienteNombre"></span></p>
-                                            <p><strong><i class="icon_paperclip"></i> Nacimiento: </strong> <span id="clienteFechaNacimiento"></span></p>
-                                            <p><strong><i class="icon_paperclip"></i> Genero: </strong> <span id="clienteGenero"></span></p>
-                                            <p><strong><i class="fa fa-envelope"></i> Email:</strong> <span id="clienteEmail"></span></p>
-                                            <p><strong><i class="fa fa-phone"></i> Teléfono:</strong> <span id="clienteTelefono"></span></p>
-                                            <p><strong><i class="fa fa-map-marker"></i> Dirección:</strong> <span id="clienteDireccion"></span></p>
-                                        </div>
-                                    </div>
-                                    <div class="panel panel-default">
-                                        <div class="panel-heading">
-                                            <i class="fa fa-share-alt"></i> Redes sociales
-                                        </div>
-                                        <div class="panel-body" id="clienteRedes">
-                                            <!-- Las redes sociales se cargarán aquí -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <?php include("LibraryJs.php"); ?>
+        <?php include("../Views/UsuarioDetalleModal.php"); ?>
         <script>
             function verDetalleCliente(idCliente) {
-                $('#loadingCliente').show();
-                $('#clienteContent').hide();
+                console.log('ID Cliente:', idCliente);
+                const modal = $('#usuarioDetalleModal');
+                var URL_VIEWS = '<?= URL_VIEWS ?>';
 
+                // Mostrar loading
+                modal.find('#loadingCliente').show();
+                modal.find('#clienteContent').hide();
+                modal.modal('show');
+
+                // Obtener datos del cliente vía AJAX
                 $.ajax({
-                    url: 'ClientesController.php',
+                    url: 'UsuarioController.php?action=detalle&id=' + idCliente,
                     type: 'GET',
-                    data: {
-                        action: 'getDetalleCliente',
-                        id: idCliente
-                    },
                     dataType: 'json',
                     success: function(response) {
+                        console.log('Respuesta Success:', response);
+
                         if (response.success) {
-                            const cliente = response.cliente;
+                            const usuario = response.data.usuario;
+                            const redes = response.data.redes;
 
-                            $('#clienteFoto').attr('src', '../Public/img/' + (cliente.imagen || 'default.jpg'));
-                            $('#clienteLogin').text(cliente.login || 'N/A');
-                            $('#clienteNombre').text(cliente.nombre || 'N/A');
-                            $('#clienteFechaNacimiento').text(cliente.fecha_nacimiento || 'N/A');
-                            $('#clienteGenero').text(cliente.genero || 'N/A');
-                            $('#clienteEmail').text(cliente.email || 'N/A');
-                            $('#clienteTelefono').text(cliente.telefono || 'N/A');
-                            $('#clienteDireccion').text(cliente.direccion || 'N/A');
+                           //información básica
+                            $('#usuarioFoto').attr('src', URL_VIEWS + (usuario.foto_perfil || 'fotoproducto/user.png'));
+                            $('#usuarioNombre').text(usuario.nombre + (usuario.apellido ? ' ' + usuario.apellido : ''));
+                            $('#usuarioLogin').text('@' + usuario.login);
+                            $('#usuarioFechaNacimiento').text(usuario.fecha_nacimiento);
+                            const genero = usuario.genero;
+                            const mapeoGenero = {
+                                'M': 'Masculino',
+                                'F': 'Femenino'
+                            };
 
-                            $('#clienteContent').show();
-                            $('#loadingCliente').hide();
+                            $('#usuarioGenero').text(mapeoGenero[genero] || 'No definido');
+                            $('#usuarioEmail').text(usuario.email || 'No proporcionado');
+                            $('#usuarioTelefono').text(usuario.telefono || 'No proporcionado');
+                            $('#usuarioDireccion').text(usuario.direccion || 'No proporcionada');
+
+                            //FUNCION PARA WHASTAPP
+                            const telefono = usuario.telefono;
+                            const telefonoLimpio = telefono ? telefono.replace(/\D/g, '') : null; // Elimina caracteres no numéricos
+                            const enlaceWhatsApp = telefonoLimpio ? `https://wa.me/${telefonoLimpio}` : null;
+
+                            const telefonoElemento = $('#usuarioTelefono');
+
+                            if (enlaceWhatsApp) {
+                                telefonoElemento.html(`<a href="${enlaceWhatsApp}" target="_blank">${telefono} <i class="icon_link_alt"></i></a>`);
+                            } else {
+                                telefonoElemento.text(telefono || 'No proporcionado');
+                            }
+                            // Actualizar redes sociales
+                            let redesHtml = '';
+                            if (response.data.redes && response.data.redes.length > 0) {
+                                const redesObjeto = response.data.redes[0]; // Accedemos al primer (y único) objeto dentro del array
+
+                                if (redesObjeto.facebook) {
+                                    redesHtml += `
+                                <a href="${redesObjeto.facebook}" target="_blank" class="btn btn-sm btn-default">
+                                    <i class="fa fa-facebook"></i> Facebook
+                                </a> `;
+                                }
+                                if (redesObjeto.instagram) {
+                                    redesHtml += `
+                                <a href="${redesObjeto.instagram}" target="_blank" class="btn btn-sm btn-default">
+                                    <i class="fa fa-instagram"></i> Instagram
+                                </a> `;
+                                }
+                                if (redesObjeto.linkedin) {
+                                    redesHtml += `
+                                <a href="${redesObjeto.linkedin}" target="_blank" class="btn btn-sm btn-default">
+                                    <i class="fa fa-linkedin"></i> LinkedIn
+                                </a> `;
+                                }
+                                if (redesObjeto.twitter) {
+                                    redesHtml += `
+                                <a href="${redesObjeto.twitter}" target="_blank" class="btn btn-sm btn-default">
+                                    <i class="fa fa-twitter"></i> Twitter
+                                </a> `;
+                                }
+
+                                if (redesHtml === '') {
+                                    redesHtml = '<p class="text-muted">El usuario no ha agregado redes sociales</p>';
+                                }
+                            } else {
+                                redesHtml = '<p class="text-muted">El usuario no ha agregado redes sociales</p>';
+                            }
+                            $('#usuarioRedes').html(redesHtml);
+
+                            // Mostrar contenido
+                            $('#loadingUsuario').hide();
+                            $('#usuarioContent').show();
                         } else {
-                            alert('Error al cargar detalles del cliente: ' + (response.message || 'Error desconocido'));
+                            modal.find('.modal-body').html(`
+                    <div class="alert alert-danger">
+                        ${response.message || 'Error al cargar la información del cliente'}
+                    </div>
+                `);
                         }
                     },
-                    error: function(xhr, status, error) {
-                        alert('Error al cargar detalles del cliente: ' + error);
+                    error: function(xhr) {
+                        console.log('Error AJAX:', xhr);
+                        modal.find('.modal-body').html(`
+                <div class="alert alert-danger">
+                    Error en la conexión: ${xhr.statusText}
+                </div>
+            `);
                     }
                 });
             }
+
             $(document).ready(function() {
                 $('#clienteDetalleModal').on('show.bs.modal', function() {
                     $('#loadingCliente').show();
                     $('#clienteContent').hide();
                 });
-            }); 
+            });
         </script>
     </section>
+</body>
+</html>

@@ -2,18 +2,21 @@
 require_once('../Model/Conexion.php');
 require('Constants.php');
 
-class UsuarioController {
+class UsuarioController
+{
     private $conexion;
     private $urlViews;
-    
-    public function __construct() {
+
+    public function __construct()
+    {
         $this->conexion = new Conexion();
-        $this->urlViews=URL_VIEWS;
+        $this->urlViews = URL_VIEWS;
     }
-    
-    public function handleRequest() {
+
+    public function handleRequest()
+    {
         $action = $_GET['action'] ?? 'detalle';
-        
+
         switch ($action) {
             case 'detalle':
                 $this->handleDetalleUsuario();
@@ -25,8 +28,9 @@ class UsuarioController {
                 ], 400);
         }
     }
-    
-    private function handleDetalleUsuario() {
+
+    private function handleDetalleUsuario()
+    {
         if (!isset($_GET['id'])) {
             $this->sendJsonResponse([
                 'success' => false,
@@ -34,10 +38,14 @@ class UsuarioController {
             ], 400);
             return;
         }
-        
+
         $id_usuario = $_GET['id'];
         $usuario = $this->conexion->getUserById($id_usuario);
         
+        if (isset($usuario['fecha_nacimiento']) && $usuario['fecha_nacimiento'] instanceof DateTime) {
+            $usuario['fecha_nacimiento'] = $usuario['fecha_nacimiento']->format('Y-m-d');
+        }
+
         if (!$usuario) {
             $this->sendJsonResponse([
                 'success' => false,
@@ -45,10 +53,10 @@ class UsuarioController {
             ], 404);
             return;
         }
-        
+
         // Obtener redes sociales del usuario
         $redes = $this->conexion->getSocialNetworks($id_usuario);
-        
+
         if (!$redes) {
             $this->sendJsonResponse([
                 'success' => false,
@@ -59,13 +67,15 @@ class UsuarioController {
         $this->sendJsonResponse([
             'success' => true,
             'data' => [
+              
                 'usuario' => $usuario,
                 'redes' => $redes
             ]
         ]);
     }
-    
-    private function sendJsonResponse($data, $statusCode = 200) {
+
+    private function sendJsonResponse($data, $statusCode = 200)
+    {
         header('Content-Type: application/json');
         http_response_code($statusCode);
         echo json_encode($data);

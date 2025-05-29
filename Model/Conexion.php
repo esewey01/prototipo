@@ -1658,6 +1658,36 @@ class Conexion
         $stmt = $this->executeQuery($sql, [$id_orden]);
         return $this->getResults($stmt);
     }
+
+    //FUNCIONES DE CLIENTESCONTROLLER
+    public function getClientesPorVendedor($id_vendedor){
+        $sql = "SELECT DISTINCT u.id_usuario, u.nombre, u.email, u.telefono
+            FROM ORDENES o
+            JOIN USUARIOS u ON o.id_usuario = u.id_usuario
+            WHERE o.id_vendedor = ? AND o.estado = 'PAGADO'";
+
+        $stmt =$this ->executeQuery($sql, [$id_vendedor]);
+        return $this ->getResults($stmt);
+    }
+
+    public function getDetalleCliente($id_cliente) {
+    $sql = "SELECT u.id_usuario, u.login, u.nombre, u.fecha_nacimiento, 
+                   u.genero, u.email, u.telefono, u.direccion, u.foto_perfil
+            FROM USUARIOS u
+            WHERE u.id_usuario = ?";
+    
+    $stmt = $this->executeQuery($sql, [$id_cliente]);
+    $cliente = $this->getResults($stmt)[0] ?? null;
+    
+    if ($cliente) {
+        // Obtener redes sociales
+        $redes = $this->getSocialNetworks($id_cliente);
+        $cliente['redes'] = $redes[0] ?? []; // getSocialNetworks devuelve un array de arrays
+    }
+    
+    return $cliente;
+}
+
 }
 
 

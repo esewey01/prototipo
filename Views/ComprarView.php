@@ -328,7 +328,7 @@
                             const usuario = response.data.usuario;
                             const redes = response.data.redes;
 
-                            // Actualizar información básica
+                            // información básica
                             $('#usuarioFoto').attr('src', URL_VIEWS + (usuario.foto_perfil || 'fotoproducto/user.png'));
                             $('#usuarioNombre').text(usuario.nombre + (usuario.apellido ? ' ' + usuario.apellido : ''));
                             $('#usuarioLogin').text('@' + usuario.login);
