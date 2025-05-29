@@ -102,10 +102,10 @@
                                     <a class="nav-link <?= ($_GET['estado'] ?? '') == 'PAGADO' ? 'active' : '' ?>"
                                         href="HistorialController.php?estado=PAGADO">Pagados</a>
                                 </li>
-                                <li class="nav-item">
+                                <!--li class="nav-item">
                                     <a class="nav-link <?= ($_GET['estado'] ?? '') == 'ENTREGADO' ? 'active' : '' ?>"
                                         href="HistorialController.php?estado=ENTREGADO">Entregados</a>
-                                </li>
+                                </li-->
                                 <li class="nav-item">
                                     <a class="nav-link <?= ($_GET['estado'] ?? '') == 'CANCELADO' ? 'active' : '' ?>"
                                         href="HistorialController.php?estado=CANCELADO">Cancelados</a>
@@ -116,7 +116,7 @@
                                 <?php if (empty($ordenes)): ?>
                                     <div class="alert alert-info text-center">
                                         <i class="fa fa-info-circle fa-2x"></i><br>
-                                        No se encontraron órdenes en este estado.
+                                        No se han encontrado compras procesadas en tu historial.
                                     </div>
                                 <?php else: ?>
                                     <div class="table-responsive">
@@ -192,7 +192,7 @@
                         <ul>
                             <li><strong>Pendientes:</strong> Estos son los pedidos que aún no han sido confirmados o que esperan una acción de tu parte, como el pago. Te recomendamos revisar estos pedidos periódicamente para asegurarte de que se completen a tiempo.</li>
                             <li><strong>Pagados:</strong> Estos son los pedidos que ya has pagado exitosamente y que están en proceso de preparación o envío por parte del vendedor.</li>
-                            <li><strong>Entregados:</strong> Aquí encontrarás los pedidos que han sido recibidos satisfactoriamente. ¡Disfruta de tus productos!</li>
+                            <!--li><strong>Entregados:</strong> Aquí encontrarás los pedidos que han sido recibidos satisfactoriamente. ¡Disfruta de tus productos!</li-->
                             <li><strong>Cancelados:</strong> Revisa los pedidos que han sido anulados, ya sea por ti o por el vendedor. Si tienes dudas sobre una cancelación, puedes contactar a soporte.</li>
                         </ul>
 

@@ -27,6 +27,7 @@
             <?php foreach ($reportes as $reporte): ?>
                 <tr>
                     <td><?= $reporte['id_reporte'] ?></td>
+                    
                     <td><?= $reporte['fecha_reporte']->format('d/m/Y H:i') ?></td>
 
                     <?php if ($tipo_reporte == 'ORDEN'): ?>

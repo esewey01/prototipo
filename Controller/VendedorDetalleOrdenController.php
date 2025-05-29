@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once('../Model/Conexion.php');
+require('Constants.php');
 
 try {
     if (!isset($_SESSION['usuario'])) {

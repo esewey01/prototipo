@@ -24,6 +24,10 @@ try {
 
         $detalle = $db->getDetalleReporte($id_reporte, $tipo_reporte);
         $historial = $db->getHistorialReporte($id_reporte);
+        if (isset($detalle['reporte']['fecha_reporte']) && $detalle['reporte']['fecha_reporte'] instanceof DateTime) {
+            $detalle['reporte']['fecha_reporte'] = $detalle['reporte']['fecha_reporte']->format('Y-m-d H:i:s');
+        }
+
 
         header('Content-Type: application/json');
         echo json_encode([
@@ -55,7 +59,7 @@ try {
         switch ($accion) {
             case 'enviar_aviso':
                 //$mensaje = 'Aviso enviado al usuario';
-                $resultado = $db->actualizarReporte($id_reporte, 'AVISO ENVIADO', 'PROCESADO', $comentarios, );
+                $resultado = $db->actualizarReporte($id_reporte, 'AVISO ENVIADO', 'PROCESADO', $comentarios,);
                 $db->registrarAccionReporte($id_reporte, $id_admin, 'AVISO', 'Aviso enviado al usuario');
                 break;
 
@@ -64,7 +68,7 @@ try {
                     $resultado = $db->desactivarProd($reporte['id_producto']);
                     if ($resultado) {
                         $mensaje = 'Producto suspendido temporalmente';
-                        $db->actualizarReporte($id_reporte, 'SUSPENSIÓN DE PRODUCTO', 'RESUELTO', $mensaje);
+                        $db->actualizarReporte($id_reporte, 'SUSPENSIÓN DE PRODUCTO', 'PROCESADO', $mensaje);
                         $db->registrarAccionReporte($id_reporte, $id_admin, 'SUSPENSIÓN', 'Producto suspendido por reporte');
                     } else {
                         throw new Exception("No se pudo suspender el producto");
@@ -79,7 +83,7 @@ try {
                 if ($reporte['id_usuario_reportado']) {
                     $resultado = $db->suspenderUser($reporte['id_usuario_reportado']);
                     $mensaje = 'Cuenta suspendida temporalmente';
-                    $db->actualizarReporte($id_reporte, 'SUSPENSIÓN DE CUENTA', 'RESUELTO', $mensaje);
+                    $db->actualizarReporte($id_reporte, 'SUSPENSIÓN DE CUENTA', 'PROCESADO', $mensaje);
                     $db->registrarAccionReporte($id_reporte, $id_admin, 'SUSPENSIÓN', 'Cuenta suspendida por reporte');
                 }
                 break;
@@ -92,7 +96,7 @@ try {
 
             case 'marcar_resuelto':
                 $mensaje = 'Reporte marcado como resuelto';
-                $resultado = $db->actualizarReporte($id_reporte, 'RESUELTO MANUALMENTE', 'RESUELTO', $mensaje);
+                $resultado = $db->actualizarReporte($id_reporte, 'RESUELTO MANUALMENTE', 'PROCESADO', $mensaje);
                 $db->registrarAccionReporte($id_reporte, $id_admin, 'RESOLUCIÓN', 'Reporte marcado como resuelto');
                 break;
 
@@ -111,21 +115,25 @@ try {
 
     $reportes = $db->getReportes();
 
+    /*
     foreach ($reportes as &$reporte) {
         $detalle_reporte  = $db->getDetalleReporte($reporte['id_reporte']);
     }
-
+*/
     $reportesProductos = array_filter($reportes, function ($r) {
-        return $r['tipo_reporte'] == 'PRODUCTO';
+        return $r['tipo_reporte'] == 'PRODUCTO' && $r['estado'] == 'PENDIENTE';
     });
     $reportesVendedores = array_filter($reportes, function ($r) {
-        return $r['tipo_reporte'] == 'VENDEDOR';
+        return $r['tipo_reporte'] == 'VENDEDOR' && $r['estado'] == 'PENDIENTE';
     });
     $reportesUsuarios = array_filter($reportes, function ($r) {
-        return $r['tipo_reporte'] == 'USUARIO';
+        return $r['tipo_reporte'] == 'USUARIO' && $r['estado'] == 'PENDIENTE';
     });
     $reportesOrdenes = array_filter($reportes, function ($r) {
-        return $r['tipo_reporte'] == 'ORDEN';
+        return $r['tipo_reporte'] == 'ORDEN' && $r['estado'] == 'PENDIENTE';
+    });
+    $reportesProcesados = array_filter($reportes, function ($r) {
+        return in_array($r['estado'], ['PROCESADO', 'RESUELTO']);
     });
 
     $data = [
@@ -133,6 +141,7 @@ try {
         'reportesVendedores' => $reportesVendedores,
         'reportesUsuarios' => $reportesUsuarios,
         'reportesOrdenes' => $reportesOrdenes,
+        'reportesProcesados' => $reportesProcesados,
         'usuario' => $_SESSION['usuario']['login']
     ];
 

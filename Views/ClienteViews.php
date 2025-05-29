@@ -1,389 +1,186 @@
 <!DOCTYPE html>
-<html lang="en">
-<?php
-include('Head.php');
-?>
+<html lang="es">
+<?php include('Head.php'); ?>
+
 <body>
-<section id="container" class="">
-    <header class="header dark-bg">
-        <div class="toggle-nav">
-            <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"><i
-                        class="icon_menu"></i></div>
-        </div>
-        <?PHP include("Logo.php") ?>
-        <div class="nav search-row" id="top_menu">
-            <!--  search form start -->
-            <ul class="nav top-menu">
-                <li>
-                    <form class="navbar-form">
-                        <!--                              <input class="form-control" placeholder="Search" type="text">-->
-                    </form>
-                </li>
-            </ul>
-            <!--  search form end -->
-        </div>
-        <?PHP include("DropDown.php"); ?>
-    </header>
-    <?PHP include("Menu.php") ?>
-
-</section>
-
-<!--sidebar end-->
-<!--main content start-->
-<section id="main-content">
-    <section class="wrapper">
-        <!--overview start-->
-        <div class="row">
-            <div class="col-lg-12">
-                <h3 class="page-header"><i class="fa fa-laptop"></i> PRINCIPAL</h3>
-                <div class="<?PHP echo $alerta; ?>" role="alert">
-                    <strong><?PHP echo $mensaje; ?></strong>
+    <section id="container">
+        <!-- Header -->
+        <header class="header dark-bg">
+            <div class="toggle-nav">
+                <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom">
+                    <i class="icon_menu"></i>
                 </div>
-
-                <ol class="breadcrumb">
-                    <li><i class="fa fa-home"></i><a
-                                href="principal.php?usuario=<?php echo $usuario; ?> &password=<?php echo $password; ?>">Inicio</a>
-                    </li>
-                </ol>
             </div>
-        </div>
+            <?php include("Logo.php") ?>
+            <div class="nav search-row" id="top_menu">
+                <ul class="nav top-menu">
+                    <li>
+                        <form class="navbar-form">
+                            <!-- Busqueda si es necesaria -->
+                        </form>
+                    </li>
+                </ul>
+            </div>
+            <?php include("DropDown.php"); ?>
+        </header>
 
-        <!---->
-        <!--        <div class="row">-->
-        <!--            <div class="col-lg-12">-->
-        <!--                <div class="row">-->
-        <!--                    <section class="panel">-->
+        <!-- Menú Principal -->
+        <?php include("Menu.php") ?>
 
-
-        <header class="panel-heading"> Lista de clientes del sistema</header>
-        <header class="panel-heading">
-            <div class="panel-body">
-                <div align="right">
-                    <button href="#addCliente" title="" data-placement="left" data-toggle="modal"
-                            class="btn btn-primary tooltips" type="button"
-                            data-original-title="Nuevo Usuario">
-                        <span class="fa fa-plus"> </span>
-                        AGREGAR NUEVO CLIENTE
-                    </button>
+        <!-- Contenido Principal -->
+        <section id="main-content">
+            <section class="wrapper">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h3 class="page-header"><i class="fa fa-users"></i> CLIENTES DEL VENDEDOR</h3>
+                        <ol class="breadcrumb">
+                            <li>
+                                <i class="fa fa-home"></i><a href="principal.php">Inicio</a>
+                            </li>
+                            <li>
+                                <i class="fa fa-users"></i><a href="#">Clientes del Vendedor</a>
+                            </li>
+                        </ol>
+                    </div>
                 </div>
 
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3>Clientes del Vendedor</h3>
+                            </div>
+                            <div class="panel-body">
+                                <table class="table table-striped table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID Cliente</th>
+                                            <th>Nombre</th>
+                                            <th>Email</th>
+                                            <th>Teléfono</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($clientes as $cliente): ?>
+                                            <tr>
+                                                <td><?= $cliente['id_usuario'] ?></td>
+                                                <td><?= htmlspecialchars($cliente['nombre']) ?></td>
+                                                <td><?= htmlspecialchars($cliente['email']) ?></td>
+                                                <td><?= htmlspecialchars($cliente['telefono']) ?></td>
+                                                <td>
+                                                    <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#clienteDetalleModal" onclick="verDetalleCliente(<?= $cliente['id_usuario'] ?>)">
+                                                        <i class="fa fa-eye"></i> Ver Detalle
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>
 
-                <div id="addCliente" class="modal fade" tabindex="-1" role="dialog"
-                     aria-labelledby="myModalLabel"
-                     aria-hidden="true">
-                    <form class="form-validate form-horizontal" name="form2"
-                          action="RegistroCliente.php"
-                          method="post"
-                          enctype="multipart/form-data">
-                        <input name="usuarioLogin" value="<?php echo $usuario; ?>" type="hidden">
-                        <input name="passwordLogin" value="<?php echo $password; ?>" type="hidden">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal"
-                                            aria-hidden="true">×
-                                    </button>
-                                    <h3 id="myModalLabel" align="center">Registrar Informacion del
-                                        Cliente</h3>
+        <!-- Modal Detalle del Cliente -->
+        <div class="modal fade" id="clienteDetalleModal" tabindex="-1" role="dialog" aria-labelledby="clienteDetalleModalLabel">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h3 class="modal-title" id="clienteDetalleModalLabel">Información del Cliente</h3>
+                    </div>
+                    <div class="modal-body">
+                        <div class="text-center py-5" id="loadingCliente">
+                            <i class="fa fa-spinner fa-spin fa-3x"></i>
+                            <p>Cargando información del cliente...</p>
+                        </div>
+                        <div id="clienteContent" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-4 text-center">
+                                    <img id="clienteFoto" src="" class="img-thumbnail" style="width: 150px; height: 150px;">
+                                    <p id="clienteLogin" class="text-muted"></p>
                                 </div>
-                                <div class="modal-body">
-                                    <div class="row">
-                                        <div class="col-lg-4">
-                                            <div><strong>Agregar Imagen</strong></div>
-                                            <br>
-                                            <?php
-                                            include("UploadViewImageCreate.php");
-                                            ?>
+                                <div class="col-md-8">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <i class="fa fa-info-circle"></i> Información de contacto
                                         </div>
-                                        <div class="col-lg-8">
-                                            <br><br><br><br>
-                                            <label for="nombre"
-                                                   class="control-label col-lg-3">Nombre:</label>
-                                            <div class="col-lg-9">
-                                                <input class="form-control input-lg m-bot15" id="nombre"
-                                                       name="nombre" minlength="5" type="text"
-                                                       required/>
-                                            </div>
-                                            <br><br>
-
-                                            <label for="apellido" class="control-label col-lg-3">Apellido:</label>
-                                            <div class="col-lg-9">
-                                                <input class="form-control input-lg m-bot15"
-                                                       id="apellido"
-                                                       name="apellido" minlength="5" type="text"
-                                                       required/>
-                                            </div>
-                                            <br><br>
-
-                                            <label for="ci" class="control-label col-lg-3">CI:</label>
-                                            <div class="col-lg-9">
-                                                <input class="form-control input-lg m-bot15" id="ci"
-                                                       name="ci"
-                                                       minlength="5" type="text" required/>
-                                            </div>
-                                            <br><br>
-
-                                            <label for="direccion" class="control-label col-lg-3">Direccion:</label>
-                                            <div class="col-lg-9">
-                                                <input class="form-control input-lg m-bot15"
-                                                       id="direccion"
-                                                       name="direccion" minlength="5" type="text"
-                                                       required/>
-                                            </div>
-                                            <br><br>
-
-                                            <label for="telefonoFijo"
-                                                   class="control-label col-lg-3">Telefono:</label>
-                                            <div class="col-lg-9">
-                                                <input class="form-control input-lg m-bot15"
-                                                       id="telefonoFijo"
-                                                       name="telefonoFijo" minlength="5" type="text"
-                                                       required/>
-                                            </div>
-                                            <br><br>
-
-                                            <label for="telefonoCelular"
-                                                   class="control-label col-lg-3">Celular:</label>
-                                            <div class="col-lg-9">
-                                                <input class="form-control input-lg m-bot15"
-                                                       id="telefonoCelular"
-                                                       name="telefonoCelular" minlength="5" type="text"
-                                                       required/>
-                                            </div>
-                                            <br><br>
-
-                                            <label for="email"
-                                                   class="control-label col-lg-3">Email:</label>
-                                            <div class="col-lg-9">
-                                                <input class="form-control input-lg m-bot15" id="email"
-                                                       name="email"
-                                                       minlength="5" type="text" required/>
-                                            </div>
-                                            <br><br>
-
-                                            <label for="fechaRegistro" class="control-label col-lg-3">Fecha:</label>
-                                            <div class="col-lg-9">
-                                                <input class="form-control input-lg m-bot15" type="date"
-                                                       readonly
-                                                       name="fechaRegistro" autocomplete="off"
-                                                       value="<?php echo date('Y-m-d'); ?>">
-                                            </div>
+                                        <div class="panel-body">
+                                            <p><strong><i class="icon_paperclip"></i> Nombre: </strong> <span id="clienteNombre"></span></p>
+                                            <p><strong><i class="icon_paperclip"></i> Nacimiento: </strong> <span id="clienteFechaNacimiento"></span></p>
+                                            <p><strong><i class="icon_paperclip"></i> Genero: </strong> <span id="clienteGenero"></span></p>
+                                            <p><strong><i class="fa fa-envelope"></i> Email:</strong> <span id="clienteEmail"></span></p>
+                                            <p><strong><i class="fa fa-phone"></i> Teléfono:</strong> <span id="clienteTelefono"></span></p>
+                                            <p><strong><i class="fa fa-map-marker"></i> Dirección:</strong> <span id="clienteDireccion"></span></p>
                                         </div>
                                     </div>
-
-                                </div>
-                                <div class="modal-footer">
-                                    <button class="btn btn-default" data-dismiss="modal"
-                                            aria-hidden="true"><strong>Cerrar</strong>
-                                    </button>
-                                    <button name="nuevo_cliente" type="submit" class="btn btn-primary">
-                                        <strong>Registrar</strong></button>
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <i class="fa fa-share-alt"></i> Redes sociales
+                                        </div>
+                                        <div class="panel-body" id="clienteRedes">
+                                            <!-- Las redes sociales se cargarán aquí -->
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                    </div>
                 </div>
-
-            </div>
-        </header>
-
-        <div class="panel-body">
-            <div class="dataTable_wrapper">
-                <table class="table table-striped table-bordered table-hover" id="dataTables-example">
-                    <thead>
-                    <tr>
-                        <th><i class="icon_images"></i> FOTO</th>
-                        <th><i class="icon_contacts"></i> NOMBRE</th>
-                        <th><i class="icon_folder"></i> CI</th>
-                        <th><i class="icon_contacts_alt"></i> DIRECCION</th>
-                        <th><i class="icon_contacts_alt"></i> TELEFONO FIJO</th>
-                        <th><i class="icon_contacts_alt"></i> TELEFONO MOBIL</th>
-                        <th><i class="icon_contacts_alt"></i> EMAIL</th>
-                        <th><i class="icon_key"></i> FECHA DE REGISTRO</th>
-                        <th><i class="icon_cog"></i> ACCIONES</th>
-                    </tr>
-                    </thead>
-                    <?PHP
-                    while ($client = mysqli_fetch_array($allCliente)) {
-                        ?>
-
-                        <tr>
-                            <td><img src="<?php echo $urlViews . $client['foto'] ?>" height="50"
-                                     width="50"></td>
-                            <td> <?PHP echo $client['nombre'] . '' . $client['apellido']; ?></td>
-                            <td> <?PHP echo $client['ci']; ?></td>
-                            <td> <?PHP echo $client['direccion']; ?></td>
-                            <td> <?PHP echo $client['telefonoFijo']; ?></td>
-                            <td> <?PHP echo $client['telefonoCelular']; ?></td>
-                            <td> <?PHP echo $client['email']; ?></td>
-                            <td> <?PHP echo $client['fechaRegistro']; ?></td>
-                            <td>
-                                <a href="#a<?php echo $client[0]; ?>" role="button"
-                                   class="btn btn-success" data-toggle="modal">
-                                    <i class="icon_check_alt2"></i> </a>
-                                <a href="RegistroCliente.php?idborrar=<?PHP echo $client[0]; ?>&usuarioLogin=<?PHP echo $usuario; ?>&passwordLogin=<?PHP echo $password; ?>"
-                                   role="button" class="btn btn-danger"> <i class="icon_close_alt2"></i>
-                                </a>
-                            </td>
-                        </tr>
-
-                        <div id="a<?php echo $client[0]; ?>" class="modal fade" tabindex="-1"
-                             role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                            <form class="form-validate form-horizontal" name="form2"
-                                  action="RegistroCliente.php"
-                                  method="post" enctype="multipart/form-data">
-                                <input type="hidden" name="idcliente"
-                                       value="<?php echo $client['idcliente']; ?>">
-                                <input name="usuarioLogin" value="<?php echo $usuario; ?>"
-                                       type="hidden">
-                                <input name="passwordLogin" value="<?php echo $password; ?>"
-                                       type="hidden">
-                                <input type="hidden" name="imagen"
-                                       value="<?php echo $client['foto']; ?>">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <button type="button" class="close" data-dismiss="modal"
-                                                    aria-hidden="true">×
-                                            </button>
-                                            <h3 id="myModalLabel" align="center">Cambiar Informacion del
-                                                Cliente</h3>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="row">
-                                                <div class="col-lg-4">
-
-                                                    <div><strong> Imagen</strong></div>
-                                                    <img src="<?PHP echo $urlViews . $client['foto']; ?>" width="250"
-                                                         height="250">
-                                                    <br><br>
-                                                    <section class="panel" class="col-lg-6">
-                                                        <div><strong>Cambiar Imagen de Cliente</strong>
-                                                        </div>
-                                                        <?php
-                                                        include("UploadViewImageEdit.php");
-                                                        ?>
-                                                    </section>
-                                                </div>
-                                                <div class="col-lg-8">
-                                                    <br><br><br><br>
-                                                    <label for="nombre" class="control-label col-lg-3">Nombre:</label>
-                                                    <div class="col-lg-9">
-                                                        <input class="form-control input-lg m-bot15"
-                                                               id="nombre"
-                                                               name="nombre" minlength="3" type="text"
-                                                               value="<?php echo $client['nombre']; ?>"/>
-                                                    </div>
-                                                    <br><br>
-
-                                                    <label for="apellido"
-                                                           class="control-label col-lg-3">Apellido:</label>
-                                                    <div class="col-lg-9">
-                                                        <input class="form-control input-lg m-bot15"
-                                                               id="apellido"
-                                                               name="apellido" minlength="3" type="text"
-                                                               value="<?php echo $client['apellido']; ?>"/>
-                                                    </div>
-                                                    <br><br>
-
-                                                    <label for="ci"
-                                                           class="control-label col-lg-3">CI:</label>
-                                                    <div class="col-lg-9">
-                                                        <input class="form-control input-lg m-bot15"
-                                                               id="ci" name="ci"
-                                                               minlength="5" type="text"
-                                                               value="<?php echo $client['ci']; ?>"/>
-                                                    </div>
-                                                    <br><br>
-
-                                                    <label for="direccion"
-                                                           class="control-label col-lg-3">Direccion:</label>
-                                                    <div class="col-lg-9">
-                                                        <input class="form-control input-lg m-bot15"
-                                                               id="direccion"
-                                                               name="direccion" minlength="5"
-                                                               type="text"
-                                                               value="<?php echo $client['direccion']; ?>"/>
-                                                    </div>
-                                                    <br><br>
-
-                                                    <label for="telefonoFijo"
-                                                           class="control-label col-lg-3">Telefono:</label>
-                                                    <div class="col-lg-9">
-                                                        <input class="form-control input-lg m-bot15"
-                                                               id="telefonoFijo"
-                                                               name="telefonoFijo" minlength="5"
-                                                               type="text"
-                                                               value="<?php echo $client['telefonoFijo']; ?>"/>
-                                                    </div>
-                                                    <br><br>
-
-                                                    <label for="telefonoCelular"
-                                                           class="control-label col-lg-3">Telefono Mobil:</label>
-                                                    <div class="col-lg-9">
-                                                        <input class="form-control input-lg m-bot15"
-                                                               id="telefonoCelular"
-                                                               name="telefonoCelular" minlength="5"
-                                                               type="text"
-                                                               value="<?php echo $client['telefonoCelular']; ?>"/>
-                                                    </div>
-                                                    <br><br>
-
-                                                    <label for="email" class="control-label col-lg-3">Email:</label>
-                                                    <div class="col-lg-9">
-                                                        <input class="form-control input-lg m-bot15"
-                                                               id="email" name="email"
-                                                               minlength="5" type="text"
-                                                               value="<?php echo $client['email']; ?>"/>
-                                                    </div>
-                                                    <br><br>
-
-                                                    <label for="fechaRegistro"
-                                                           class="control-label col-lg-3">Fecha Registro:</label>
-                                                    <div class="col-lg-9">
-                                                        <input class="form-control input-lg m-bot15"
-                                                               type="date"
-                                                               name="fechaRegistro" autocomplete="off"
-                                                               value="<?php echo $client['fechaRegistro']; ?>">
-                                                    </div>
-                                                </div>
-                                            </div>
-
-
-                                            <div class="modal-footer">
-                                                <button class="btn btn-default" data-dismiss="modal"
-                                                        aria-hidden="true"><strong>Cerrar</strong>
-                                                </button>
-                                                <button name="update_cliente" type="submit"
-                                                        class="btn btn-primary">
-                                                    <strong>Actualizar Datos</strong>
-                                                </button>
-                                            </div>
-                                        </div>
-
-
-                                    </div>
-                                </div>
-
-
-                            </form>
-                        </div>
-                    <?php } ?>
-                </table>
             </div>
         </div>
-        <!--                    </section>-->
-        <!--                </div>-->
-        <!---->
-        <!--            </div>-->
-        <!-- statics end -->
 
+        <?php include("LibraryJs.php"); ?>
+        <script>
+            function verDetalleCliente(idCliente) {
+                $('#loadingCliente').show();
+                $('#clienteContent').hide();
+
+                $.ajax({
+                    url: 'ClientesController.php',
+                    type: 'GET',
+                    data: {
+                        action: 'getDetalleCliente',
+                        id: idCliente
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            const cliente = response.cliente;
+
+                            $('#clienteFoto').attr('src', '../Public/img/' + (cliente.imagen || 'default.jpg'));
+                            $('#clienteLogin').text(cliente.login || 'N/A');
+                            $('#clienteNombre').text(cliente.nombre || 'N/A');
+                            $('#clienteFechaNacimiento').text(cliente.fecha_nacimiento || 'N/A');
+                            $('#clienteGenero').text(cliente.genero || 'N/A');
+                            $('#clienteEmail').text(cliente.email || 'N/A');
+                            $('#clienteTelefono').text(cliente.telefono || 'N/A');
+                            $('#clienteDireccion').text(cliente.direccion || 'N/A');
+
+                            $('#clienteContent').show();
+                            $('#loadingCliente').hide();
+                        } else {
+                            alert('Error al cargar detalles del cliente: ' + (response.message || 'Error desconocido'));
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Error al cargar detalles del cliente: ' + error);
+                    }
+                });
+            }
+            $(document).ready(function() {
+                $('#clienteDetalleModal').on('show.bs.modal', function() {
+                    $('#loadingCliente').show();
+                    $('#clienteContent').hide();
+                });
+            }); 
+        </script>
     </section>
-</section>
-<!--main content end-->
-
-<?PHP include("LibraryJs.php"); ?>
-
-
-</body>
-</html>

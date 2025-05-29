@@ -48,7 +48,7 @@
                 <?php foreach ($detalles as $detalle): ?>
                 <tr>
                     <td>
-                        <img src="<?= $detalle['imagen'] ?>" width="50" height="50" class="img-thumbnail">
+                        <img src="<?=URL_VIEWS. $detalle['imagen'] ?>" width="50" height="50" class="img-thumbnail">
                         <?= htmlspecialchars($detalle['nombre_producto']) ?>
                     </td>
                     <td><?= $detalle['cantidad'] ?></td>

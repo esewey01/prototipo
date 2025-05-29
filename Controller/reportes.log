@@ -213,3 +213,28 @@ Datos decodificados: Array
 ID Producto: 1
 ID Vendedor: 3
 Resultado operación: Éxito
+2025-05-29 02:59:16 - Inicio
+Raw input: {"id_producto":"1","motivo":"Contenido inapropiado","comentarios":"Producto demasiado caro, se le enviará un aviso \nTest hecho desde el modal de detalles productos"}
+Datos decodificados: Array
+(
+    [id_producto] => 1
+    [motivo] => Contenido inapropiado
+    [comentarios] => Producto demasiado caro, se le enviará un aviso 
+Test hecho desde el modal de detalles productos
+)
+
+ID Producto: 1
+ID Vendedor: 3
+Resultado operación: Éxito
+2025-05-29 03:22:43 - Inicio
+Raw input: {"id_producto":"1","motivo":"Información falsa","comentarios":"PRUEBA 28/05 NUEVO TEST"}
+Datos decodificados: Array
+(
+    [id_producto] => 1
+    [motivo] => Información falsa
+    [comentarios] => PRUEBA 28/05 NUEVO TEST
+)
+
+ID Producto: 1
+ID Vendedor: 3
+Resultado operación: Éxito

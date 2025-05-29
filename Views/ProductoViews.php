@@ -258,8 +258,8 @@
                                 <td> <?PHP echo htmlspecialchars($product['descripcion']); ?></td>
                                 <td> <?PHP echo htmlspecialchars($product['nombre_categoria']); ?></td>
                                 <td>
-                                    <?php if ($product['estado'] == 'AGOTADO'): ?>
-                                        <span class="label label-warning">AGOTADO</span>
+                                    <?php if ($product['estado'] == 'AGOTADO' || $product['estado'] == 'INACTIVO'): ?>
+                                        <span class="label label-warning"><?php echo $product['estado'] ?></span>
                                     <?php else: ?>
                                         <?PHP echo htmlspecialchars($product['cantidad']); ?>
                                     <?php endif; ?>
@@ -275,7 +275,7 @@
                                     <?php if ($id_rol == 2): // Si es vendedor 
                                     ?>
 
-                                        <!-- Mostrar motivo si está INACTIVO -->
+                                        <!-- MOSTRA MOTIVO SI SE ENCUENTRA INACTIVO -->
                                         <?php if ($product['estado'] == 'INACTIVO' && isset($reportesProductos[$product['id_producto']])): ?>
                                             <button class="btn btn-info btn-motivo"
                                                 data-motivo="<?= htmlspecialchars($reportesProductos[$product['id_producto']]['comentarios']) ?>">
@@ -283,27 +283,30 @@
                                             </button>
                                         <?php endif; ?>
 
-                                        <!-- Botón de edición - Solo para productos ACTIVOS o AGOTADOS -->
+                                        <!-- EDITAR SI EL PRODUCTO SE ENCUENTRA ACTIVO O AGOTADO -->
                                         <?php if ($product['estado'] != 'INACTIVO'): ?>
                                             <a href="#editProduct<?php echo $product['id_producto']; ?>"
                                                 class="btn btn-success" data-toggle="modal">
                                                 <i class="icon_check_alt2"></i>
                                             </a>
-                                        <?php endif; ?>
+                                            <!-- BOTÓN PARA CAMBIAR DE ESTADO AGOTADO A ACTIVO Y-->
+                                            <button class="btn btn-warning btn-estado"
+                                                data-id="<?= $product['id_producto'] ?>"
+                                                data-estado="<?= $product['estado'] ?>">
+                                                <i class="fa fa-exchange"></i>
+                                            </button>
 
-                                        <!-- Botón para cambiar estado -->
-                                        <button class="btn btn-warning btn-estado"
-                                            data-id="<?= $product['id_producto'] ?>"
-                                            data-estado="<?= $product['estado'] ?>">
-                                            <i class="fa fa-exchange"></i>
-                                        </button>
-
-                                        <!-- Botón de eliminar -->
+                                            <!--BOTON PARA ELIMINAR UN PRODUCTO -->
                                         <a href="RegistroProducto.php?idborrar=<?php echo $product['id_producto']; ?>&usuarioLogin=<?php echo urlencode($usuario); ?>&passwordLogin=<?php echo urlencode($password); ?>"
                                             role="button" class="btn btn-danger"
                                             onclick="return confirm('¿Estás seguro de eliminar este producto?')">
                                             <i class="icon_close_alt2"></i>
                                         </a>
+                                        <?php endif; ?>
+
+
+
+                                        
                                     <?php else: // Para administradores 
                                     ?>
 

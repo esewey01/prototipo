@@ -1,58 +1,29 @@
 <?php
+session_start();
 require('../Model/Conexion.php');
-require('Constants.php');
 
-if (!isset($_SESSION)) {
-    session_start();
+// Verificar permisos (descomentar cuando esté listo)
+if ($_SESSION['usuario']['rol']['id_rol'] >= 2) {
+    $_SESSION['error'] = "NO POSEES PERMISOS DE ADMINISTRADOR";
+    header("Location: PrincipalController.php");
+    exit();
 }
 
-$usuario = $_SESSION['usuario']['login'];
-$password = $_SESSION['usuario']['password'];
+try {
+    $db = new Conexion();
+    $id_vendedor = $_GET['id_vendedor'] ?? 0;
 
-$con = new Conexion();
+    // Obtener clientes relacionados con órdenes pagadas del vendedor
+    $clientes = $db->getClientesPorVendedor($id_vendedor);
 
+    $data = [
+        'clientes' => $clientes,
+        'id_vendedor' => $id_vendedor
+    ];
 
-$searchUser = $con->getUser($usuario, $password);
-$allUsuarios = $con->getAllUserData();
-
-foreach ($searchUser as $user) {
-    $tipo = $user['tipo'];
-    $id_usuario = $user['id_usu'];
-    $nombres = $user['nombre'];
-    $password = $user['password'];
-    $foto = $user['foto'];
+    require("../Views/ClientesViews.php");
+} catch (Exception $e) {
+    $_SESSION['error'] = "ERROR AL OBTENER CLIENTES: " . $e->getMessage();
+    header("Location: ../Index.php");
+    exit();
 }
-
-/*$colorElegido="#4e4e4e";
-$colorDefecto="#0061c2";
-$idMenu="4";
-
-$updateMenuColorElegido=$con->updateOpcionElegida($colorElegido,$idMenu);
-$updateMenuColorDefecto=$con->updateOpcionDefecto($colorDefecto,$idMenu);*/
-
-
-$tipoDeAlerta = $con->getMensajeAlerta();
-foreach ($tipoDeAlerta as $tipoAlerta) {
-    $alerta = $tipoAlerta['tipoAlerta'];
-    $mensaje = $tipoAlerta['mensaje'];
-}
-
-if (!isset($_GET['estado'])) {
-    $mensaje = "";
-    $alerta = "";
-
-    $updateMensaje = $con->updateMensajeAlert($mensaje, $alerta);
-}
-
-
-$urlViews = URL_VIEWS;
-$userLogueado = $nombres;
-$imageUser = $foto;
-
-$allCliente =$con->getAllCliente();
-
-$menuMain = $con->getMenuMain();
-require("../Views/ClienteViews.php");
-
-
-?>

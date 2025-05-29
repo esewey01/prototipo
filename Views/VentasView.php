@@ -61,7 +61,7 @@
                                 <ul class="nav nav-tabs">
                                     <li class="active"><a href="#pendientes" data-toggle="tab">Pendientes</a></li>
                                     <li><a href="#pagadas" data-toggle="tab">Pagadas</a></li>
-                                    <li><a href="#entregadas" data-toggle="tab">Entregadas</a></li>
+                                    <!--li><a href="#entregadas" data-toggle="tab">Entregadas</a></li-->
                                     <li><a href="#canceladas" data-toggle="tab">Canceladas</a></li>
                                 </ul>
 
@@ -249,6 +249,7 @@
                             <!-- Contenido cargado por AJAX -->
                         </div>
                         <div class="modal-footer">
+                            <?php if ($orden['estado'] !== 'PENDIENTES'): ?>
                             <form id="formCambiarEstado" class="form-inline pull-left">
                                 <input type="hidden" id="idOrden" name="id_orden">
                                 <div class="form-group">
@@ -256,12 +257,13 @@
                                     <select class="form-control" id="nuevoEstado" name="estado">
                                         <option value="PENDIENTE">Pendiente</option>
                                         <option value="PAGADO">Pagado</option>
-                                        <option value="ENTREGADO">Entregado</option>
+                                        <!--option value="ENTREGADO">Entregado</option-->
                                         <option value="CANCELADO">Cancelado</option>
                                     </select>
                                 </div>
                                 <button type="submit" class="btn btn-primary ml-2">Actualizar</button>
                             </form>
+                            <?php endif; ?>
                             <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
                         </div>
                     </div>

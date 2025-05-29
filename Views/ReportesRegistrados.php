@@ -65,6 +65,7 @@
                     <li><a href="#reportes-vendedores" data-toggle="tab">Vendedores Reportados</a></li>
                     <li><a href="#reportes-usuarios" data-toggle="tab">Clientes Reportados</a></li>
                     <li><a href="#reportes-ordenes" data-toggle="tab">Reportes por Órdenes</a></li>
+                    <li><a href="#reportes-procesados" data-toggle="tab">Reportes Procesados</a></li>
                 </ul>
                 <!-- Contenido de las pestañas -->
                 <div class="tab-content">
@@ -165,95 +166,127 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Tabla de Reportes Procesados -->
+                    <div class="tab-pane" id="reportes-procesados">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                REPORTES PROCESADOS
+                                <div class="pull-right">
+                                    <button href="#" title="" data-placement="left" data-toggle="modal"
+                                        class="btn btn-primary tooltips" type="button"
+                                        data-original-title="Exportar PDF">
+                                        <span class="fa fa-file-pdf-o"> </span>
+                                        EXPORTAR A PDF
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="panel-body">
+                                <?php
+                                $reportes = $reportesProcesados;
+                                $tipo_reporte = 'PROCESADO';
+                                include("_partials/tabla_reportes.php");
+                                ?>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
             <!-- Modal Detalle de Reporte -->
+            <!-- Modal Detalle de Reporte -->
             <div class="modal fade" id="detalleReporteModal" tabindex="-1" role="dialog" aria-labelledby="detalleReporteModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
                     <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                        <div class="modal-header bg-primary text-white">
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar">
                                 <span aria-hidden="true">&times;</span>
                             </button>
-                            <h4 class="modal-title" id="detalleReporteModalLabel">
-                                <i class="fa fa-clipboard-list mr-2"></i> Detalles del Reporte #<span id="reporte-id-modal"></span>
-                            </h4>
+                            <h3 class="modal-title">
+                                <i class="fa fa-clipboard mr-2"></i> Detalles del Reporte #<span id="reporte-id-modal"></span>
+                            </h3>
 
                         </div>
+
                         <div class="modal-body">
                             <div class="row">
+                                <!-- Columna Izquierda -->
                                 <div class="col-md-6 border-right">
-                                    <h3 class="mb-3"><i class="fa fa-info-circle mr-2"></i> Información del Reporte</h3>
-                                    <p><strong>Tipo de Reporte:</strong> <span id="reporte-tipo" class="font-weight-bold"></span></p>
+                                    <h4 class="mb-3 text-primary"><i class="fa fa-info-circle mr-2"></i> Información del Reporte</h4>
+                                    <p><strong>Tipo:</strong> <span id="reporte-tipo" class="font-weight-bold"></span></p>
                                     <p><strong>Motivo:</strong> <span id="reporte-motivo"></span></p>
-                                    <p><strong>Comentarios del Reportante:</strong> <span id="reporte-comentarios"></span></p>
-                                    <p><strong>Fecha de Reporte:</strong> <span id="reporte-fecha"></span></p>
-                                    <p><strong>Estado Actual:</strong> <span id="reporte-estado" class="badge badge-info"></span></p>
-                                    <p><strong>Última Acción Tomada:</strong> <span id="reporte-accion-tomada"></span></p>
+                                    <p><strong>Comentarios:</strong> <span id="reporte-comentarios"></span></p>
+                                    <p><strong>Fecha:</strong> <span id="reporte-fecha"></span></p>
+                                    <p><strong>Estado:</strong> <span id="reporte-estado" class="badge badge-info"></span></p>
+                                    <p><strong>Última Acción:</strong> <span id="reporte-accion-tomada"></span></p>
                                     <p><strong>Reportado por:</strong> <span id="reporte-administrador"></span></p>
                                 </div>
+
+                                <!-- Columna Derecha -->
                                 <div class="col-md-6">
-                                    <div id="detalle-producto-seccion" class="mb-4" style="display:none;">
-                                        <h3 class="mb-3 text-danger"><i class="fa fa-flag"></i> Información del Producto</h3>
+                                    <!-- Producto -->
+                                    <div id="detalle-producto-seccion" class="mb-4 d-none">
+                                        <h4 class="text-danger"><i class="fa fa-inbox mr-2"></i> Información del Producto</h4>
                                         <div class="media">
-                                            <img id="producto-imagen" src="" alt="Imagen del Producto" class="mr-3 rounded" style="max-width: 100px; height: auto; border: 1px solid #ddd;">
+                                            <img id="producto-imagen" src="" alt="Imagen del Producto" class="mr-3 rounded border" style="max-width: 100px;">
                                             <div class="media-body">
-                                                <h5 class="mt-0"><strong id="producto-nombre"></strong></h5>
-                                                <p><strong>Descripción:</strong> <span id="producto-descripcion" class="text font-weight-bold"></span></p>
-                                                <p><strong>Precio:</strong> <span id="producto-precio" class="text font-weight-bold"></span></p>
-                                                <p><strong>Stock Disponible:</strong> <span id="producto-stock"></span></p>
+                                                <h6 class="mt-0"><strong id="producto-nombre"></strong></h6>
+                                                <p><strong>Descripción:</strong> <span id="producto-descripcion"></span></p>
+                                                <p><strong>Precio:</strong> <span id="producto-precio"></span></p>
+                                                <p><strong>Stock:</strong> <span id="producto-stock"></span></p>
                                                 <p><strong>Vendedor:</strong> <span id="producto-vendedor"><a href="#">Ver Perfil</a></span></p>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div id="detalle-usuario-seccion" class="mb-4" style="display:none;">
-                                        <h3 class="mb-3 text-danger"><i class="fa fa-flag2"></i> Información del Usuario/Vendedor Reportado</h3>
+                                    <!-- Usuario -->
+                                    <div id="detalle-usuario-seccion" class="mb-4 d-none">
+                                        <h4 class="text-danger"><i class="fa fa-user mr-2"></i> Usuario/Vendedor Reportado</h4>
                                         <p><strong>Login:</strong> <span id="usuario-login"></span></p>
-                                        <p><strong>Nombre Completo:</strong> <span id="usuario-nombre"></span></p>
-                                        <p><strong>Email:</strong> <span id="usuario-email"><a href="mailto:"></a></span></p>
-                                        <p><strong>Teléfono:</strong> <span id="usuario-telefono"><a href="tel:"></a></span></p>
+                                        <p><strong>Nombre:</strong> <span id="usuario-nombre"></span></p>
+                                        <p><strong>Email:</strong> <a href="#" id="usuario-email"></a></p>
+                                        <p><strong>Teléfono:</strong> <a href="#" id="usuario-telefono"></a></p>
                                         <p><strong>Rol:</strong> <span id="usuario-rol" class="badge badge-secondary"></span></p>
                                     </div>
 
-                                    <div id="detalle-orden-seccion" style="display:none;">
-                                        <h3 class="mb-3 text-danger"><i class="fa fa-file-invoice-dollar mr-2"></i> Información de la Orden</h3>
-                                        <p><strong>ID de Orden:</strong> <span id="orden-id"></span></p>
+                                    <!-- Orden -->
+                                    <div id="detalle-orden-seccion" class="d-none">
+                                        <h4 class="text-danger"><i class="fa fa-receipt mr-2"></i> Información de la Orden</h4>
+                                        <p><strong>ID Orden:</strong> <span id="orden-id"></span></p>
                                         <p><strong>Cliente:</strong> <span id="orden-cliente"></span></p>
-                                        <p><strong>Fecha de Orden:</strong> <span id="orden-fecha"></span></p>
-                                        <p><strong>Total de la Orden:</strong> <span id="orden-total" class="text-danger font-weight-bold"></span></p>
-                                        <p><strong>Estado de la Orden:</strong> <span id="orden-estado" class="badge badge-warning"></span></p>
+                                        <p><strong>Fecha:</strong> <span id="orden-fecha"></span></p>
+                                        <p><strong>Total:</strong> <span id="orden-total" class="text-danger font-weight-bold"></span></p>
+                                        <p><strong>Estado:</strong> <span id="orden-estado" class="badge badge-warning"></span></p>
                                     </div>
                                 </div>
                             </div>
-                            <hr class="mt-4 mb-4">
-                        </div>
-                        <div class="modal-footer d-flex justify-content-between align-items-center">
-                            <div class="form-inline">
-                                <label for="accionSeleccionada" class="mr-2 text-dark font-weight-bold">Tomar Acción:</label>
-                                <select class="form-control mr-2" id="accionSeleccionada">
-                                    <!-- Opciones se llenan dinámicamente con JavaScript -->
-                                </select>
 
+                            <hr class="my-4">
+                            <!-- Comentarios -->
+                            <div class="form-group">
+                                <label for="comentarios" class="font-weight-bold">Comentarios (Requerido):</label>
+                                <textarea class="form-control" id="comentarios" rows="3" required></textarea>
                             </div>
-                            <!-- Campo de comentarios -->
-                            <div class="modal-body">
-                                <div class="form-group">
-                                    <label for="comentarios" class="text-dark font-weight-bold">Comentarios (Requerido):</label>
-                                    <textarea class="form-control" id="comentarios" rows="3" required></textarea>
-                                </div>
+                        </div>
+
+                        <div class="modal-footer d-flex justify-content-between flex-wrap">
+                            <div class="form-inline mb-2 mb-md-0">
+                                <label for="accionSeleccionada" class="mr-2 font-weight-bold">Tomar Acción:</label>
+                                <select class="form-control" id="accionSeleccionada"></select>
                             </div>
-                            <div>
+                            <div class="btn-group">
                                 <button type="button" class="btn btn-primary" id="btn-aplicar-accion">Aplicar Acción</button>
-                                <button type="button" class="btn btn-info mr-2" id="btn-descargar-pdf"><i class="fa fa-file-pdf mr-1"></i> Exportar a PDF</button>
+                                <button type="button" class="btn btn-info" id="btn-descargar-pdf">
+                                    <i class="fa fa-file-pdf mr-1"></i> Exportar PDF
+                                </button>
+
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
+
         </section>
     </section>
 
@@ -318,6 +351,9 @@
                             const orden = response.orden;
                             const historial = response.historial;
 
+                            console.log("Fecha bruta:", reporte.fecha_reporte);
+
+
                             // Rellenar información del reporte
                             $('#reporte-id-modal').text(reporte.id_reporte);
                             $('#reporte-tipo').text(reporte.tipo_reporte || 'N/A');
@@ -329,7 +365,7 @@
                             $('#reporte-administrador').text((reporte.nombre_administrador || '') + ' ' + (reporte.apellido_administrador || ''));
 
                             // Mostrar información específica según el tipo de reporte
-                            if (reporte.tipo_reporte === 'PRODUCTO' && producto) {
+                            if ((reporte.tipo_reporte === 'PRODUCTO' || reporte.estado === 'PROCESADO') && producto) {
                                 $('#detalle-producto-seccion').show();
                                 $('#producto-nombre').text(producto.nombre_producto || 'N/A');
                                 $('#producto-descripcion').text(producto.descripcion || 'N/A');
@@ -337,14 +373,14 @@
                                 $('#producto-stock').text(producto.stock || 'N/A');
                                 $('#producto-vendedor').text((producto.vendedor_nombre || '') + ' ' + (producto.vendedor_apellido || ''));
                                 $('#producto-imagen').attr('src', '../Views/' + (producto.imagen || 'default.jpg')); // Asegúrate de tener una imagen por defecto
-                            } else if ((reporte.tipo_reporte === 'VENDEDOR' || reporte.tipo_reporte === 'USUARIO') && usuario) {
+                            } else if ((reporte.tipo_reporte === 'VENDEDOR' || reporte.tipo_reporte === 'USUARIO') || reporte.estado === 'PROCESADO' && usuario) {
                                 $('#detalle-usuario-seccion').show();
                                 $('#usuario-login').text(usuario.login || 'N/A');
                                 $('#usuario-nombre').text((usuario.nombre || '') + ' ' + (usuario.apellido || ''));
                                 $('#usuario-email').text(usuario.email || 'N/A');
                                 $('#usuario-telefono').text(usuario.telefono || 'N/A');
                                 $('#usuario-rol').text(usuario.nombre_rol || 'N/A');
-                            } else if (reporte.tipo_reporte === 'ORDEN' && orden) {
+                            } else if (reporte.tipo_reporte === 'ORDEN' || reporte.estado === 'PROCESADO' && orden) {
                                 $('#detalle-orden-seccion').show();
                                 $('#orden-id').text(orden.id_orden || 'N/A');
                                 $('#orden-cliente').text((orden.cliente_nombre || '') + ' ' + (orden.cliente_apellido || ''));
