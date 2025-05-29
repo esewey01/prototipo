@@ -362,7 +362,10 @@ CREATE TABLE HISTORIAL_REPORTES (
 SELECT*FROM REPORTES
 SELECT*FROM HISTORIAL_REPORTES
 
-SELECT*FROM USUARIOS
+update reportes set comentarios='TEST HECHO DESDE EL MODAL DE USUARIO DETALLES '  where id_reporte=1
+
+SELECT*FROM ORDENES
+SELECT*FROM DETALLE_ORDEN
 
 SELECT*FROM PRODUCTOS
 
@@ -371,6 +374,18 @@ select*from HISTORIAL_REPORTES
 
 
 DROP TABLE HISTORIAL_REPORTES 
-DROP TABLE REPORTES ..
+DROP TABLE REPORTES 
 
 
+SELECT 
+    r.*, 
+    p.nombre_producto, 
+    u.nombre as nombre_reportado, 
+    a.nombre as nombre_administrador,
+    o.id_orden as id_orden
+FROM REPORTES r
+LEFT JOIN PRODUCTOS p ON r.id_producto = p.id_producto
+LEFT JOIN USUARIOS u ON r.id_usuario_reportado = u.id_usuario
+LEFT JOIN USUARIOS a ON r.id_administrador = a.id_usuario
+LEFT JOIN ORDENES o ON r.id_orden = o.id_orden
+ORDER BY r.fecha_reporte DESC
