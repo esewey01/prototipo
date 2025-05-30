@@ -389,3 +389,6 @@ SELECT DISTINCT u.id_usuario, u.nombre, u.email, u.telefono
             SELECT u.id_usuario, u.login, u.nombre, u.fecha_nacimiento, u.genero, u.email, u.telefono, u.direccion 
             FROM USUARIOS u
             WHERE u.id_usuario = 1
+
+
+            SELECT*FROM USUARIOS
