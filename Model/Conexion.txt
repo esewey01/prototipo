@@ -1692,25 +1692,6 @@ class Conexion
         $sql = "UPDATE PASSWORD_RESET_TOKENS SET used = 1 WHERE token = ?";
         return $this->executeNonQuery($sql, [$token]);
     }
-
-    public function getClientesPorVendedor($id_vendedor)
-    {
-        $sql ="SELECT DISTINCT 
-        u.id_usuario as id_cliente,
-        u.nombre as nombre_cliente,
-        u.apellido as apellido_cliente,
-        u.email as email_cliente,
-        u.telefono as telefono_cliente
-        from ordenes o
-        join usuarios u on o.id_usuario = u.id_usuario
-        where o.id_vendedor = ?
-        and o.estado='PAGADO'";
-        $stmt = $this->executeQuery($sql, [$id_vendedor]);
-        return $this->getResults($stmt);
-    }
-
-
-
 }
 
 
