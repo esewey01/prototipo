@@ -1659,57 +1659,34 @@ class Conexion
         return $this->getResults($stmt);
     }
 
-    // En tu archivo Conexion.php
-    public function getUserByEmail($email)
-    {
-        $sql = "SELECT * FROM USUARIOS WHERE email = ?";
-        return $this->getRow($sql, [$email]); // getRow ya te devuelve la fila o false
+    //FUNCIONES DE CLIENTESCONTROLLER
+    public function getClientesPorVendedor($id_vendedor){
+        $sql = "SELECT DISTINCT u.id_usuario, u.nombre, u.email, u.telefono
+            FROM ORDENES o
+            JOIN USUARIOS u ON o.id_usuario = u.id_usuario
+            WHERE o.id_vendedor = ? AND o.estado = 'PAGADO'";
+
+        $stmt =$this ->executeQuery($sql, [$id_vendedor]);
+        return $this ->getResults($stmt);
     }
 
-    // En tu archivo Conexion.php
-    public function savePasswordResetToken($id_usuario, $token, $expires_at)
-    {
-        $sql = "INSERT INTO PASSWORD_RESET_TOKENS (id_usuario, token, expiration) 
-                     VALUES (?, ?, ?)";
-        return $this->executeNonQuery($sql, [$id_usuario, $token, $expires_at]);
+    public function getDetalleCliente($id_cliente) {
+    $sql = "SELECT u.id_usuario, u.login, u.nombre, u.fecha_nacimiento, 
+                   u.genero, u.email, u.telefono, u.direccion, u.foto_perfil
+            FROM USUARIOS u
+            WHERE u.id_usuario = ?";
+    
+    $stmt = $this->executeQuery($sql, [$id_cliente]);
+    $cliente = $this->getResults($stmt)[0] ?? null;
+    
+    if ($cliente) {
+        // Obtener redes sociales
+        $redes = $this->getSocialNetworks($id_cliente);
+        $cliente['redes'] = $redes[0] ?? []; // getSocialNetworks devuelve un array de arrays
     }
-
-    // En tu archivo Conexion.php, dentro de la clase Conexion
-    public function getPasswordResetTokenData($token)
-    {
-        $sql = "SELECT t.*, u.id_usuario 
-            FROM PASSWORD_RESET_TOKENS t
-            JOIN USUARIOS u ON t.id_usuario = u.id_usuario
-            WHERE t.token = ? AND t.expiration > GETDATE() AND t.used = 0";
-
-        return $this->getRow($sql, [$token]);
-    }
-
-
-   
-    public function markTokenAsUsed($token)
-    {
-        $sql = "UPDATE PASSWORD_RESET_TOKENS SET used = 1 WHERE token = ?";
-        return $this->executeNonQuery($sql, [$token]);
-    }
-
-    public function getClientesPorVendedor($id_vendedor)
-    {
-        $sql ="SELECT DISTINCT 
-        u.id_usuario as id_cliente,
-        u.nombre as nombre_cliente,
-        u.apellido as apellido_cliente,
-        u.email as email_cliente,
-        u.telefono as telefono_cliente
-        from ordenes o
-        join usuarios u on o.id_usuario = u.id_usuario
-        where o.id_vendedor = ?
-        and o.estado='PAGADO'";
-        $stmt = $this->executeQuery($sql, [$id_vendedor]);
-        return $this->getResults($stmt);
-    }
-
-
+    
+    return $cliente;
+}
 
 }
 

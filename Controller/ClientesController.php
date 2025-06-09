@@ -1,23 +1,53 @@
 <?php
 session_start();
-
 require('../Model/Conexion.php');
 require('Constants.php');
 
-// Verificar sesión y permisos
-if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol']['id_rol'] != 2) {
-    $_SESSION['mensaje'] = "No eres un vendedor, no puedes acceder a esta sección";
-    $_SESSION['alerta']= "alert-danger";
+$id_vendedor = $_SESSION['usuario']['id_usuario'];
+
+// Verificar permisos (descomentar cuando esté listo)
+if ($_SESSION['usuario']['rol']['id_rol'] === "2") {
+    $_SESSION['mensaje'] = "NO POSEES PERMISOS DE ADMINISTRADOR";
     header("Location: PrincipalController.php");
     exit();
 }
 
 try {
     $db = new Conexion();
+    $action = $_GET['action'] ?? ($_POST['action'] ?? '');
 
-    // Obtener el ID del vendedor desde la sesión
-    $id_vendedor = $_SESSION['usuario']['id_usuario'];
+    if ($action === 'getDetalleCliente') {
+    try {
+        $id_cliente = $_GET['id'] ?? 0;
+        
+        if (!is_numeric($id_cliente)) {
+            throw new Exception("ID de cliente no válido");
+        }
 
+        $cliente = $db->getDetalleCliente($id_cliente);
+        
+        if (!$cliente) {
+            throw new Exception("Cliente no encontrado");
+        }
+
+        // Agregar redes sociales si es necesario
+        $cliente['redes'] = $db->getSocialNetworks($id_cliente);
+
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => true,
+            'cliente' => $cliente
+        ]);
+    } catch (Exception $e) {
+        header('Content-Type: application/json');
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => $e->getMessage()
+        ]);
+    }
+    exit();
+}
     // Obtener clientes relacionados con órdenes pagadas del vendedor
     $clientes = $db->getClientesPorVendedor($id_vendedor);
 
@@ -27,9 +57,17 @@ try {
     ];
 
     require("../Views/ClienteViews.php");
-
 } catch (Exception $e) {
-    $_SESSION['error'] = "ERROR AL OBTENER CLIENTES: " . $e->getMessage();
-    header("Location: ../Index.php");
-    exit();
+    if ($action === 'getDetalleCliente') {
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => false,
+            'message' => $e->getMessage()
+        ]);
+        exit();
+    } else {
+        $_SESSION['error'] = "ERROR AL OBTENER CLIENTES: " . $e->getMessage();
+        header("Location: ../Index.php");
+        exit();
+    }
 }

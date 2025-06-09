@@ -376,16 +376,19 @@ select*from HISTORIAL_REPORTES
 DROP TABLE HISTORIAL_REPORTES 
 DROP TABLE REPORTES 
 
+SELECT*FROM USUARIOS
+SELECT*FROM ROLES_USUARIO
 
-SELECT 
-    r.*, 
-    p.nombre_producto, 
-    u.nombre as nombre_reportado, 
-    a.nombre as nombre_administrador,
-    o.id_orden as id_orden
-FROM REPORTES r
-LEFT JOIN PRODUCTOS p ON r.id_producto = p.id_producto
-LEFT JOIN USUARIOS u ON r.id_usuario_reportado = u.id_usuario
-LEFT JOIN USUARIOS a ON r.id_administrador = a.id_usuario
-LEFT JOIN ORDENES o ON r.id_orden = o.id_orden
-ORDER BY r.fecha_reporte DESC
+
+SELECT DISTINCT u.id_usuario, u.nombre, u.email, u.telefono
+            FROM ORDENES o
+            JOIN USUARIOS u ON o.id_usuario = u.id_usuario
+            WHERE o.id_vendedor = 3 AND o.estado = 'PAGADO'
+
+
+            SELECT u.id_usuario, u.login, u.nombre, u.fecha_nacimiento, u.genero, u.email, u.telefono, u.direccion 
+            FROM USUARIOS u
+            WHERE u.id_usuario = 1
+
+
+            SELECT*FROM USUARIOS
