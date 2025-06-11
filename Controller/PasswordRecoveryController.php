@@ -50,6 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
+        
+
         // Envío del correo
         $mail = new PHPMailer(true);
         try {
