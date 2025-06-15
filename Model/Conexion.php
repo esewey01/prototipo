@@ -1264,6 +1264,32 @@ class Conexion
         return $this->getResults($stmt);
     }
 
+    //FUNCION PARA ENCONTRAR REPORTES POR USUARIO
+    //
+    public function getReportesPorUsuario($id_usuario)
+{
+    $sql = "SELECT 
+                r.id_reporte,
+                r.tipo_reporte,
+                r.motivo,
+                r.comentarios,
+                r.fecha_reporte,
+                r.estado,
+                r.accion_tomada,
+                p.nombre_producto AS producto_nombre,
+                u.nombre AS nombre_administrador
+            FROM REPORTES r
+            LEFT JOIN PRODUCTOS p ON r.id_producto = p.id_producto
+            LEFT JOIN USUARIOS u ON r.id_administrador = u.id_usuario
+            WHERE r.id_usuario_reportado = ?
+            ORDER BY r.fecha_reporte DESC";
+    
+    $stmt = $this->executeQuery($sql, [$id_usuario]);
+    return $this->getResults($stmt);
+}
+
+
+
     public function verificarReporteOrdenExistente($id_orden, $id_usuario)
     {
         $sql = "SELECT id_reporte FROM REPORTES 

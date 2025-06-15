@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mail->Subject = 'Nuevo Password - UPIICSA FOOD';
 
             $mensaje = '
-                <h3>Recuperación de Contraseña</h3>
+                <h3>Recuperacion de Contrasena</h3>
                 <p>Hola <strong>' . htmlspecialchars($usuario['login']) . '</strong>,</p>
                 <p>Se ha generado una nueva contrasena temporal:</p>
                 <p><strong>Tu nueva contrasena es:</strong> <code>' . htmlspecialchars($nueva_contrasena) . '</code></p>
