@@ -81,7 +81,7 @@
                                                 <td><?= htmlspecialchars($reporte['motivo']) ?></td>
                                                 <td><?= !empty($reporte['comentarios']) ? htmlspecialchars($reporte['comentarios']) : 'Sin comentarios' ?></td>
                                                 <td><?= htmlspecialchars($reporte['nombre_administrador']) ?></td>
-                                                <td><?= date('d/m/Y H:i', strtotime($reporte['fecha_reporte'])) ?></td>
+                                                <td><?= $reporte['fecha_reporte']->format('d/m/Y H:i') ?></td>
                                                 <td>
                                                     <?php if ($reporte['estado'] === 'PENDIENTE'): ?>
                                                         <span class="badge badge-warning"><?= $reporte['estado'] ?></span>
