@@ -123,8 +123,8 @@ INSERT INTO REDES_SOCIALES (id_usuario, tipo_red, url_perfil ) VALUES
 (8, 'Instagram', 'https://instagram.com/lety_calani');
 
 
-
-DROP TABLE MENU
+drop table MENU
+SELECT*FROM USUARIOS
 --TABLA MENU 
 CREATE TABLE MENU (
   id_menu INT IDENTITY(1,1) PRIMARY KEY,
@@ -147,8 +147,9 @@ INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden
 ('Comprar', 'Activo', 'icon_creditcard', 'ComprarController.php', '#ffffff', 'A',NULL, 2),
 ('Carrito', 'Activo', 'icon_cart', 'CarritoController.php', '#ffffff', 'A', NULL,3),
 ('Pagar', 'Activo', 'icon_wallet_alt', 'CheckoutController.php', '#ffffff', 'A', NULL,4),
-('Historial', 'Activo', 'icon_document', 'HistorialController.php', '#ffffff', 'A',NULL, 5);
-
+('Historial', 'Activo', 'icon_document', 'HistorialController.php', '#ffffff', 'A',NULL, 5),
+('Incidencias', 'Activo', '.icon_datareport', 'MisReportesController.php', '#ffffff', 'A', NULL, 6),
+('Valoraciones', 'Activo', '.icon_comment_alt', 'ValoracionesController.php', '#ffffff', 'A', NULL, 7);
 -- Opciones solo para administradores (id_rol = 1)
 INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden) VALUES
 ('Usuarios', 'Activo', 'icon_organigrama', 'UsuariosController.php', '#ffffff', 'A', 1, 5),
@@ -359,36 +360,24 @@ CREATE TABLE HISTORIAL_REPORTES (
 );
 
 
-SELECT*FROM REPORTES
-SELECT*FROM HISTORIAL_REPORTES
-
-update reportes set comentarios='TEST HECHO DESDE EL MODAL DE USUARIO DETALLES '  where id_reporte=1
-
-SELECT*FROM ORDENES
-SELECT*FROM DETALLE_ORDEN
-
-SELECT*FROM PRODUCTOS
-
-
-select*from HISTORIAL_REPORTES
+--FUNCION PARA ALMACENAR TOKEN DE RECUPERACION
+CREATE TABLE PASSWORD_RESET_TOKENS (
+    id_token INT IDENTITY(1,1) PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    token VARCHAR(64) NOT NULL,
+    expiration DATETIME NOT NULL,
+    used BIT DEFAULT 0,
+    created_at DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (id_usuario) REFERENCES USUARIOS(id_usuario)
+);
 
 
-DROP TABLE HISTORIAL_REPORTES 
-DROP TABLE REPORTES 
-
-SELECT*FROM USUARIOS
-SELECT*FROM ROLES_USUARIO
+select *from REPORTES
 
 
-SELECT DISTINCT u.id_usuario, u.nombre, u.email, u.telefono
-            FROM ORDENES o
-            JOIN USUARIOS u ON o.id_usuario = u.id_usuario
-            WHERE o.id_vendedor = 3 AND o.estado = 'PAGADO'
 
+SELECT * FROM USUARIOS;
 
-            SELECT u.id_usuario, u.login, u.nombre, u.fecha_nacimiento, u.genero, u.email, u.telefono, u.direccion 
-            FROM USUARIOS u
-            WHERE u.id_usuario = 1
-
-
-            SELECT*FROM USUARIOS
+UPDATE USUARIOS 
+SET PASSWORD = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918' 
+WHERE id_usuario = 2;

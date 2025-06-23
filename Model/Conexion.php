@@ -172,7 +172,7 @@ class Conexion
         return !empty($result);
     }
 
-     public function getUserByEmail($email)
+    public function getUserByEmail($email)
     {
         $sql = "SELECT * FROM USUARIOS WHERE email = ?";
         return $this->getRow($sql, [$email]); // getRow ya te devuelve la fila o false
@@ -560,7 +560,7 @@ class Conexion
         return !empty($result);
     }
 
-     
+
 
     public function getAllProductosWithVendedor()
     {
@@ -1267,8 +1267,8 @@ class Conexion
     //FUNCION PARA ENCONTRAR REPORTES POR USUARIO
     //
     public function getReportesPorUsuario($id_usuario)
-{
-    $sql = "SELECT 
+    {
+        $sql = "SELECT 
                 r.id_reporte,
                 r.tipo_reporte,
                 r.motivo,
@@ -1283,10 +1283,10 @@ class Conexion
             LEFT JOIN USUARIOS u ON r.id_administrador = u.id_usuario
             WHERE r.id_usuario_reportado = ?
             ORDER BY r.fecha_reporte DESC";
-    
-    $stmt = $this->executeQuery($sql, [$id_usuario]);
-    return $this->getResults($stmt);
-}
+
+        $stmt = $this->executeQuery($sql, [$id_usuario]);
+        return $this->getResults($stmt);
+    }
 
 
 
@@ -1421,19 +1421,6 @@ class Conexion
         return $result[0]['total_items'] ?? 0;
     }
 
-    // Funciones para valoraciones
-    public function agregarValoracion($id_usuario, $id_producto, $calificacion, $comentario = null)
-    {
-        $sql = "INSERT INTO VALORACIONES 
-            (id_usuario, id_producto, calificacion, comentario)
-            VALUES (?, ?, ?, ?)";
-        return $this->executeNonQuery($sql, [
-            $id_usuario,
-            $id_producto,
-            $calificacion,
-            $comentario
-        ]);
-    }
 
     public function obtenerValoracionesProducto($id_producto)
     {
@@ -1731,6 +1718,61 @@ class Conexion
 
         return $cliente;
     }
+
+    // Agregar una valoración
+    public function agregarValoracion($id_usuario, $id_producto, $calificacion, $comentario = null)
+    {
+        $sql = "INSERT INTO VALORACIONES (id_usuario, id_producto, calificacion, comentario) VALUES (?, ?, ?, ?)";
+        return $this->executeNonQuery($sql, [$id_usuario, $id_producto, $calificacion, $comentario]);
+    }
+
+    // Obtener todas las valoraciones de un usuario (vendedor)
+    public function getValoracionesByVendedor($id_vendedor)
+    {
+        $sql = "SELECT 
+                v.id_valoracion,
+                v.calificacion,
+                v.comentario,
+                v.fecha_valoracion,
+                u.nombre as nombre_cliente,
+                p.nombre_producto
+            FROM VALORACIONES v
+            JOIN USUARIOS u ON v.id_usuario = u.id_usuario
+            JOIN PRODUCTOS p ON v.id_producto = p.id_producto
+            WHERE p.id_usuario = ?
+            ORDER BY v.fecha_valoracion DESC";
+
+        $stmt = $this->executeQuery($sql, [$id_vendedor]);
+        return $this->getResults($stmt);
+    }
+
+    // Obtener promedio de valoraciones
+    public function getPromedioValoraciones($id_vendedor)
+    {
+        $sql = "SELECT AVG(calificacion) as promedio, COUNT(*) as total FROM VALORACIONES WHERE id_usuario = ?";
+        $stmt = $this->executeQuery($sql, [$id_vendedor]);
+        $result = $this->getResults($stmt);
+        return [
+            'promedio' => round($result[0]['promedio'] ?? 0, 1),
+            'total' => $result[0]['total'] ?? 0
+        ];
+    }
+
+    // Verificar si un cliente ya valoró a este vendedor
+    public function usuarioYaValoroAVendedor($id_usuario, $id_vendedor)
+    {
+        $sql = "SELECT id_valoracion FROM VALORACIONES WHERE id_usuario = ? AND id_usuario = ?";
+        $stmt = $this->executeQuery($sql, [$id_usuario, $id_vendedor]);
+        $result = $this->getResults($stmt);
+        return !empty($result);
+    }
+
+    public function getRolUsuario($id_usuario)
+{
+    $sql = "SELECT r.id_rol FROM ROLES_USUARIO ru JOIN ROLES r ON ru.id_rol = r.id_rol WHERE ru.id_usuario = ?";
+    $stmt = $this->executeQuery($sql, [$id_usuario]);
+    return $this->getResults($stmt)[0] ?? null;
+}
 }
 
 

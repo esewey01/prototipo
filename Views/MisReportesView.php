@@ -60,7 +60,7 @@
                             endif; ?>
 
                             <?php if (empty($reportes)): ?>
-                                <div class="alert alert-info">No tienes ningún reporte registrado.</div>
+                                <div class="alert alert-info">No tienes ninguna incidencia registrada.</div>
                             <?php else: ?>
                                 <table class="table table-bordered table-striped">
                                     <thead class="thead-light">
