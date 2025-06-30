@@ -175,7 +175,9 @@ class Conexion
     public function getUserByEmail($email)
     {
         $sql = "SELECT * FROM USUARIOS WHERE email = ?";
-        return $this->getRow($sql, [$email]); // getRow ya te devuelve la fila o false
+        $stmt = $this->executeQuery($sql, [$email]);
+        $result = $this->getResults($stmt);
+        return $result[0] ?? null;
     }
 
     // En tu archivo Conexion.php
@@ -235,20 +237,39 @@ class Conexion
         return $this->getResults($stmt)[0] ?? null;
     }
     //REGISTRAR NUEVO USUARIO
-    public function registerUserWithRole($nombre, $login, $password, $foto_perfil, $telefono, $id_rol)
+    public function registerUserWithRole($nombre, $login, $password, $foto_perfil, $telefono, $email, $id_rol)
     {
         // Iniciar transacción para asegurar integridad
         sqlsrv_begin_transaction($this->connection);
-        //HASHEAR LA CONTRASEÑA ANTES DE ALMACENARLA
+        //hashear la contraseña antes de almacenarla
         $hashedPassword = strtolower(hash('sha256', $password));
 
         try {
-            // 1. Insertar el usuario y obtener el ID insertado directamente
+            // 1. Verificar si el login o email ya existen
+            $existingUser = $this->searchUser($login);
+            $existingEmail = $this->searchUserByEmail($email);
+
+            if ($existingUser) {
+                throw new Exception("Usuario ya existente, boleta ya registrada");
+            }
+
+            if ($existingEmail) {
+                throw new Exception("El correo electrónico ya está registrado");
+            }
+
+            // 2. Insertar el usuario y obtener el ID insertado directamente
             $sql_user = "INSERT INTO USUARIOS 
-                    (nombre, login, password, foto_perfil, telefono, fecha_registro) 
-                    OUTPUT INSERTED.id_usuario
-                    VALUES (?, ?, ?, ?, ?, GETDATE())";
-            $result = $this->executeQuery($sql_user, array($nombre, $login, $hashedPassword, $foto_perfil, $telefono));
+                (nombre, login, password, foto_perfil, telefono, email, fecha_registro) 
+                OUTPUT INSERTED.id_usuario
+                VALUES (?, ?, ?, ?, ?, ?, GETDATE())";
+            $result = $this->executeQuery($sql_user, array(
+                $nombre,
+                $login,
+                $hashedPassword,
+                $foto_perfil,
+                $telefono,
+                $email
+            ));
 
             // Obtener el ID del nuevo usuario desde el resultado
             $row = $this->getResults($result);
@@ -256,10 +277,9 @@ class Conexion
                 throw new Exception("No se pudo obtener el ID del nuevo usuario.");
             }
 
-
             $id_usuario = $row[0]['id_usuario'];
 
-            // 2. Asignar el rol
+            // 3. Asignar el rol
             $sql_role = "INSERT INTO ROLES_USUARIO (id_usuario, id_rol) VALUES (?, ?)";
             $this->executeNonQuery($sql_role, array($id_usuario, $id_rol));
 
@@ -271,6 +291,14 @@ class Conexion
             sqlsrv_rollback($this->connection);
             throw $e; // Relanzar la excepción para manejarla en el controlador
         }
+    }
+
+    public function searchUserByEmail($email)
+    {
+        $sql = "SELECT id_usuario FROM USUARIOS WHERE email = ?";
+        $stmt = $this->executeQuery($sql, [$email]);
+        $result = $this->getResults($stmt);
+        return !empty($result);
     }
 
 
@@ -1720,11 +1748,35 @@ class Conexion
     }
 
     // Agregar una valoración
-    public function agregarValoracion($id_usuario, $id_producto, $calificacion, $comentario = null)
+    public function agregarValoracion(int $id_usuario, int $id_producto, int $calificacion, string $comentario = ''): bool
     {
-        $sql = "INSERT INTO VALORACIONES (id_usuario, id_producto, calificacion, comentario) VALUES (?, ?, ?, ?)";
+        $sql = "INSERT INTO VALORACIONES (id_usuario, id_producto, calificacion, comentario, fecha_valoracion)
+                VALUES (?, ?, ?, ?, GETDATE())";
         return $this->executeNonQuery($sql, [$id_usuario, $id_producto, $calificacion, $comentario]);
     }
+
+
+    public function getValoracionesProducto($id_producto)
+    {
+        $sql = "SELECT v.*, u.nombre as usuario_nombre, u.foto_perfil 
+            FROM VALORACIONES v
+            JOIN USUARIOS u ON v.id_usuario = u.id_usuario
+            WHERE v.id_producto = ? AND v.estado = 'ACTIVO'
+            ORDER BY v.fecha_valoracion DESC";
+        $stmt = $this->executeQuery($sql, [$id_producto]);
+        return $this->getResults($stmt);
+    }
+
+
+    public function getPromedioValoracionesProducto(int $id_producto): float
+    {
+        $sql = "SELECT AVG(calificacion) AS promedio FROM VALORACIONES WHERE id_producto = ? AND estado = 'ACTIVO'";
+        $stmt = $this->executeQuery($sql, [$id_producto]);
+
+        $result = $this->getResults($stmt);
+        return round((float)($result[0]['promedio'] ?? 0), 1);
+    }
+
 
     // Obtener todas las valoraciones de un usuario (vendedor)
     public function getValoracionesByVendedor($id_vendedor)
@@ -1747,15 +1799,14 @@ class Conexion
     }
 
     // Obtener promedio de valoraciones
-    public function getPromedioValoraciones($id_vendedor)
+    public function getPromedioValoraciones($id_producto)
     {
-        $sql = "SELECT AVG(calificacion) as promedio, COUNT(*) as total FROM VALORACIONES WHERE id_usuario = ?";
-        $stmt = $this->executeQuery($sql, [$id_vendedor]);
+        $sql = "SELECT AVG(calificacion) as promedio 
+            FROM VALORACIONES 
+            WHERE id_producto = ? AND estado = 'ACTIVO'";
+        $stmt = $this->executeQuery($sql, [$id_producto]);
         $result = $this->getResults($stmt);
-        return [
-            'promedio' => round($result[0]['promedio'] ?? 0, 1),
-            'total' => $result[0]['total'] ?? 0
-        ];
+        return round($result[0]['promedio'] ?? 0, 1);
     }
 
     // Verificar si un cliente ya valoró a este vendedor
@@ -1768,12 +1819,94 @@ class Conexion
     }
 
     public function getRolUsuario($id_usuario)
-{
-    $sql = "SELECT r.id_rol FROM ROLES_USUARIO ru JOIN ROLES r ON ru.id_rol = r.id_rol WHERE ru.id_usuario = ?";
-    $stmt = $this->executeQuery($sql, [$id_usuario]);
-    return $this->getResults($stmt)[0] ?? null;
+    {
+        $sql = "SELECT r.id_rol FROM ROLES_USUARIO ru JOIN ROLES r ON ru.id_rol = r.id_rol WHERE ru.id_usuario = ?";
+        $stmt = $this->executeQuery($sql, [$id_usuario]);
+        return $this->getResults($stmt)[0] ?? null;
+    }
+
+
+    public function getProductosCompradosPorUsuario($id_usuario)
+    {
+        $sql = "SELECT 
+                p.id_producto, 
+                p.nombre_producto, 
+                p.imagen,
+                p.id_usuario as id_vendedor,
+                u.nombre as nombre_vendedor,
+                o.estado as estado_orden,
+                o.id_orden,
+                o.fecha_orden,
+                do.cantidad,
+                do.precio_unitario
+            FROM DETALLE_ORDEN do
+            JOIN ORDENES o ON do.id_orden = o.id_orden
+            JOIN PRODUCTOS p ON do.id_producto = p.id_producto
+            JOIN USUARIOS u ON p.id_usuario = u.id_usuario
+            WHERE o.id_usuario = ?
+            ORDER BY o.fecha_orden DESC";
+
+        $stmt = $this->executeQuery($sql, [$id_usuario]);
+        return $this->getResults($stmt);
+    }
+
+
+
+    // Verificar si ya valoró este producto
+    public function yaValoroProducto(int $id_usuario, int $id_producto): bool
+    {
+        $sql = "SELECT COUNT(*) as total FROM VALORACIONES WHERE id_usuario = ? AND id_producto = ?";
+        $stmt = $this->executeQuery($sql, [$id_usuario, $id_producto]);
+        $row = $this->getResults($stmt)[0] ?? ['total' => 0];
+        return $row['total'] > 0;
+    }
+
+    public function yaValoroVendedor($id_usuario, $id_vendedor)
+    {
+        $sql = "SELECT COUNT(*) as total FROM VALORACIONES_VENDEDOR 
+            WHERE id_usuario = ? AND id_vendedor = ?";
+        $stmt = $this->executeQuery($sql, [$id_usuario, $id_vendedor]);
+        $result = $this->getResults($stmt);
+        return ($result[0]['total'] > 0);
+    }
+    // Obtener productos comprados y pagados
+    public function getProductosComprados(int $id_usuario): array
+    {
+        $sql = "SELECT p.id_producto, p.nombre_producto, p.descripcion, p.imagen, o.estado
+                FROM DETALLE_ORDEN do
+                JOIN PRODUCTOS p ON do.id_producto = p.id_producto
+                JOIN ORDENES o ON do.id_orden = o.id_orden
+                WHERE o.id_usuario = ? AND o.estado = 'PAGADO'";
+        $stmt = $this->executeQuery($sql, [$id_usuario]);
+        return $this->getResults($stmt);
+    }
+
+    public function verificarCompraVendedor($id_usuario, $id_vendedor)
+    {
+        $sql = "SELECT TOP 1 1 as existe
+            FROM ORDENES o
+            JOIN DETALLE_ORDEN do ON o.id_orden = do.id_orden
+            JOIN PRODUCTOS p ON do.id_producto = p.id_producto
+            WHERE o.id_usuario = ? AND p.id_usuario = ? AND o.estado = 'PAGADO'";
+
+        $stmt = $this->executeQuery($sql, [$id_usuario, $id_vendedor]);
+        $result = $this->getResults($stmt);
+        return !empty($result);
+    }
+
+    // Verificar si ya existe una orden pagada para ese producto
+    public function verificarProductoComprado(int $id_usuario, int $id_producto): bool
+    {
+        $sql = "SELECT TOP 1 1 as existe
+                FROM ORDENES o
+                JOIN DETALLE_ORDEN do ON o.id_orden = do.id_orden
+                WHERE o.id_usuario = ? AND do.id_producto = ? AND o.estado = 'PAGADO'";
+        $stmt = $this->executeQuery($sql, [$id_usuario, $id_producto]);
+        return !empty($this->getResults($stmt));
+    }
 }
-}
+
+
 
 
 class DatabaseConnectionException extends Exception {}

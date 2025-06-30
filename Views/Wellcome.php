@@ -49,6 +49,7 @@
                             <i class="fa fa-laptop"></i> PAGINA PRINCIPAL
                         </h3>
                     </div>
+
                     <!--FUNCION DE ALERTA DE MENSAJES-->
                     <?php if (isset($_SESSION['mensaje'])): ?>
                         <div class="alert <?= $_SESSION['alerta'] ?? 'alert-info' ?> alert-dismissible fade in" role="alert">
@@ -61,9 +62,12 @@
                         unset($_SESSION['mensaje']);
                         unset($_SESSION['alerta']);
                     endif; ?>
+
                     <ol class="breadcrumb">
-                        <li><i class="fa fa-home"></i><a href="PrincipalController.php">Inicio</a></li>
-                        <li><i class="fa fa-laptop"></i> Principal</li>
+
+                        <li><i class="fa fa-home"></i><a href="PrincipalController.php">Pagina de Inicio</a></li>
+                        <li><i class="fa fa-question-circle"></i> <a href="#" data-toggle="modal" data-target="#helpPaginaPrincipal">¿Qué es esta página?</a></li>
+                        <li><i class="icon_creditcard"></i> <a href="ComprarController.php">Comprar</a></li>
                     </ol>
                 </div>
             </div>

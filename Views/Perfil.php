@@ -96,8 +96,9 @@ $id_rol = $_SESSION['usuario']['rol']['id_rol'];
                             </div>
                         <?php endif; ?>
                         <ol class="breadcrumb">
-                            <li><i class="fa fa-home"></i><a href="PrincipalController.php">Inicio</a></li>
-                            <li><i class="fa fa-user"></i>Perfil</li>
+                            <li><i class="fa fa-home"></i><a href="PrincipalController.php">Pagina de Inicio</a></li>
+                            <li><i class="fa fa-question-circle"></i> <a href="#" data-toggle="modal" data-target="#helpMiPerfil">¿Necesitas ayuda?</a></li>
+                            <li><i class="fa fa-user"></i><a href="PerfilController.php">Perfil del Usuario</a></li>
                         </ol>
                     </div>
                 </div>

@@ -2,23 +2,26 @@
 require_once('../Model/Conexion.php');
 require('Constants.php');
 
-class ProductosController {
+class ProductosController
+{
     private $conexion;
     private $requestMethod;
     private $isAjax;
     private $urlViews;
-    
-    public function __construct() {
+
+    public function __construct()
+    {
         $this->conexion = new Conexion();
-        $this->urlViews=URL_VIEWS;
+        $this->urlViews = URL_VIEWS;
         $this->requestMethod = $_SERVER['REQUEST_METHOD'];
         $this->isAjax = $this->isAjaxRequest();
         session_start();
     }
-    
-    public function handleRequest() {
+
+    public function handleRequest()
+    {
         $action = $_GET['action'] ?? 'index';
-        
+
         switch ($action) {
             case 'detalle':
                 $this->handleProductDetail();
@@ -30,83 +33,97 @@ class ProductosController {
                 $this->showProductList();
         }
     }
-    
-    private function showProductList() {
-    try {
-        $categorias = $this->conexion->getAllCategorias();
-        $id_categoria = $_GET['categoria'] ?? null;
-        $pagina_actual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
-        $productos_por_pagina = 12; // Número de productos por página
 
-        // Calcular el offset para la consulta SQL
-        $offset = ($pagina_actual - 1) * $productos_por_pagina;
+    private function showProductList()
+    {
+        try {
+            $categorias = $this->conexion->getAllCategorias();
+            $id_categoria = $_GET['categoria'] ?? null;
+            $pagina_actual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
+            $productos_por_pagina = 12; // Número de productos por página
 
-        // Obtener el total de productos activos
-        $total_productos = $this->conexion->getTotalProductosActivos($id_categoria);
-        $total_paginas = ceil($total_productos / $productos_por_pagina);
+            // Calcular el offset para la consulta SQL
+            $offset = ($pagina_actual - 1) * $productos_por_pagina;
 
-        // Obtener los productos para la página actual
-        $productos = $this->conexion->getProductosByCategoria($id_categoria, $productos_por_pagina, $offset);
+            // Obtener el total de productos activos
+            $total_productos = $this->conexion->getTotalProductosActivos($id_categoria);
+            $total_paginas = ceil($total_productos / $productos_por_pagina);
 
-        $this->renderView('ComprarView.php', [
-            'categorias' => $categorias,
-            'productos' => $productos,
-            'total_paginas' => $total_paginas,
-            'pagina_actual' => $pagina_actual,
-            'error' => empty($productos) ? 'No se encontraron productos' : null
-        ]);
-    } catch (Exception $e) {
-        error_log("Error en showProductList: " . $e->getMessage());
-        $this->renderView('ComprarView.php', [
-            'categorias' => [],
-            'productos' => [],
-            'error' => 'Error al cargar los productos'
-        ]);
+            // Obtener los productos para la página actual
+            $productos = $this->conexion->getProductosByCategoria($id_categoria, $productos_por_pagina, $offset);
+
+            $this->renderView('ComprarView.php', [
+                'categorias' => $categorias,
+                'productos' => $productos,
+                'total_paginas' => $total_paginas,
+                'pagina_actual' => $pagina_actual,
+                'error' => empty($productos) ? 'No se encontraron productos' : null
+            ]);
+        } catch (Exception $e) {
+            error_log("Error en showProductList: " . $e->getMessage());
+            $this->renderView('ComprarView.php', [
+                'categorias' => [],
+                'productos' => [],
+                'error' => 'Error al cargar los productos'
+            ]);
+        }
     }
-}
-    
-    private function handleProductDetail() {
+
+    private function handleProductDetail()
+    {
         if (!isset($_GET['id'])) {
             $this->sendErrorResponse('ID de producto no proporcionado');
             return;
         }
-        
+
         $id_producto = $_GET['id'];
         $producto = $this->conexion->getProductoById($id_producto);
-        
+
         if (!$producto) {
             $this->handleProductNotFound();
             return;
         }
-        
+
+        // Obtener valoraciones y promedio
+        $valoraciones = $this->conexion->getValoracionesProducto($id_producto);
+        $promedio = $this->conexion->getPromedioValoraciones($id_producto);
+
         if ($this->isAjax) {
             $this->renderPartialView('ProductoDetalle.php', [
                 'producto' => $producto,
+                'valoraciones' => $valoraciones,
+                'promedio' => $promedio,
                 'URL_VIEWS' => URL_VIEWS
             ]);
         } else {
             $this->renderView('ProductoDetalle.php', [
-                'producto' => $producto
+                'producto' => $producto,
+                'valoraciones' => $valoraciones,
+                'promedio' => $promedio
             ]);
         }
     }
-    
-    private function handleGetRatings() {
+
+    private function handleGetRatings()
+    {
         if (!isset($_GET['id'])) {
             $this->sendErrorResponse('ID de producto no proporcionado');
             return;
         }
-        
+
         $id_producto = $_GET['id'];
-        //$valoraciones = $this->conexion->getValoracionesProducto($id_producto);
-        
+        $valoraciones = $this->conexion->getValoracionesProducto($id_producto);
+        $promedio = $this->conexion->getPromedioValoraciones($id_producto);
+
         $this->sendJsonResponse([
             'success' => true,
-            'data' => [] //$valoraciones
+            'data' => $valoraciones,
+            'promedio' => $promedio
         ]);
     }
-    
-    private function handleProductNotFound() {
+
+    private function handleProductNotFound()
+    {
         if ($this->isAjax) {
             $this->sendJsonResponse([
                 'success' => false,
@@ -118,47 +135,51 @@ class ProductosController {
             exit;
         }
     }
-    
-    private function renderView($viewPath, $data = []) {
+
+    private function renderView($viewPath, $data = [])
+    {
         extract($data);
         include "../Views/{$viewPath}";
         exit;
     }
-    
-    private function renderPartialView($viewPath, $data = []) {
+
+    private function renderPartialView($viewPath, $data = [])
+    {
         ob_start();
         $this->renderView($viewPath, $data);
         $html = ob_get_clean();
         echo $html;
         exit;
     }
-    
-    private function sendJsonResponse($data, $statusCode = 200) {
+
+    private function sendJsonResponse($data, $statusCode = 200)
+    {
         header('Content-Type: application/json');
         http_response_code($statusCode);
         echo json_encode($data);
         exit;
     }
-    
-    private function sendErrorResponse($message, $statusCode = 400) {
+
+    private function sendErrorResponse($message, $statusCode = 400)
+    {
         $this->sendJsonResponse([
             'success' => false,
             'message' => $message
         ], $statusCode);
     }
-    
-    private function isAjaxRequest() {
-        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
-               strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+
+    private function isAjaxRequest()
+    {
+        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
     }
 }
 
-try{
-// Punto de entrada de la aplicación
-$controller = new ProductosController();
-$controller->handleRequest();
-}
-catch (Throwable $e) { // Captura tanto Exception como Error
+try {
+    // Punto de entrada de la aplicación
+    $controller = new ProductosController();
+    $controller->handleRequest();
+} catch (Throwable $e) { // Captura tanto Exception como Error
     // Registrar el error en logs
     error_log("Error crítico: " . $e->getMessage() . " en " . $e->getFile() . ":" . $e->getLine());
 
@@ -171,5 +192,4 @@ catch (Throwable $e) { // Captura tanto Exception como Error
     $_SESSION['alerta'] = "alert-danger";
     header("Location: ComprarController.php");
     exit();
-
 }

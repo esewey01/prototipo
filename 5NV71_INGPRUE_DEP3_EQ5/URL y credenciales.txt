@@ -1,0 +1,15 @@
+https://upiicsafood-g6f2cbdcczh0h3dc.canadacentral-01.azurewebsites.net/
+
+CREDENCIALES COMO ADMINISTRADOR
+admin
+admin
+
+CREDENCIALES COMO VENDEDOR
+vendedor
+admin
+
+CREDENCIALES COMO CLIENTE
+2056465123
+admin
+
+Puede crearse un usuario y ser "cliente"

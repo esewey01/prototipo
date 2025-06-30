@@ -9,11 +9,24 @@ if (isset($_SESSION['mensaje'])): ?>
         </button>
         <strong><?= $_SESSION['mensaje'] ?></strong>
     </div>
+
+    
 <?php
+
     unset($_SESSION['mensaje']);
     unset($_SESSION['alerta']);
 endif; ?>
 
+
+
+<?php
+if (isset($_SESSION['registration_messages'])) {
+    echo '<div class="alert alert-' . $_SESSION['registration_messages']['type'] . '">';
+    echo $_SESSION['registration_messages']['text'];
+    echo '</div>';
+    unset($_SESSION['registration_messages']);
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 

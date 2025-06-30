@@ -148,21 +148,21 @@ INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden
 ('Carrito', 'Activo', 'icon_cart', 'CarritoController.php', '#ffffff', 'A', NULL,3),
 ('Pagar', 'Activo', 'icon_wallet_alt', 'CheckoutController.php', '#ffffff', 'A', NULL,4),
 ('Historial', 'Activo', 'icon_document', 'HistorialController.php', '#ffffff', 'A',NULL, 5),
-('Incidencias', 'Activo', '.icon_datareport', 'MisReportesController.php', '#ffffff', 'A', NULL, 6),
-('Valoraciones', 'Activo', '.icon_comment_alt', 'ValoracionesController.php', '#ffffff', 'A', NULL, 7);
+('Inicidencias', 'Activo', 'icon_error-triangle', 'MisReportesController.php', '#ffffff', 'A', NULL, 6),
+('Valoraciones', 'Activo', 'icon_comment', 'ValoracionesController.php', '#ffffff', 'A', NULL, 7);
 -- Opciones solo para administradores (id_rol = 1)
 INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden) VALUES
+('Productos', 'Activo', 'icon_datareport_alt', 'ProductoController.php', '#ffffff', 'A', 1, 11),--TAMBIEN PARA ADMIN
 ('Usuarios', 'Activo', 'icon_organigrama', 'UsuariosController.php', '#ffffff', 'A', 1, 5),
-('Solicitudes', 'Activo', 'icon_documents', 'SolicitudesController.php', '#ffffff', 'A', 1, 7),
-('Productos', 'Activo', 'icon_datareport_alt', 'ProductoController.php', '#ffffff', 'A', 1, 8),--TAMBIEN PARA ADMIN
+('Solicitudes', 'Activo', 'icon_documents', 'SolicitudesController.php', '#ffffff', 'A', 1, 8),--TAMBIEN PARA ADMIN
 ('Reportes', 'Activo', 'icon_clipboard', 'ReportesController.php', '#ffffff', 'A', 1, 9),
 ('Configuración', 'Activo', 'icon_tools', 'ConfiguracionController.php', '#ffffff', 'A' ,1, 10);
 
 -- Opciones para vendedores (id_rol = 2)
 INSERT INTO MENU (opcion, estado, icono, ubicacion, color, acceso, id_rol, orden) VALUES
-('Productos', 'Activo', 'icon_datareport_alt', 'ProductoController.php', '#ffffff', 'A', 2, 6),--TAMBIEN PARA ADMIN
-('Ventas', 'Activo', 'icon_cart', 'VentasController.php', '#ffffff', 'A', 2, 7),
-('Clientes', 'Activo', 'icon_organigrama', 'ClientesController.php', '#ffffff', 'A', 2, 8);
+('Productos', 'Activo', 'icon_datareport_alt', 'ProductoController.php', '#ffffff', 'A', 2, 11),--TAMBIEN PARA ADMIN
+('Ventas', 'Activo', 'icon_cart', 'VentasController.php', '#ffffff', 'A', 2, 12),
+('Clientes', 'Activo', 'icon_organigrama', 'ClientesController.php', '#ffffff', 'A', 2, 13);
 
 
 
@@ -298,6 +298,18 @@ CREATE TABLE VALORACIONES (
 );
 
 
+CREATE TABLE VALORACIONES_VENDEDOR (
+    id_valoracion INT IDENTITY(1,1) PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    id_vendedor INT NOT NULL,
+    calificacion INT NOT NULL CHECK (calificacion BETWEEN 1 AND 5),
+    comentario VARCHAR(500),
+    fecha_valoracion DATETIME DEFAULT GETDATE(),
+    estado VARCHAR(20) DEFAULT 'ACTIVO' CHECK (estado IN ('ACTIVO', 'OCULTO')),
+    FOREIGN KEY (id_usuario) REFERENCES USUARIOS(id_usuario),
+    FOREIGN KEY (id_vendedor) REFERENCES USUARIOS(id_usuario)
+);
+
 CREATE TABLE ORDENES (
     id_orden INT IDENTITY(1,1) PRIMARY KEY,
     id_usuario INT NOT NULL,
@@ -381,3 +393,14 @@ SELECT * FROM USUARIOS;
 UPDATE USUARIOS 
 SET PASSWORD = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918' 
 WHERE id_usuario = 2;
+
+
+
+
+
+
+
+use UPIICSAFOOD;
+
+
+SELECT*FROM VALORACIONES

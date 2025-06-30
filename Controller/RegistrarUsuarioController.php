@@ -63,6 +63,7 @@ class UserRegistrationController
             'password' => $_POST['password'] ?? '',
             'password2' => $_POST['password2'] ?? '',
             'telefono' => $_POST['telefono'] ?? '',
+            'email' => $_POST['email'] ?? '',
             'foto' => $_FILES['foto']['name'] ?? '',
             'tipo' => 'CLIENTE',
             'fotoPath' => $this->defaultPhoto
@@ -80,8 +81,26 @@ class UserRegistrationController
     {
         $this->validateRequiredFields($userData);
         $this->validatePhone($userData['telefono']);
+        $this->validateEmail($userData['email']);
         $this->validateLogin($userData['login']);
         $this->validatePasswords($userData['password'], $userData['password2']);
+    }
+    private function validateEmail($email)
+    {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $this->errors[] = "El correo electrónico no es válido";
+            return;
+        }
+
+        // Verificar si el correo ya existe en la base de datos
+        try {
+            $existingEmail = $this->conexion->searchUserByEmail($email);
+            if (!empty($existingEmail)) {
+                $this->errors[] = "El correo electrónico ya está registrado";
+            }
+        } catch (Exception $e) {
+            $this->errors[] = "Error al verificar el correo electrónico";
+        }
     }
 
     private function validateRequiredFields($userData)
@@ -228,9 +247,14 @@ class UserRegistrationController
     {
         try {
             $existingUser = $this->conexion->searchUser($userData['login']);
+            $existingEmail = $this->conexion->searchUserByEmail($userData['email']);
 
             if (!empty($existingUser)) {
                 return "Usuario ya existente, boleta ya registrada";
+            }
+
+            if (!empty($existingEmail)) {
+                return "El correo electrónico ya está registrado";
             }
 
             $id_rol = 3; // Rol de cliente
@@ -240,6 +264,7 @@ class UserRegistrationController
                 $userData['password'],
                 $userData['fotoPath'],
                 $userData['telefono'],
+                $userData['email'],
                 $id_rol
             );
 
@@ -256,7 +281,8 @@ class UserRegistrationController
             'login' => $userData['login'],
             'password' => $userData['password'],
             'foto' => $userData['fotoPath'],
-            'telefono' => $userData['telefono']
+            'telefono' => $userData['telefono'],
+            'email' => $userData['email']
         ];
     }
 

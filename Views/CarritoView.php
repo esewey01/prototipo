@@ -20,17 +20,7 @@
             </div>
             <?PHP include("Logo.php") ?>
 
-            <div class="nav search-row" id="top_menu">
-                <!--  search form start -->
-                <ul class="nav top-menu">
-                    <li>
-                        <form class="navbar-form">
-                            <input class="form-control" placeholder="Search" type="text">
-                        </form>
-                    </li>
-                </ul>
-                <!--  search form end -->
-            </div>
+            
             <?PHP include("DropDown.php"); ?> <!--MENU DE USUARIO-->
         </header>
 
@@ -60,8 +50,10 @@
                         unset($_SESSION['alerta']);
                     endif; ?>
                     <ol class="breadcrumb">
-                        <li><i class="fa fa-home"></i><a href="PrincipalController.php">Inicio</a></li>
-                        <li><i class="fa fa-laptop"></i> Principal</li>
+                        <li><i class="fa fa-home"></i><a href="PrincipalController.php">Página de Inicio</a></li>
+                        <li><i class="fa fa-question-circle"></i> <a href="#" data-toggle="modal" data-target="#helpCarrito">¿Necesitas ayuda?</a></li>
+                        <li><i class="icon_creditcard"></i> <a href="ComprarController.php">Seguir comprando</a></li>
+                        <li><i class="icon_wallet_alt"></i><a href="CheckoutController.php">Tickets</a></li>
                     </ol>
                 </div>
             </div>

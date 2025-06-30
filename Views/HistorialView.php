@@ -43,15 +43,7 @@
                 </div>
             </div>
             <?PHP include("Logo.php") ?>
-            <div class="nav search-row" id="top_menu">
-                <ul class="nav top-menu">
-                    <li>
-                        <form class="navbar-form">
-                            <input class="form-control" placeholder="Buscar..." type="text">
-                        </form>
-                    </li>
-                </ul>
-            </div>
+            
             <?PHP include("DropDown.php"); ?>
         </header>
 
@@ -79,8 +71,9 @@
                         endif; ?>
 
                         <ol class="breadcrumb">
-                            <li><i class="fa fa-home"></i><a href="PrincipalController.php">Inicio</a></li>
-                            <li><i class="icon_document"></i> Historial</li>
+                            <li><i class="fa fa-home"></i><a href="PrincipalController.php">Página de Inicio</a></li>
+                            <li><i class="fa fa-question-circle"></i> <a href="#" data-toggle="modal" data-target="#helpHistorial">¿Necesitas ayuda?</a></li>
+                            <li><i class="icon_document"></i><a href="HistorialController.php">Mi Historial de Compras</a></li>
                         </ol>
                     </div>
                 </div>

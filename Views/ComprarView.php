@@ -60,10 +60,11 @@
                     endif; ?>
 
                     <ol class="breadcrumb">
-                        <li><i class="fa fa-home"></i><a href="PrincipalController.php">Inicio</a></li>
-                        <li><i class="icon_creditcard"></i><a href="ComprarController.php">Productos</a></li>
-                        <li><i class="icon_cart_alt"></i><a href="CarritoController.php">Carrito</a></li>
-                        <li><i class="icon_wallet_alt"></i><a href="PagarController.php">Pagar</a></li>
+                        <li><i class="fa fa-home"></i><a href="PrincipalController.php">Pagina de Inicio</a></li>
+                        <li><i class="fa fa-question-circle"></i> <a href="#" data-toggle="modal" data-target="#helpComprar">¿Necesitas ayuda?</a></li>
+                        <li><i class="icon_creditcard"></i><a href="ComprarController.php">Productos disponibles</a></li>
+                        <li><i class="icon_cart_alt"></i><a href="CarritoController.php">Mi Carrito</a></li>
+                        <li><i class="icon_wallet_alt"></i><a href="CheckoutController.php">Tickets</a></li>
                     </ol>
                 </div>
             </div>
@@ -184,25 +185,25 @@
                             <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
                                 <span aria-hidden="true">&times;</span>
                             </button>
-                            <h4 class="modal-title" id="helpModalTitle"><i class="icon_wallet" ></i> Informacion sobre la Tienda </h4>
+                            <h4 class="modal-title" id="helpModalTitle"><i class="icon_wallet"></i> Informacion sobre la Tienda </h4>
 
                         </div>
                         <div class="modal-body">
                             <p>¡Bienvenido a la sección de <strong>Productos</strong>
-                            ! Aquí puedes explorar todos los artículos que nuestra comunidad UPIICSA ofrece.
-                            Estamos comprometidos con una experiencia de compra y venta <strong>justa y segura</strong> para todos los politécnicos.</p>
+                                ! Aquí puedes explorar todos los artículos que nuestra comunidad UPIICSA ofrece.
+                                Estamos comprometidos con una experiencia de compra y venta <strong>justa y segura</strong> para todos los politécnicos.</p>
 
-                            
+
 
                             <h4>¿Cómo usar esta sección?</h4>
                             <ul>
-                                <li><strong>Añadir al carrito:</strong> ¿Te interesa un producto? Haz clic en el botón  <i class="fa fa-shopping-cart"></i><strong> Añadir</strong> para guardarlo mientras sigues explorando. .</li>
+                                <li><strong>Añadir al carrito:</strong> ¿Te interesa un producto? Haz clic en el botón <i class="fa fa-shopping-cart"></i><strong> Añadir</strong> para guardarlo mientras sigues explorando. .</li>
                                 <li><strong>Ver comentarios:</strong> Antes de decidirte, puedes leer lo que otros usuarios opinan del producto o del vendedor. Ve más detalles en la sección de <i class="fa fa-eye"></i><strong> Ver</strong> ¡Tu opinión también es valiosa!</li>
-                                <li><strong>Comprar:</strong> Cuando estés listo para adquirir un producto, ve a tu carrito y procede a comprarlo o haz clic en el botón <i class="fa fa-money-bill-alt"></i>  <strong> Pagar en Efectivo </strong></li>
-                                <li><strong>Reportar:</strong> Si encuentras un producto inapropiado, una descripción engañosa o tienes algún problema con un vendedor, puedes <i class="fa fa-exclamation-triangle"></i><strong> Reportarlo</strong>.  </li>
+                                <li><strong>Comprar:</strong> Cuando estés listo para adquirir un producto, ve a tu carrito y procede a comprarlo o haz clic en el botón <i class="fa fa-money-bill-alt"></i> <strong> Pagar en Efectivo </strong></li>
+                                <li><strong>Reportar:</strong> Si encuentras un producto inapropiado, una descripción engañosa o tienes algún problema con un vendedor, puedes <i class="fa fa-exclamation-triangle"></i><strong> Reportarlo</strong>. </li>
                             </ul>
 
-                            
+
 
                             <p>Recuerda siempre revisar la descripción del producto y contactar al vendedor si tienes alguna pregunta antes de finalizar tu compra.</p>
                         </div>
@@ -445,6 +446,14 @@
                     type: 'GET',
                     success: function(data) {
                         modal.find('.modal-body').html(data);
+
+                        // Después de cargar el detalle, cargar las valoraciones
+                        $.get('ComprarController.php?action=getValoraciones&id=' + idProducto, function(response) {
+                            if (response.success) {
+                                // Actualizar la sección de valoraciones con los datos recibidos
+                                // Aquí debes implementar la lógica para renderizar las valoraciones
+                            }
+                        }, 'json');
                     },
                     error: function(xhr) {
                         let errorMsg = 'Error al cargar los detalles';
@@ -452,13 +461,13 @@
                             errorMsg += ': ' + xhr.responseText.substring(0, 100);
                         }
                         modal.find('.modal-body').html(`
-                        <div class="alert alert-danger">
-                            ${errorMsg}
-                            <button class="btn btn-sm btn-default" onclick="window.location.reload()">
-                                Recargar
-                            </button>
-                        </div>
-                        `);
+            <div class="alert alert-danger">
+                ${errorMsg}
+                <button class="btn btn-sm btn-default" onclick="window.location.reload()">
+                    Recargar
+                </button>
+            </div>
+        `);
                     }
                 });
             });
