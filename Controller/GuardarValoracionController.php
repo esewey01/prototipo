@@ -6,7 +6,7 @@ require('Constants.php');
 if (!isset($_SESSION['usuario']) || !isset($_SESSION['usuario']['id_usuario'])) {
     $_SESSION['mensaje'] = "Debes iniciar sesión para valorar.";
     $_SESSION['alerta'] = "alert-danger";
-header("Location: ValoracionesController.php");
+    header("Location: ValoracionesController.php");
     exit();
 }
 
@@ -25,19 +25,19 @@ if ($tipo_valoracion === 'producto') {
 
     if (!$id_producto) {
         $_SESSION['mensaje'] = "ID de producto inválido.";
-header("Location: ValoracionesController.php");
+        header("Location: ValoracionesController.php");
         exit();
     }
 
     if (!$conexion->verificarProductoComprado($id_usuario, $id_producto)) {
         $_SESSION['mensaje'] = "No puedes valorar este producto o no está pagado.";
-header("Location: ValoracionesController.php");
+        header("Location: ValoracionesController.php");
         exit();
     }
 
     if ($conexion->yaValoroProducto($id_usuario, $id_producto)) {
         $_SESSION['mensaje'] = "Ya has valorado este producto.";
-header("Location: ValoracionesController.php");
+        header("Location: ValoracionesController.php");
         exit();
     }
 
@@ -48,7 +48,6 @@ header("Location: ValoracionesController.php");
         $_SESSION['mensaje'] = "Error al guardar la valoración.";
         $_SESSION['alerta'] = "alert-danger";
     }
-
 } else {
     $_SESSION['mensaje'] = "Tipo de valoración no válido.";
     $_SESSION['alerta'] = "alert-danger";

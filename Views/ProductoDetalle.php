@@ -31,34 +31,42 @@ if (!isset($producto)) {
             </div>
 
 
-            <div class="mt-4" style="padding-top:10px">
-                
-
+            <div class="mt-4 pt-3">
                 <div class="mb-3 d-flex align-items-center">
-                    <strong><i class="fa fa-star text-warning"></i> PROMEDIO</strong>
-                    <!--strong class="mr-2">PROMEDIO:</strong-->
-                    <div class="stars-avg">
+                    <strong class="text-secondary mr-2">
+                        <i class="fa fa-star text-warning"></i> PROMEDIO
+                    </strong>
+                    <?php if (!empty($valoraciones)): ?>
+                        <span class="font-weight-bold text-primary mr-2"><?= count($valoraciones) ?> RESEÑAS TOTALES</span>
+                    <?php endif; ?>
+                    <div class="d-flex align-items-center">
+                        <span class="ml-2 font-weight-bold text-primary mr-2">(<?= number_format($promedio, 1) ?>/5)</span>
                         <?php for ($i = 1; $i <= 5; $i++): ?>
-                            <i class="fa fa-star<?= $i <= $promedio ? ' text-warning' : ' text-muted' ?>"></i>
+                            <i class="fa fa-star<?= $i <= $promedio ? ' text-warning' : ' text-muted' ?> mr-1"></i>
                         <?php endfor; ?>
                     </div>
-                    <span class="ml-2 font-weight-bold text-primary">(<?= number_format($promedio, 1) ?>/5)</span>
-                    <?php if (!empty($valoraciones)): ?>
-                        <span class="ml-3 text-muted"> - <?= count($valoraciones) ?> RESEÑAS TOTALES</span>
-                    <?php endif; ?>
                 </div>
 
+                <?php if (!empty($valoraciones)): ?>
+                    <p class="text small mt-2 mb-3"><i class="fa fa-check-circle text-success mr-1"></i> Todas las reseñas son de compras verificadas.</p>
+                <?php endif; ?>
+
                 <?php if (empty($valoraciones)): ?>
-                    <div class="alert alert-info mt-3">
+                    <div class="alert alert-info mt-3" role="alert">
                         Este producto no tiene valoraciones aún. ¡Sé el primero en calificarlo!
                     </div>
                 <?php else: ?>
-                    <div class="valoraciones-list-container" style="max-height: 400px; overflow-y: auto; padding-right: 15px;">
+                    <div class="valoraciones-list-container" style="max-height: 400px; overflow-y: auto;">
                         <?php foreach ($valoraciones as $index => $valoracion): ?>
-                            <div class="valoracion-item mb-4">
-                                <div class="d-flex align-items-center">
-                                    <strong class="text-dark mr-2"><?= htmlspecialchars($valoracion['usuario_nombre']) ?></strong>
-                                    <div>
+                            <?php if ($index > 0): ?>
+                                <hr class="my-4 border-top"> <?php // Línea separadora sutil y con más margen 
+                                                                ?>
+                            <?php endif; ?>
+                            <div class="valoracion-item"> <?php // Ya no usamos 'card' para que la línea de abajo sea más notoria 
+                                                            ?>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <strong class="text-dark"><?= htmlspecialchars($valoracion['usuario_nombre']) ?></strong>
+                                    <div class="d-flex align-items-center">
                                         <?php for ($i = 1; $i <= 5; $i++): ?>
                                             <i class="fa fa-star<?= $i <= $valoracion['calificacion'] ? '' : '-o' ?> text-warning mr-1"></i>
                                         <?php endfor; ?>
@@ -66,19 +74,18 @@ if (!isset($producto)) {
                                     </div>
                                 </div>
 
-                                <p class="mt-1 mb-2 text-dark small"><?= nl2br(htmlspecialchars($valoracion['comentario'])) ?></p>
+                                <p class="text-dark small mb-2"><?= nl2br(htmlspecialchars($valoracion['comentario'])) ?></p>
 
                                 <?php if (!empty($valoracion['respuesta_vendedor'])): ?>
                                     <div class="bg-light p-2 mt-2 rounded border-left border-primary" style="border-left-width: 3px !important;">
-                                        <strong class="text-primary d-block mb-1"><i class="fa fa-reply mr-1"></i> Respuesta del vendedor:</strong>
+                                        <strong class="text-primary d-block mb-1">
+                                            <i class="fa fa-reply mr-1"></i> Respuesta del vendedor:
+                                        </strong>
                                         <p class="mb-0 small text-dark"><?= nl2br(htmlspecialchars($valoracion['respuesta_vendedor'])) ?></p>
-                                        <small class="text-muted mt-1 d-block"><?= $valoracion['fecha_respuesta']->format('d/m/Y H:i') ?></small>
+                                        <small class="text-muted mt-1 d-block text-right"><?= $valoracion['fecha_respuesta']->format('d/m/Y H:i') ?></small>
                                     </div>
                                 <?php endif; ?>
                             </div>
-
-                            <?php if ($index < count($valoraciones) - 1): ?>
-                                <hr class="my-3"> <?php endif; ?>
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>

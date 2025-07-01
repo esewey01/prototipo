@@ -1853,12 +1853,13 @@ class Conexion
 
 
     // Verificar si ya valoró este producto
-    public function yaValoroProducto(int $id_usuario, int $id_producto): bool
+    public function yaValoroProducto($id_usuario, $id_producto)
     {
-        $sql = "SELECT COUNT(*) as total FROM VALORACIONES WHERE id_usuario = ? AND id_producto = ?";
+        $sql = "SELECT COUNT(*) as total FROM VALORACIONES 
+            WHERE id_usuario = ? AND id_producto = ?";
         $stmt = $this->executeQuery($sql, [$id_usuario, $id_producto]);
-        $row = $this->getResults($stmt)[0] ?? ['total' => 0];
-        return $row['total'] > 0;
+        $result = $this->getResults($stmt);
+        return ($result[0]['total'] > 0);
     }
 
     public function yaValoroVendedor($id_usuario, $id_vendedor)
@@ -1895,14 +1896,128 @@ class Conexion
     }
 
     // Verificar si ya existe una orden pagada para ese producto
-    public function verificarProductoComprado(int $id_usuario, int $id_producto): bool
+    public function verificarProductoComprado($id_usuario, $id_producto)
     {
         $sql = "SELECT TOP 1 1 as existe
-                FROM ORDENES o
-                JOIN DETALLE_ORDEN do ON o.id_orden = do.id_orden
-                WHERE o.id_usuario = ? AND do.id_producto = ? AND o.estado = 'PAGADO'";
+            FROM ORDENES o
+            JOIN DETALLE_ORDEN do ON o.id_orden = do.id_orden
+            WHERE o.id_usuario = ? 
+            AND do.id_producto = ? 
+            AND o.estado = 'PAGADO'";
+
         $stmt = $this->executeQuery($sql, [$id_usuario, $id_producto]);
-        return !empty($this->getResults($stmt));
+        $result = $this->getResults($stmt);
+        return !empty($result);
+    }
+
+
+    public function getProductosCompradosPorValorar($id_usuario)
+    {
+        $sql = "SELECT DISTINCT 
+                p.id_producto, 
+                p.nombre_producto, 
+                p.descripcion, 
+                p.imagen,
+                p.id_usuario as id_vendedor,
+                u.nombre as nombre_vendedor,
+                o.estado as estado_orden,
+                o.id_orden,
+                o.fecha_orden,
+                do.cantidad,
+                do.precio_unitario
+            FROM ORDENES o
+            JOIN DETALLE_ORDEN do ON o.id_orden = do.id_orden
+            JOIN PRODUCTOS p ON do.id_producto = p.id_producto
+            JOIN USUARIOS u ON p.id_usuario = u.id_usuario
+            WHERE o.id_usuario = ? 
+            AND o.estado = 'PAGADO'
+            AND NOT EXISTS (
+                SELECT 1 FROM VALORACIONES v 
+                WHERE v.id_usuario = o.id_usuario 
+                AND v.id_producto = p.id_producto
+            )
+            ORDER BY o.fecha_orden DESC";
+
+        $stmt = $this->executeQuery($sql, [$id_usuario]);
+        return $this->getResults($stmt);
+    }
+    public function getProductosValorados($id_usuario)
+    {
+        $sql = "SELECT 
+                v.id_valoracion,
+                v.calificacion,
+                v.comentario,
+                v.fecha_valoracion,
+                p.id_producto, 
+                p.nombre_producto, 
+                p.descripcion, 
+                p.imagen,
+                p.id_usuario as id_vendedor,
+                u.nombre as nombre_vendedor,
+                o.fecha_orden,
+                do.precio_unitario
+            FROM VALORACIONES v
+            JOIN PRODUCTOS p ON v.id_producto = p.id_producto
+            JOIN USUARIOS u ON p.id_usuario = u.id_usuario
+            JOIN DETALLE_ORDEN do ON do.id_producto = p.id_producto
+            JOIN ORDENES o ON do.id_orden = o.id_orden AND o.id_usuario = ?
+            WHERE v.id_usuario = ?
+            ORDER BY v.fecha_valoracion DESC";
+
+        $stmt = $this->executeQuery($sql, [$id_usuario, $id_usuario]);
+        return $this->getResults($stmt);
+    }
+
+    public function getVendedoresPorValorar($id_usuario)
+    {
+        $sql = "SELECT 
+                DISTINCT p.id_usuario,
+                u.nombre,
+                u.email,
+                u.foto_perfil,
+                COUNT(p.id_producto) as total_productos,
+                MAX(o.fecha_orden) as ultima_compra
+            FROM ORDENES o
+            JOIN DETALLE_ORDEN do ON o.id_orden = do.id_orden
+            JOIN PRODUCTOS p ON do.id_producto = p.id_producto
+            JOIN USUARIOS u ON p.id_usuario = u.id_usuario
+            WHERE o.id_usuario = ? AND o.estado = 'PAGADO'
+            AND NOT EXISTS (
+                SELECT 1 FROM VALORACIONES_VENDEDOR vv 
+                WHERE vv.id_usuario = ? AND vv.id_vendedor = p.id_usuario
+            )
+            GROUP BY p.id_usuario, u.nombre, u.email, u.foto_perfil
+            ORDER BY ultima_compra DESC";
+
+        $stmt = $this->executeQuery($sql, [$id_usuario, $id_usuario]);
+        return $this->getResults($stmt);
+    }
+
+    public function getVendedoresValorados($id_usuario)
+    {
+        $sql = "SELECT 
+                vv.id_valoracion,
+                vv.calificacion,
+                vv.comentario,
+                vv.fecha_valoracion,
+                u.id_usuario,
+                u.nombre,
+                u.email,
+                u.foto_perfil,
+                COUNT(p.id_producto) as total_productos,
+                MAX(o.fecha_orden) as ultima_compra
+            FROM VALORACIONES_VENDEDOR vv
+            JOIN USUARIOS u ON vv.id_vendedor = u.id_usuario
+            LEFT JOIN PRODUCTOS p ON u.id_usuario = p.id_usuario
+            LEFT JOIN DETALLE_ORDEN do ON p.id_producto = do.id_producto
+            LEFT JOIN ORDENES o ON do.id_orden = o.id_orden
+            WHERE vv.id_usuario = ?
+            GROUP BY vv.id_valoracion, vv.calificacion, vv.comentario, vv.fecha_valoracion, 
+                     u.id_usuario, u.nombre, u.email, u.foto_perfil
+            ORDER BY vv.fecha_valoracion DESC";
+
+        $stmt = $this->executeQuery($sql, [$id_usuario]);
+        return $this->getResults($stmt);
     }
 }
 

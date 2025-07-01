@@ -74,7 +74,7 @@ Website: http://geekslabs.com/
 }
 
 .card-text {
-    flex-grow: 1;
+   
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -4367,9 +4367,7 @@ ul.amounts li {
     border-radius: 0;
 }
 
-.panel-heading .nav>li>a {
-    color: #fff;
-}
+
 
 .panel-heading .nav>li.active>a,
 .panel-heading .nav>li>a:hover {
